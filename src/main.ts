@@ -6,14 +6,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors()
 
-  const config = new DocumentBuilder()
-    .setTitle('Nest-blog example')
-    .setDescription('The cats API description')
-    .setVersion('1.0')
-    .addTag('swagger')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+  // const config = new DocumentBuilder()
+  //   .setTitle('Nest-blog example')
+  //   .setDescription('The cats API description')
+  //   .setVersion('1.0')
+  //   .addTag('swagger')
+  //   .build();
+  // const document = SwaggerModule.createDocument(app, config);
+  // SwaggerModule.setup('swagger', app, document);
 
   await app.listen(3000);
 }
