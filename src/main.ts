@@ -7,13 +7,13 @@ async function bootstrap() {
   app.enableCors()
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
+    .setTitle('Nest-blog example')
     .setDescription('The cats API description')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('swagger')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('swagger', app, document);
 
   await app.listen(3000);
 }
