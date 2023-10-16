@@ -1,13 +1,14 @@
 import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException} from "@nestjs/common";
-import { getPaginationFromQuery } from "src/helpers/query-filter";
 import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { Pagination } from "src/helpers/query-filter";
 
 @Controller('blogs')
 export class BlogsController {
     constructor(protected blogsService: BlogsService,
+        private readonly pagination : Pagination
     ) {
     }
     @Get()
@@ -19,7 +20,7 @@ export class BlogsController {
         pageNumber?: string;
         pageSize?: string;
     }) {
-        const queryFilter = getPaginationFromQuery(query);
+        const queryFilter = this.pagination.getPaginationFromQuery(query);
         return await this.blogsService.findBlogs(queryFilter)
     }
     @Get(':id')

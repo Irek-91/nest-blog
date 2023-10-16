@@ -13,6 +13,7 @@ import { BlogsService } from './blogs/blogs.service';
 import { BlogsRepository } from './blogs/blogs.repo';
 import { Blog, BlogSchema } from './blogs/models/blogs-schema';
 import * as process from 'process';
+import { Pagination } from './helpers/query-filter';
 
 
 @Module({
@@ -33,7 +34,7 @@ import * as process from 'process';
     ]),
   ],
   controllers: [AppController, TestingController, UsersController, BlogsController],
-  providers: [AppService, UserService, UsersRepository, BlogsService, BlogsRepository],
+  providers: [AppService, UserService, UsersRepository, BlogsService, BlogsRepository, Pagination],
 })
 
 export class AppModule {}

@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Post, Delete, Param, Query, HttpException, HttpStatus } from "@nestjs/common";
 import { UserService } from "./users.service";
-import { getPaginationFromQueryUser } from 'src/helpers/query-filter';
+import { Pagination } from 'src/helpers/query-filter';
 import { CreatUserInputModel } from "./models/users-model";
 import { log } from "console";
 
 @Controller('users')
 export class UsersController {
     constructor(protected usersService: UserService,
+        private readonly pagination : Pagination
     ) { }
     @Get()
     async getUsers(@Query()
@@ -19,7 +20,7 @@ export class UsersController {
         searchLoginTerm?: string;
         searchEmailTerm?: string;
     }) {
-        const queryFilter = getPaginationFromQueryUser(query);
+        const queryFilter = this.pagination.getPaginationFromQueryUser(query);
         return await this.usersService.findUsers(queryFilter)
     }
     @Post()

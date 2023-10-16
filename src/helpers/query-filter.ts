@@ -1,15 +1,26 @@
+import { Injectable } from "@nestjs/common"
 
 export type QueryPaginationTypeUser = {
-    sortBy: string
-    sortDirection: 1 | -1
-    pageNumber: number
-    pageSize: number
-    searchLoginTerm: string
-    searchEmailTerm: string
-    skip: number
-  }
-   
-  export const getPaginationFromQueryUser = (query: any): QueryPaginationTypeUser => {
+  sortBy: string
+  sortDirection: 1 | -1
+  pageNumber: number
+  pageSize: number
+  searchLoginTerm: string
+  searchEmailTerm: string
+  skip: number
+}
+export type QueryPaginationType = {
+  searchNameTerm: string
+  sortBy: string
+  sortDirection: 'asc' | 'desc'
+  pageNumber: number
+  pageSize: number
+  skip: number
+}
+
+@Injectable()
+export class Pagination {
+  getPaginationFromQueryUser = (query: any): QueryPaginationTypeUser => {
    const defaultValuesUsers: QueryPaginationTypeUser = {
      sortBy: 'createdAt',
      sortDirection: -1,
@@ -31,16 +42,9 @@ export type QueryPaginationTypeUser = {
   }
 
 
-  export type QueryPaginationType = {
-    searchNameTerm: string
-    sortBy: string
-    sortDirection: 'asc' | 'desc'
-    pageNumber: number
-    pageSize: number
-    skip: number
-  }
   
-  export const getPaginationFromQuery = (query: any): QueryPaginationType => {
+  
+  getPaginationFromQuery = (query: any): QueryPaginationType => {
     const defaultValues: QueryPaginationType = {
       searchNameTerm: '',
       sortBy: 'createdAt',
@@ -58,3 +62,4 @@ export type QueryPaginationTypeUser = {
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
     return defaultValues
   }
+}
