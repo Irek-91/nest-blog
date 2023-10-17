@@ -14,6 +14,7 @@ import { BlogsRepository } from './blogs/blogs.repo';
 import { Blog, BlogSchema } from './blogs/models/blogs-schema';
 import * as process from 'process';
 import { Pagination } from './helpers/query-filter';
+import { Post, PostSchema } from './posts/model/post-schema';
 
 
 @Module({
@@ -30,6 +31,10 @@ import { Pagination } from './helpers/query-filter';
       {
         name: Blog.name,
         schema: BlogSchema
+      },
+      {
+        name: Post.name,
+        schema: PostSchema
       }
     ]),
   ],
