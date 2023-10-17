@@ -88,4 +88,16 @@ export class UsersRepository {
     catch (e) { return HttpStatus.NOT_FOUND }
   }
 
+  async findUserById(userId: ObjectId): Promise<UserDocument | false> {
+    try {
+      let user = await this.userModel.findOne({ _id: userId });
+      if (user === null) {
+        return false
+      }
+      else {
+        return user
+      }
+    } catch (e) { return false }
+  }
+
 }

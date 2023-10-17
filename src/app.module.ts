@@ -1,3 +1,4 @@
+import { CommentsService } from './comments/comments.service';
 import { ConfigModule } from '@nestjs/config';
 
 import { Module } from '@nestjs/common';
@@ -18,6 +19,9 @@ import { Post, PostSchema } from './posts/model/post-schema';
 import { PostsController } from './posts/posts.controller';
 import { PostsService } from './posts/posts.service';
 import { PostRepository } from './posts/post.repo';
+import { CommentSchema } from './comments/model/comments-schema';
+import { CommentsRepository } from './comments/comments.repo';
+import { CommentsController } from './comments/comments.controller';
 
 
 @Module({
@@ -38,11 +42,20 @@ import { PostRepository } from './posts/post.repo';
       {
         name: Post.name,
         schema: PostSchema
+      },
+      {
+        name: Comment.name,
+        schema: CommentSchema
       }
     ]),
   ],
-  controllers: [AppController, TestingController, UsersController, BlogsController, PostsController],
-  providers: [AppService, UserService, UsersRepository, BlogsService, BlogsRepository, PostsService, PostRepository,Pagination],
+  controllers: [AppController, TestingController, UsersController, BlogsController, PostsController, CommentsController],
+  providers: [AppService, 
+    UserService, UsersRepository, 
+    BlogsService, BlogsRepository, 
+    PostsService, PostRepository, 
+    Pagination, 
+    CommentsService, CommentsRepository],
 })
 
 export class AppModule {}

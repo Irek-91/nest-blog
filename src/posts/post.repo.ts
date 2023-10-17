@@ -169,62 +169,25 @@ export class PostRepository {
         } catch (e) { return false }
     }
 
-    async deletePostId(id: string): Promise<boolean> {
+    async deletePostId(id: string): Promise<Number> {
         const postInstance = await this.postModel.findOne({ _id: new ObjectId(id) })
-        if (!postInstance) { return false }
+        if (!postInstance) { return HttpStatus.NOT_FOUND }
 
         await postInstance.deleteOne()
-        return true
+        return HttpStatus.NO_CONTENT
     }
 
 
-    async createdPostId(title: string, shortDescription: string, content: string, blogId: string, blogName: string | boolean): Promise<postOutput | false> {
-        if (blogName == false || blogName == true) { return false }
+    async createdPost(newPost: postMongoDb): Promise<Number> {
 
-        const newPostId = new ObjectId()
-        const createdAt = new Date().toISOString();
-
-        const newPost: postMongoDb = {
-            _id: newPostId,
-            title: title,
-            shortDescription: shortDescription,
-            content: content,
-            blogId: blogId,
-            blogName: blogName,
-            createdAt: createdAt,
-            extendedLikesInfo: {
-                likesCount: 0,
-                dislikesCount: 0,
-                myStatus: 'None',
-                newestLikes: [
-                ]
-            }
-        }
-
-        const postInstance = new PostsModelClass(newPost)
-
+        const postInstance = new this.postModel(newPost)
         await postInstance.save()
 
-        return {
-            id: postInstance._id.toString(),
-            title: postInstance.title,
-            shortDescription: postInstance.shortDescription,
-            content: postInstance.content,
-            blogId: postInstance.blogId,
-            blogName: postInstance.blogName,
-            createdAt: postInstance.createdAt,
-            extendedLikesInfo: {
-                likesCount: 0,
-                dislikesCount: 0,
-                myStatus: 'None',
-                newestLikes: []
-            }
-        }
+        return HttpStatus.CREATED
 
     }
 
     async updatePostId(id: string, title: string, shortDescription: string, content: string, blogId: string): Promise<boolean> {
-        //const postInstance = await PostsModelClass.updateOne({_id: new ObjectId(id)}, {$set: {title , shortDescription, content, blogId}})    
         const postInstance = await this.postModel.findOne({ _id: new ObjectId(id) })
         if (!postInstance) return false
         postInstance.title = title
@@ -248,7 +211,7 @@ export class PostRepository {
                 { upsert: true }
             )
 
-            const post = await PostsModelClass.findOne({ _id: new ObjectId(postId) })
+            const post = await this.postModel.findOne({ _id: new ObjectId(postId) })
             
             const newestLikes = await LikesPostsClass.find({ postId: postId, status: 'Like' })
                 .sort({ createdAt: -1 })

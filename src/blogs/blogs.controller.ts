@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException} from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException } from "@nestjs/common";
 import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
@@ -8,7 +8,7 @@ import { Pagination } from "src/helpers/query-filter";
 @Controller('blogs')
 export class BlogsController {
     constructor(protected blogsService: BlogsService,
-        private readonly pagination : Pagination
+        private readonly pagination: Pagination
     ) {
     }
     @Get()
@@ -41,9 +41,9 @@ export class BlogsController {
     }
     @Put(':id')
     async updateBlog(@Param('id') blogId: string,
-    @Body() blogInputData : blogInput) {
+        @Body() blogInputData: blogInput) {
         const blogUpdate = await this.blogsService.updateBlog(blogId, blogInputData)
-        
+
         if (blogUpdate === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
@@ -51,7 +51,7 @@ export class BlogsController {
         }
     }
 
-    
+
 
 
 
