@@ -15,6 +15,9 @@ import { Blog, BlogSchema } from './blogs/models/blogs-schema';
 import * as process from 'process';
 import { Pagination } from './helpers/query-filter';
 import { Post, PostSchema } from './posts/model/post-schema';
+import { PostsController } from './posts/posts.controller';
+import { PostsService } from './posts/posts.service';
+import { PostRepository } from './posts/post.repo';
 
 
 @Module({
@@ -38,8 +41,8 @@ import { Post, PostSchema } from './posts/model/post-schema';
       }
     ]),
   ],
-  controllers: [AppController, TestingController, UsersController, BlogsController],
-  providers: [AppService, UserService, UsersRepository, BlogsService, BlogsRepository, Pagination],
+  controllers: [AppController, TestingController, UsersController, BlogsController, PostsController],
+  providers: [AppService, UserService, UsersRepository, BlogsService, BlogsRepository, PostsService, PostRepository,Pagination],
 })
 
 export class AppModule {}

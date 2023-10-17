@@ -4,7 +4,7 @@ import { Pagination } from 'src/helpers/query-filter';
 import { paginatorPost, postOutput } from './model/post-model';
 
 @Controller('posts')
-export class BlogsController {
+export class PostsController {
     constructor(protected postsService: PostsService,
         private readonly pagination : Pagination
     ) {
