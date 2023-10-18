@@ -38,7 +38,7 @@ export class Post {
     createdAt:string
     @Prop({
         required: true,
-        type: String,
+        type: Object,
     })
     extendedLikesInfo: {
         likesCount: number,
