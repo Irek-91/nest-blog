@@ -18,7 +18,7 @@ export class PostsService {
     }
 
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string|null): Promise<paginatorPost | boolean> {
+    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string|null): Promise<paginatorPost | Number> {
         return this.postRepository.findPostsBlogId(paginationQuery, blogId, userId)
     }
 

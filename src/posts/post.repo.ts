@@ -67,7 +67,7 @@ export class PostRepository {
         }
     }
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string| null): Promise<paginatorPost | boolean> {
+    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string| null): Promise<paginatorPost | Number> {
         try {
 
             const filter = { blogId: blogId }
@@ -120,7 +120,7 @@ export class PostRepository {
                 totalCount: totalCount,
                 items: postsOutput
             }
-        } catch (e) { return false }
+        } catch (e) { return HttpStatus.NOT_FOUND }
 
     }
 
