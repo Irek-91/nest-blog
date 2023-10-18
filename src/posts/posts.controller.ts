@@ -4,6 +4,7 @@ import { PostsService } from './posts.service';
 import { Pagination } from 'src/helpers/query-filter';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { CommentsService } from 'src/comments/comments.service';
+import { log } from 'console';
 
 @Controller('posts')
 export class PostsController {
@@ -38,7 +39,7 @@ export class PostsController {
         const userId = null //поменять когда будет авторизация
 
         let post: postOutput | number = await this.postsService.getPostId(postId, userId)
-        if (!post) {
+        if (post === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
             return post
@@ -101,7 +102,7 @@ export class PostsController {
         @Query('id') postId: string
     ) {
         let post = await this.postsService.deletePostId(postId);
-        if (post) {
+        if (post === HttpStatus.NO_CONTENT) {
             throw new HttpException('Not Found', HttpStatus.NO_CONTENT);
         } else {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);

@@ -51,7 +51,7 @@ export class BlogsController {
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const blog = await this.blogsService.getBlogId(blogId)
-        if (!blog) {
+        if (blog === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
 
@@ -60,6 +60,8 @@ export class BlogsController {
         if (foundPosts === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         } else {
+            log(foundPosts)
+
             return foundPosts
         }
     }
@@ -73,13 +75,18 @@ export class BlogsController {
     @Post(':blogId/posts')
     async createPostByBlog(@Param('blogId') blogId: string,
         @Body() inputData: postInputModelSpecific) {
-        const blogName = await this.blogsService.getBlogNameById(blogId)
         const inputDataModel = {
             title: inputData.title,
             shortDescription: inputData.shortDescription,
             content: inputData.content,
             blogId: blogId,
         }
+        
+        const blog = await this.blogsService.getBlogId(blogId)
+        if (blog === HttpStatus.NOT_FOUND) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+
         const newPost = await this.postsService.createdPostBlogId(inputDataModel);
 
         if (newPost === HttpStatus.NOT_FOUND) {
