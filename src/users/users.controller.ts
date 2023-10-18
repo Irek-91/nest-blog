@@ -12,7 +12,6 @@ export class UsersController {
     @Get()
     async getUsers(@Query()
     query: {
-        searchNameTerm?: string;
         sortBy?: string;
         sortDirection?: string;
         pageNumber?: string;

@@ -88,7 +88,7 @@ export class PostsController {
 
     @Put(':id')
     async updatePostId(@Body() postInputData: postInputModel,
-        @Query('id') postId: string) {
+        @Param('id') postId: string) {
         let postResult = await this.postsService.updatePostId(postInputData, postId)
         if (postResult === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -99,7 +99,7 @@ export class PostsController {
 
     @Delete(':id')
     async deletePost(
-        @Query('id') postId: string
+        @Param('id') postId: string
     ) {
         let post = await this.postsService.deletePostId(postId);
         if (post === HttpStatus.NO_CONTENT) {
