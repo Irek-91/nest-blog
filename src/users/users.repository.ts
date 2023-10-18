@@ -30,7 +30,7 @@ export class UsersRepository {
 
     const users = await this.userModel.find().
       where(filter).
-      sort([[paginatorUser.sortBy, paginatorUser.sortDirection]]).
+      sort([[`accountData.${paginatorUser.sortBy}`, paginatorUser.sortDirection]]).
       skip(paginatorUser.skip).
       limit(paginatorUser.pageSize).
       lean()
