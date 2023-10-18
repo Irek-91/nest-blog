@@ -1,4 +1,4 @@
-import { CommentDocument, CommentSchema } from './model/comments-schema';
+import { Comment, CommentDocument, CommentSchema } from './model/comments-schema';
 import { Injectable } from '@nestjs/common';
 import { Injector } from "@nestjs/core/injector/injector"
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,11 +6,13 @@ import { Model } from 'mongoose';
 import { Filter, ObjectId } from "mongodb";
 import { commentMongoModel, commentViewModel, paginatorComments } from './model/comments-model';
 import { QueryPaginationType } from 'src/helpers/query-filter';
+import { Like, LikeDocument } from 'src/likes/model/likes-schema';
 
 
 @Injectable()
 export class CommentsRepository {
-    constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>) {}
+    constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
+    @InjectModel(Like.name) private likeModel: Model<LikeDocument> ) {}
     
     async createdCommentPostId(postId: string, content: string, userId: string, userLogin: string, createdAt: string): Promise<commentViewModel> {
       const newCommentId = new ObjectId()
@@ -58,13 +60,13 @@ export class CommentsRepository {
         let myStatus = 'None'
   
         if (userId) {
-          const status = await LikesModelClass.findOne({ commentsId: commentId, userId })
+          const status = await this.likeModel.findOne({ postIdOrCommentId: commentId, userId })
           if (status) {
             myStatus = status.status
           }
         }
-        const likeCount = await LikesModelClass.countDocuments({ commentsId: commentId, status: 'Like' })
-        const dislikesCount = await LikesModelClass.countDocuments({ commentsId: commentId, status: 'Dislike' })
+        const likeCount = await this.likeModel.countDocuments({ postIdOrCommentId: commentId, status: 'Like' })
+        const dislikesCount = await this.likeModel.countDocuments({ postIdOrCommentId: commentId, status: 'Dislike' })
         const commentViewModel: commentViewModel = {
           id: comment._id.toString(),
           content: comment.content,
@@ -124,7 +126,7 @@ export class CommentsRepository {
           const commentsId = c._id.toString()
   
           if (userId) {
-            const status = await LikesModelClass.findOne({ commentsId, userId })
+            const status = await this.likeModel.findOne({ postIdOrCommentId: commentsId, userId })
             if (status) {
               myStatus = status.status
             }
@@ -135,8 +137,8 @@ export class CommentsRepository {
             commentatorInfo: c.commentatorInfo,
             createdAt: c.createdAt,
             likesInfo: {
-              likesCount: await LikesModelClass.countDocuments({ commentsId, status: 'Like' }),
-              dislikesCount: await LikesModelClass.countDocuments({ commentsId, status: 'Dislike' }),
+              likesCount: await this.likeModel.countDocuments({ postIdOrCommentId: commentsId, status: 'Like' }),
+              dislikesCount: await this.likeModel.countDocuments({ postIdOrCommentId: commentsId, status: 'Dislike' }),
               myStatus: myStatus
             }
           }
@@ -156,8 +158,8 @@ export class CommentsRepository {
       try {
         const comment = await this.commentModel.findOne({ _id: new ObjectId(commentId) })
         if (!comment) { return null }
-        await LikesModelClass.updateOne(
-          { commentsId: commentId, userId },
+        await this.likeModel.updateOne(
+          { postIdOrCommentId: commentId, userId },
           { $set: { status: likeStatus, createdAt: new Date().toISOString() } },
           { upsert: true }
         )
@@ -171,7 +173,7 @@ export class CommentsRepository {
   
     async deleteCommentsAll(): Promise<boolean> {
       const deletResult = await this.commentModel.deleteMany({})
-      const deletResult1 = await LikesModelClass.deleteMany({})
+      const deletResult1 = await this.likeModel.deleteMany({})
       return true
     }
   }

@@ -26,8 +26,8 @@ export class Comment {
         type: Object,
     })
     commentatorInfo: {
-        userId: String,
-        userLogin: String
+        userId: string,
+        userLogin: string
     }
 }
 

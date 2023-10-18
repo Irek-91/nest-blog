@@ -6,12 +6,15 @@ import { newestLikes, paginatorPost, postMongoDb, postOutput } from "./model/pos
 import { Filter, ObjectId } from "mongodb";
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from 'src/users/models/users-schema';
+import { Like, LikeDocument } from 'src/likes/model/likes-schema';
 
 @Injectable()
 
 export class PostRepository {
     constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
-    @InjectModel(User.name) private userModel: Model<UserDocument>
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Like.name) private likeModel: Model<LikeDocument>
+
     ) { }
 
     async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost> {
@@ -25,12 +28,12 @@ export class PostRepository {
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
             if (userId) {
-                const status = await LikesPostsClass.findOne({ userId, postId: b._id.toString() })
+                const status = await this.likeModel.findOne({ userId, postIdOrCommentId: b._id.toString() })
                 if (status) {
                     myStatus = status.status
                 }
             }
-            const newestLikes = await LikesPostsClass.find({ postId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            const newestLikes = await this.likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
             const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
                 return {
                     addedAt: like.createdAt,
@@ -47,8 +50,8 @@ export class PostRepository {
                 blogName: b.blogName,
                 createdAt: b.createdAt,
                 extendedLikesInfo: {
-                    likesCount:  await LikesPostsClass.countDocuments({ postId: b._id.toString(), status: 'Like' }),
-                    dislikesCount: await LikesPostsClass.countDocuments({ postId: b._id.toString(), status: 'Dislike' }),
+                    likesCount:  await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
+                    dislikesCount: await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
                 }
@@ -80,12 +83,12 @@ export class PostRepository {
             const postsOutput: postOutput[] = await Promise.all(posts.map(async(b) => {
             let myStatus = 'None'
             if (userId) {
-                const status = await LikesPostsClass.findOne({ userId, postId: b._id.toString() })
+                const status = await this.likeModel.findOne({ userId, postId: b._id.toString() })
                 if (status) {
                     myStatus = status.status
                 }
             }
-            const newestLikes = await LikesPostsClass.find({ postId: b._id.toString(), status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            const newestLikes = await this.likeModel.find({ postIdOrCommentId: b._id.toString(), status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
             const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
                 return {
                     addedAt: like.createdAt,
@@ -102,8 +105,8 @@ export class PostRepository {
                     blogName: b.blogName,
                     createdAt: b.createdAt,
                     extendedLikesInfo: {
-                        likesCount:  await LikesPostsClass.countDocuments({ postId: b._id.toString(), status: 'Like' }),
-                        dislikesCount: await LikesPostsClass.countDocuments({ postId: b._id.toString(), status: 'Dislike' }),
+                        likesCount:  await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
+                        dislikesCount: await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                         myStatus: myStatus,
                         newestLikes: newestLikesMaped
                     }
@@ -139,10 +142,10 @@ export class PostRepository {
             let myStatus = 'None'
             if (userId) {
                 const user = await this.userModel.findOne({ _id: new ObjectId(userId) })
-                const userStatus = await LikesPostsClass.findOne({ postId: id, userId: userId })
+                const userStatus = await this.likeModel.findOne({ postIdOrCommentId: id, userId: userId })
                 if (userStatus) { myStatus = userStatus.status }
             }
-            const newestLikes = await LikesPostsClass.find({ postId: id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            const newestLikes = await this.likeModel.find({ postIdOrCommentId: id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
             const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
                 return {
                     addedAt: like.createdAt,
@@ -160,13 +163,13 @@ export class PostRepository {
                 blogName: post.blogName,
                 createdAt: post.createdAt,
                 extendedLikesInfo: {
-                    likesCount:  await LikesPostsClass.countDocuments({ postId: id, status: 'Like' }),
-                    dislikesCount: await LikesPostsClass.countDocuments({ postId: id, status: 'Dislike' }),
+                    likesCount:  await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Like' }),
+                    dislikesCount: await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Dislike' }),
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
                 }
             }
-        } catch (e) { return false }
+        } catch (e) { return HttpStatus.NOT_FOUND }
     }
 
     async deletePostId(id: string): Promise<Number> {
@@ -202,18 +205,18 @@ export class PostRepository {
             const createdAt = (new Date()).toISOString()
             const loginResult = await this.userModel.findOne({ _id: new ObjectId(userId) })
             const login = loginResult!.accountData.login
-            const resultLikeStatus = await LikesPostsClass.findOne({userId: userId, postId: postId, status: likeStatus})
+            const resultLikeStatus = await this.likeModel.findOne({userId: userId, postIdOrCommentId: postId, status: likeStatus})
             if (resultLikeStatus) {return true}
             
-            await LikesPostsClass.updateOne(
-                { userId: userId, postId: postId},
+            await this.likeModel.updateOne(
+                { userId: userId, postIdOrCommentId: postId},
                 { $set: { login: login, status: likeStatus, createdAt: new Date().toISOString() } },
                 { upsert: true }
             )
 
             const post = await this.postModel.findOne({ _id: new ObjectId(postId) })
             
-            const newestLikes = await LikesPostsClass.find({ postId: postId, status: 'Like' })
+            const newestLikes = await this.likeModel.find({ postIdOrCommentId: postId, status: 'Like' })
                 .sort({ createdAt: -1 })
                 .limit(3)
                 .lean()
