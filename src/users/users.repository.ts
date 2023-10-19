@@ -22,11 +22,9 @@ export class UsersRepository {
       if (paginatorUser.searchLoginTerm) {
         filter.$or.push({ 'accountData.login': { $regex: paginatorUser.searchLoginTerm, $options: 'i' } })
       }
-      //if (paginatorUser.searchEmailTerm)
-      else {
+      if (paginatorUser.searchEmailTerm) {
         filter.$or.push({ 'accountData.email': { $regex: paginatorUser.searchEmailTerm, $options: 'i' } })
       }
-
     }
 
     const users = await this.userModel.find().
