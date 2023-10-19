@@ -33,7 +33,7 @@ export class UsersRepository {
       skip(paginatorUser.skip).
       limit(paginatorUser.pageSize).
       lean()
-    const totalCount = await this.userModel.countDocuments([filter])
+    const totalCount = await this.userModel.countDocuments({filter})
     const usersOutput: userViewModel[] = users.map((b) => {
       return {
         id: b._id.toString(),
