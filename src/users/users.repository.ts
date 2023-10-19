@@ -1,6 +1,6 @@
 import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 import { User, UserDocument } from "./models/users-schema";
 import { Filter, ObjectId } from "mongodb";
 import { userMongoModel, userViewModel } from "./models/users-model";
@@ -15,7 +15,7 @@ export class UsersRepository {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
   async findUsers(paginatorUser: QueryPaginationTypeUser) {
-    const filter: Filter<userMongoModel> = {};
+    const filter: FilterQuery<userMongoModel> = {};
 
     if (paginatorUser.searchLoginTerm || paginatorUser.searchEmailTerm) {
       filter.$or = []
@@ -26,13 +26,14 @@ export class UsersRepository {
         filter.$or.push({ 'accountData.email': { $regex: paginatorUser.searchEmailTerm, $options: 'i' } })
       }
     }
+
     const users = await this.userModel.find().
       where(filter).
       sort([[`accountData.${paginatorUser.sortBy}`, paginatorUser.sortDirection]]).
       skip(paginatorUser.skip).
       limit(paginatorUser.pageSize).
       lean()
-    const totalCount = await this.userModel.countDocuments({filter})
+    const totalCount = await this.userModel.countDocuments(filter)
     const usersOutput: userViewModel[] = users.map((b) => {
       return {
         id: b._id.toString(),
