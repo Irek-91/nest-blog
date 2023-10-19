@@ -26,7 +26,6 @@ export class UsersRepository {
         filter.$or.push({ 'accountData.email': { $regex: paginatorUser.searchEmailTerm, $options: 'i' } })
       }
     }
-
     const users = await this.userModel.find().
       where(filter).
       sort([[`accountData.${paginatorUser.sortBy}`, paginatorUser.sortDirection]]).
