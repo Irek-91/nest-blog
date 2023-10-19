@@ -15,18 +15,36 @@ export class UsersRepository {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
   async findUsers(paginatorUser: QueryPaginationTypeUser) {
-    const filter: Filter<userMongoModel> = {};
+    const filter: Filter<userMongoModel> = {
+      $or:[
+        {
+          'accountData.login': {
+            $regex: paginatorUser.searchLoginTerm ?? '',
+            $options: 'i'
+          }
+        },
+        {
+          'accountData.email': {
+            $regex: paginatorUser.searchEmailTerm ?? '',
+            $options: 'i'
+          }
+        }
+      ]
+    };
 
-    if (paginatorUser.searchLoginTerm || paginatorUser.searchEmailTerm) {
-      filter.$or = []
-      if (paginatorUser.searchLoginTerm) {
-        filter.$or.push({ 'accountData.login': { $regex: paginatorUser.searchLoginTerm, $options: 'i' } })
-      }
-      if (paginatorUser.searchEmailTerm) {
-        filter.$or.push({ 'accountData.email': { $regex: paginatorUser.searchEmailTerm, $options: 'i' } })
-      }
+    // if (paginatorUser.searchLoginTerm || paginatorUser.searchEmailTerm) {
+    //   filter.$or = []
+    //   if (paginatorUser.searchLoginTerm) {
+    //     filter.$or.push({ 'accountData.login': { $regex: paginatorUser.searchLoginTerm, $options: 'i' } })
+    //   }
+    //   if (paginatorUser.searchEmailTerm) {
+    //     filter.$or.push({ 'accountData.email': { $regex: paginatorUser.searchEmailTerm, $options: 'i' } })
+    //   }
 
-    }
+    // }
+    
+
+
 
     const users = await this.userModel.find().
       where(filter).

@@ -12,12 +12,12 @@ export class UsersController {
     @Get()
     async getUsers(@Query()
     query: {
-        sortBy?: string;
-        sortDirection?: string;
-        pageNumber?: string;
-        pageSize?: string;
-        searchLoginTerm?: string;
-        searchEmailTerm?: string;
+        sortBy: string;
+        sortDirection: string;
+        pageNumber: string;
+        pageSize: string;
+        searchLoginTerm: string;
+        searchEmailTerm: string;
     }) {
         const queryFilter = this.pagination.getPaginationFromQueryUser(query);
         return await this.usersService.findUsers(queryFilter)
