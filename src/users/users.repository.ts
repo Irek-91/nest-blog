@@ -31,7 +31,6 @@ export class UsersRepository {
         }
       ]
     };
-
     // if (paginatorUser.searchLoginTerm || paginatorUser.searchEmailTerm) {
     //   filter.$or = []
     //   if (paginatorUser.searchLoginTerm) {
