@@ -43,9 +43,6 @@ export class UsersRepository {
 
     // }
     
-
-
-
     const users = await this.userModel.find().
       where(filter).
       sort([[`accountData.${paginatorUser.sortBy}`, paginatorUser.sortDirection]]).
