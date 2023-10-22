@@ -1,4 +1,14 @@
+import { IsEnum, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator"
 import { ObjectId } from "mongodb"
+
+
+export class commentInput {
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(300)
+  @MinLength(20)
+  content: string
+}
 
 export type commentViewModel = {
   id: string,
@@ -26,15 +36,15 @@ export type commentMongoModel = {
   createdAt: string
 }
 
-export type commentInputModel = {
-  postId: string,
-  content: string,
-  commentatorInfo: {
-    userId: string,
-    userLogin: string
-  },
-  createdAt: string
-}
+// export type commentInputModel = {
+//   postId: string,
+//   content: string,
+//   commentatorInfo: {
+//     userId: string,
+//     userLogin: string
+//   },
+//   createdAt: string
+// }
 
 export type likeInfoShema = {
   _id: ObjectId,

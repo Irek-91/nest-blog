@@ -1,10 +1,13 @@
 import { BlogsService } from './../blogs/blogs.service';
-import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { Pagination } from 'src/helpers/query-filter';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { CommentsService } from 'src/comments/comments.service';
 import { log } from 'console';
+import { commentInput } from 'src/comments/model/comments-model';
+import { AuthGuard } from 'src/auth.guard';
+import { likeStatus } from 'src/likes/model/likes-model';
 
 @Controller('posts')
 export class PostsController {
@@ -86,6 +89,28 @@ export class PostsController {
         }
     }
 
+
+    @UseGuards(AuthGuard)
+    @Post(':postId/comments')
+    async createdCommentPostId(@Body() commentInputData: commentInput,
+        @Param('postId') postId: string) {
+        //const userId = req.user._id.toString()
+        const userId = "null"
+        const post = await this.postsService.getPostId(postId, userId)
+        log(post)
+        if (post === HttpStatus.NOT_FOUND) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+
+        let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
+        if (comment === HttpStatus.NOT_FOUND) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+        else {
+            return comment
+        }
+    }
+
     @Put(':id')
     async updatePostId(@Body() postInputData: postInputModel,
         @Param('id') postId: string) {
@@ -94,6 +119,23 @@ export class PostsController {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
             throw new HttpException('Not Found', HttpStatus.NO_CONTENT);
+        }
+    }
+
+    @Put(':postId/like-status')
+    async updateLikeStatusPostId(@Param('postId') postId: string,
+        @Body() likeStatus: likeStatus) {
+        // if (!req.user) { return res.sendStatus(404) }
+        // const postId = req.params.postId;
+        // const userId = req.user!._id.toString()
+        // const likeStatus = req.body.likeStatus
+        const userId = 'sdvsvd'
+        const resultUpdateLikeStatusPost = await this.postsService.updateLikeStatusPostId(postId, userId, likeStatus.likeStatus)
+        if (resultUpdateLikeStatusPost) {
+            throw new HttpException('Not Found', HttpStatus.NO_CONTENT);
+        }
+        else {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
     }
 

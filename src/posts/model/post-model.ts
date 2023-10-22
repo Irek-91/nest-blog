@@ -1,12 +1,27 @@
+import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
 
-export type postInputModel = {
-  title: string,
-  shortDescription: string,
-  content: string,
-  blogId: string,
+export class postInputModel {
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(30)  
+  title: string
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100) 
+  shortDescription: string
+  
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(1000)
+  content: string
+
+  @IsNotEmpty()
+  @IsString()
+  blogId: string
 }
 
 export type postInputModelSpecific = {

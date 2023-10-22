@@ -1,20 +1,22 @@
-import { Injectable } from "@nestjs/common";
-import { UsersRepository } from "./users.repository";
+import { MeViewModel, userViewModel } from 'src/users/models/users-model';
+import { HttpStatus, Injectable } from "@nestjs/common";
+import { UsersRepository } from "./users.repo";
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
-
-
+import mongoose, { ObjectId } from "mongoose";
 import bcrypt from 'bcrypt'
 import { CreatUserInputModel } from './models/users-model';
 import { QueryPaginationTypeUser } from 'src/helpers/query-filter';
-import mongoose from "mongoose";
+import { UsersQueryRepository } from "./users.qurey.repo";
+import { UserDocument } from "./models/users-schema";
 
 @Injectable()
-export class UserService {
-  constructor(protected usersRepository: UsersRepository) { }
+export class UsersService {
+  constructor(protected usersRepository: UsersRepository,
+    protected usersQueryRepository: UsersQueryRepository) { }
 
   async findUsers(paginationQuery: QueryPaginationTypeUser) {
-    return await this.usersRepository.findUsers(paginationQuery)
+    return await this.usersQueryRepository.findUsers(paginationQuery)
   }
 
   async createUser(inputModel: CreatUserInputModel) {
@@ -49,11 +51,11 @@ export class UserService {
     return await this.usersRepository.createUser(newUser)
   }
 
-  async deleteUserId(id: string): Promise<Number> {
+  async deleteUserId(id: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     return await this.usersRepository.deleteUserId(id)
   }
 
-async deleteUsers(): Promise<Number> {
+async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     return await this.usersRepository.deleteUsers()
   }
 
@@ -62,46 +64,54 @@ async deleteUsers(): Promise<Number> {
     return hash;
   }
 
-  //   async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<userMongoModel | false> {
-  //     const user = await  this.usersRepository.findByLoginOrEmailL(loginOrEmail)
-  //     if (!user) {
-  //       return false
-  //     }
-  //     const passwordHash = await this._generateHash(passwordUser, user.accountData.salt)
-  //     if (user.accountData.hash !== passwordHash) {
-  //       return false
-  //     }
-  //     else {
-  //       return user
-  //     }
-  //   }
+    async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+      const user = await  this.usersQueryRepository.findByLoginOrEmailL(loginOrEmail)
+      if (user === HttpStatus.NOT_FOUND) {
+        return HttpStatus.NOT_FOUND
+      }
+      const passwordHash = await this._generateHash(passwordUser, user.accountData.salt)
+      if (user.accountData.hash !== passwordHash) {
+        return HttpStatus.NOT_FOUND
+      }
+      else {
+        return user
+      }
+    }
 
 
-  //   async deleteUserAll(): Promise<boolean> {
-  //     return await  this.usersRepository.deleteUserAll()
-  //   }
+    async deleteUserAll(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+      return await  this.usersRepository.deleteUsers()
+    }
 
-  //   async findByUserId(userId: ObjectId): Promise<userMeViewModel | false> {
+    async findByUserId(userId: ObjectId): Promise< MeViewModel | HttpStatus.NOT_FOUND> {
 
-  //     const result = await  this.usersRepository.findUserById(userId)
-  //     if (result) {
-  //       const resultUserViewModel = {
-  //         email: result.accountData.email,
-  //         login: result.accountData.login,
-  //         userId: result._id
-  //       }
-  //       return resultUserViewModel
-  //     }
-  //     return false
-  //   }
+      const result = await  this.usersQueryRepository.findUserById(userId)
+      if (result !== HttpStatus.NOT_FOUND) {
+        const resultUserViewModel : MeViewModel = {
+          email: result.accountData.email,
+          login: result.accountData.login,
+          userId: result._id
+        }
+        return resultUserViewModel
+      }
+      return HttpStatus.NOT_FOUND
+    }
 
-  //   async findUserByCode(code: string): Promise<userMongoModel | null> {
-  //     let user = await  this.usersRepository.findUserByCode(code)
-  //     return user
-  //   }
+    async findUserByCode(code: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+      let user = await  this.usersQueryRepository.findUserByCode(code)
+      if (user === HttpStatus.NOT_FOUND) {
+        return HttpStatus.NOT_FOUND
+      } else {
+        return user
+      }
+    }
 
-  //   async findUserByEmail(email: string): Promise<userMongoModel | null> {
-  //     let user = await  this.usersRepository.findUserByEmail(email)
-  //     return user
-  //   }
+    async findUserByEmail(email: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+      let user = await  this.usersQueryRepository.findUserByEmail(email)
+      if (user === HttpStatus.NOT_FOUND) {
+        return HttpStatus.NOT_FOUND
+      } else {
+        return user
+      }
+    }
 }

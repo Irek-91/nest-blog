@@ -1,12 +1,26 @@
-import { ObjectId } from "mongoose";
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+import mongoose, { ObjectId } from "mongoose";
 
-export type CreatUserInputModel = {
-    login: string;
-    password: string;
-    email: string;
-  };
+export class CreatUserInputModel {
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(10)
+    @MinLength(3)
+    login: string
 
-  export type userViewModel = {
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(20)
+    @MinLength(6)
+    password: string
+
+    @IsNotEmpty()
+    @IsString()
+    @IsEmail()
+    email: string
+};
+
+export type userViewModel = {
     id: string,
     login: string,
     email: string,
@@ -29,4 +43,11 @@ export type userMongoModel = {
         isConfirmed: boolean,
         recoveryCode: string
     }
+}
+
+
+export type MeViewModel = {
+    login: string,
+    email: string,
+    userId: mongoose.Types.ObjectId
 }

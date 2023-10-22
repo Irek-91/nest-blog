@@ -1,5 +1,5 @@
 import { Comment, CommentDocument, CommentSchema } from './model/comments-schema';
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { Injector } from "@nestjs/core/injector/injector"
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -50,11 +50,11 @@ export class CommentsRepository {
       }
     }
   
-    async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | null> {
+    async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | HttpStatus.NOT_FOUND> {
       try {
         const comment = await this.commentModel.findOne({ _id: new ObjectId(commentId) })
         if (!comment) {
-          return null
+          return HttpStatus.NOT_FOUND
         }
   
         let myStatus = 'None'
@@ -81,36 +81,36 @@ export class CommentsRepository {
         return commentViewModel
       }
       catch (e) {
-        return null
+        return HttpStatus.NOT_FOUND
       }
     }
   
-    async updateCommentId(commentsId: string, content: string): Promise<true | null> {
+    async updateCommentId(commentsId: string, content: string): Promise<Number> {
       try {
         const post = await this.commentModel.updateOne({ _id: new ObjectId(commentsId) }, { $set: { content } })
         if (post.matchedCount) {
-          return true
+          return HttpStatus.NO_CONTENT
         }
         else {
-          return null
+          return HttpStatus.NOT_FOUND
         }
       }
-      catch (e) { return null }
+      catch (e) { return HttpStatus.NOT_FOUND }
     }
   
-    async deletCommentById(id: string): Promise<true | null> {
+    async deletCommentById(id: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
       try {
         const result = await this.commentModel.deleteOne({ _id: new ObjectId(id) })
         if (result.deletedCount) {
-          return true
+          return HttpStatus.NO_CONTENT
         }
         else {
-          return null
+          return HttpStatus.NOT_FOUND
         }
-      } catch (e) { return null }
+      } catch (e) { return HttpStatus.NOT_FOUND }
     }
   
-    async findCommentsByPostId(postId: string, userId: string | null, pagination: QueryPaginationType): Promise<paginatorComments | null> {
+    async findCommentsByPostId(postId: string, userId: string | null, pagination: QueryPaginationType): Promise<paginatorComments | HttpStatus.NOT_FOUND> {
       try {
         const filter = { postId: postId }
         const comments = await this.commentModel.find(filter).
@@ -151,30 +151,29 @@ export class CommentsRepository {
           totalCount: totalCOunt,
           items: mappedComments
         }
-      } catch (e) { return null }
+      } catch (e) { return HttpStatus.NOT_FOUND }
     }
   
-    async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<boolean | null> {
+    async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
       try {
         const comment = await this.commentModel.findOne({ _id: new ObjectId(commentId) })
-        if (!comment) { return null }
+        if (!comment) { return HttpStatus.NOT_FOUND }
         await this.likeModel.updateOne(
           { postIdOrCommentId: commentId, userId },
           { $set: { status: likeStatus, createdAt: new Date().toISOString() } },
           { upsert: true }
         )
-        return true
+        return HttpStatus.NO_CONTENT
   
       } catch (e) {
-        console.log(e) 
-        return null
+        return HttpStatus.NOT_FOUND
        }
     }
   
-    async deleteCommentsAll(): Promise<boolean> {
+    async deleteCommentsAll(): Promise<Number> {
       const deletResult = await this.commentModel.deleteMany({})
       const deletResult1 = await this.likeModel.deleteMany({})
-      return true
+      return HttpStatus.NO_CONTENT
     }
   }
   

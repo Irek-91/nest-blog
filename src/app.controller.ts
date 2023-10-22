@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './app.service';
-import { UserService } from './users/users.service';
+import { UsersService } from './users/users.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './users/models/users-schema';
 import { Model } from 'mongoose';
@@ -12,7 +12,7 @@ import { Like, LikeDocument } from './likes/model/likes-schema';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService,
-    private readonly usersService: UserService) { }
+    private readonly usersService: UsersService) { }
 
   @Get()
   getHello(): string {

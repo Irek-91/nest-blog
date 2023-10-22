@@ -5,8 +5,8 @@ import { Module } from '@nestjs/common';
 import { AppController, TestingController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
-import { UserService } from './users/users.service';
-import { UsersRepository } from './users/users.repository';
+import { UsersService } from './users/users.service';
+import { UsersRepository } from './users/users.repo';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './users/models/users-schema';
 import { BlogsController } from './blogs/blogs.controller';
@@ -23,6 +23,13 @@ import { Comment, CommentSchema } from './comments/model/comments-schema';
 import { CommentsRepository } from './comments/comments.repo';
 import { CommentsController } from './comments/comments.controller';
 import { Like, LikeSchema } from './likes/model/likes-schema';
+import { UsersQueryRepository } from './users/users.qurey.repo';
+import { AuthService } from './auth/auth.service';
+import { EmailAdapter } from './application/email-adapter';
+import { JwtService } from './application/jwt-service';
+import { DevicesModel, DevicesModelSchema } from './securityDevices/model/device-schema';
+import { SecurityDeviceRepository } from './securityDevices/securityDevice.repo';
+import { SecurityDeviceService } from './securityDevices/securityDevice.service';
 
 
 @Module({
@@ -51,17 +58,25 @@ import { Like, LikeSchema } from './likes/model/likes-schema';
       {
         name: Like.name,
         schema: LikeSchema
+      },
+      {
+        name: DevicesModel.name,
+        schema: DevicesModelSchema
       }
 
     ]),
   ],
   controllers: [AppController, TestingController, UsersController, BlogsController, PostsController, CommentsController],
-  providers: [AppService, 
-    UserService, UsersRepository, 
+  providers: [AppService,
+    AuthService,
+    Pagination,
+    EmailAdapter, JwtService, 
+    UsersService, UsersRepository, UsersQueryRepository, 
     BlogsService, BlogsRepository, 
     PostsService, PostRepository, 
-    Pagination, 
-    CommentsService, CommentsRepository],
+    CommentsService, CommentsRepository,
+    SecurityDeviceRepository, SecurityDeviceService
+  ],
 })
 
 export class AppModule {}
