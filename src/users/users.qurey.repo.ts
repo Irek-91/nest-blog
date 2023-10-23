@@ -52,7 +52,7 @@ export class UsersQueryRepository {
     }
   }
 
-  async findUserById(userId: ObjectId): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+  async findUserById(userId: mongoose.Types.ObjectId): Promise<UserDocument | HttpStatus.NOT_FOUND> {
     try {
       let user = await this.userModel.findOne({ _id: userId });
       if (user === null) {
@@ -75,16 +75,16 @@ export class UsersQueryRepository {
   }
 
 
-  async findUserByCode(code: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+  async findUserByCode(code: string): Promise<UserDocument | HttpStatus.BAD_REQUEST> {
     try {
       let user = await this.userModel.findOne({ "emailConfirmation.confirmationCode": code }).lean()
       if (user !== null) {
         return user
       } else {
-        return HttpStatus.NOT_FOUND
+        return HttpStatus.BAD_REQUEST
       }
     }
-    catch (e) { return HttpStatus.NOT_FOUND }
+    catch (e) { return HttpStatus.BAD_REQUEST }
   }
 
 

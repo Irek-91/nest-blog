@@ -1,5 +1,4 @@
 import { IsNotEmpty, IsString, MaxLength } from "class-validator";
-import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
 
@@ -38,7 +37,7 @@ export type newestLikes = {
 
 
 export type postMongoDb = {
-  _id: ObjectId,
+  _id: mongoose.Types.ObjectId,
   title: string,
   shortDescription: string,
   content: string,

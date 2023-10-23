@@ -83,7 +83,7 @@ async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
       return await  this.usersRepository.deleteUsers()
     }
 
-    async findByUserId(userId: ObjectId): Promise< MeViewModel | HttpStatus.NOT_FOUND> {
+    async findByUserId(userId: mongoose.Types.ObjectId): Promise< MeViewModel | HttpStatus.NOT_FOUND> {
 
       const result = await  this.usersQueryRepository.findUserById(userId)
       if (result !== HttpStatus.NOT_FOUND) {
@@ -99,7 +99,7 @@ async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
 
     async findUserByCode(code: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
       let user = await  this.usersQueryRepository.findUserByCode(code)
-      if (user === HttpStatus.NOT_FOUND) {
+      if (user === HttpStatus.BAD_REQUEST) {
         return HttpStatus.NOT_FOUND
       } else {
         return user

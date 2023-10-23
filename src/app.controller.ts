@@ -8,6 +8,7 @@ import { Blog, BlogDocument } from './blogs/models/blogs-schema';
 import { Post, PostDocument } from './posts/model/post-schema';
 import { Comment, CommentDocument } from './comments/model/comments-schema';
 import { Like, LikeDocument } from './likes/model/likes-schema';
+import { DevicesModel, DevicesModelDocument } from './securityDevices/model/device-schema';
 
 @Controller()
 export class AppController {
@@ -27,8 +28,8 @@ export class TestingController {
     @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
-    @InjectModel(Like.name) private likeModel: Model<LikeDocument>
-
+    @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
+    @InjectModel(DevicesModel.name) private deviceModel: Model<DevicesModelDocument>
   ) { }
 
   @Delete()
@@ -37,7 +38,8 @@ export class TestingController {
     await this.blogModel.deleteMany();
     await this.postModel.deleteMany();
     await this.commentModel.deleteMany();
-    await this.likeModel.deleteMany()
+    await this.likeModel.deleteMany();
+    await this.deviceModel.deleteMany();
     throw new HttpException('Not Found', HttpStatus.NO_CONTENT)
   }
 }

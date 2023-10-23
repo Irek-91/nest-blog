@@ -1,7 +1,7 @@
 import { JwtService } from "src/application/jwt-service"
-import { DeviceViewModel, DevicesMongo } from "./model/device-model"
+import { DeviceViewModel, devicesMongo } from "./model/device-model"
 import { SecurityDeviceRepository } from "./securityDevice.repo"
-import { ObjectId } from "mongoose"
+import mongoose, { ObjectId } from "mongoose"
 
 
 export class SecurityDeviceService {
@@ -58,17 +58,18 @@ export class SecurityDeviceService {
         else { return null }
     }
 
-    async addDeviceIdRefreshToken(userId: ObjectId, deviceId: string, IP: string, deviceName: string): Promise<null | string> {
+    async addDeviceIdRefreshToken(userId: mongoose.Types.ObjectId, deviceId: string, IP: string, deviceName: string): Promise<null | string> {
         const refreshToken = await  this.jwtService.createJWTRefreshToken(userId, deviceId)
         const issuedAt = await  this.jwtService.getIssueAttByRefreshToken(refreshToken)
         const expirationDate = await  this.jwtService.getExpiresAttByRefreshToken(refreshToken)
-        const newDeviceAndRefreshToken = new DevicesMongo(new ObjectId(),
+        
+        const newDeviceAndRefreshToken: devicesMongo = {_id: new mongoose.Types.ObjectId(),
             issuedAt,
             expirationDate,
             deviceId,
             IP,
             deviceName,
-            userId)
+            userId}
 
         const addTokenUser = await this.securityDeviceRepository.addRefreshToken(newDeviceAndRefreshToken)
         if (addTokenUser !== true) { return null }

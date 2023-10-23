@@ -1,8 +1,7 @@
 import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { FilterQuery, Model } from "mongoose";
+import mongoose, { FilterQuery, Model } from "mongoose";
 import { User, UserDocument } from "./models/users-schema";
-import { Filter, ObjectId } from "mongodb";
 import { userMongoModel, userViewModel } from "./models/users-model";
 import { QueryPaginationTypeUser } from 'src/helpers/query-filter';
 import { log } from "console";
@@ -30,7 +29,7 @@ export class UsersRepository {
 
   async deleteUserId(userId: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
-      let user = await this.userModel.deleteOne({ _id: new ObjectId(userId) })
+      let user = await this.userModel.deleteOne({ _id: new mongoose.Types.ObjectId(userId) })
       if (user.deletedCount) {
         return HttpStatus.NO_CONTENT
       } else {return HttpStatus.NOT_FOUND}
@@ -48,22 +47,22 @@ export class UsersRepository {
     catch (e) { return HttpStatus.NOT_FOUND }
   }
 
-  async updateConfirmation(_id: ObjectId): Promise<boolean> {
+  async updateConfirmation(_id: mongoose.Types.ObjectId): Promise<boolean> {
     let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.isConfirmed": true } })
     return result.modifiedCount === 1
   }
 
-  async updateCode(_id: ObjectId, code: string, expiritionDate: Date): Promise<boolean> {
+  async updateCode(_id: mongoose.Types.ObjectId, code: string, expiritionDate: Date): Promise<boolean> {
     let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.confirmationCode": code, "emailConfirmation.expiritionDate": expiritionDate } })
     return result.modifiedCount === 2
   }
 
-  async updatePassword(_id: ObjectId, salt: string, hash: string): Promise<boolean> {
+  async updatePassword(_id: mongoose.Types.ObjectId, salt: string, hash: string): Promise<boolean> {
     let result = await this.userModel.updateOne({ _id }, { $set: { "accountData.salt": salt, "accountData.hash": hash } })
     return result.modifiedCount === 1
   }
 
-  async updateRecoveryCode(_id: ObjectId, recoveryCode: string): Promise<boolean> {
+  async updateRecoveryCode(_id: mongoose.Types.ObjectId, recoveryCode: string): Promise<boolean> {
     let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.recoveryCode": recoveryCode } })
     return result.modifiedCount === 1
   }

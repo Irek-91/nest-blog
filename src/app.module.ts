@@ -30,6 +30,7 @@ import { JwtService } from './application/jwt-service';
 import { DevicesModel, DevicesModelSchema } from './securityDevices/model/device-schema';
 import { SecurityDeviceRepository } from './securityDevices/securityDevice.repo';
 import { SecurityDeviceService } from './securityDevices/securityDevice.service';
+import { AuthController } from './auth/auth.controller';
 
 
 @Module({
@@ -66,9 +67,9 @@ import { SecurityDeviceService } from './securityDevices/securityDevice.service'
 
     ]),
   ],
-  controllers: [AppController, TestingController, UsersController, BlogsController, PostsController, CommentsController],
+  controllers: [AppController, TestingController, UsersController, BlogsController, PostsController, CommentsController, AuthController],
   providers: [AppService,
-    AuthService,
+    AuthService, EmailAdapter, JwtService,
     Pagination,
     EmailAdapter, JwtService, 
     UsersService, UsersRepository, UsersQueryRepository, 

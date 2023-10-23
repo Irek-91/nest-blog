@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
 export class CreatUserInputModel {
     @IsNotEmpty()
@@ -29,7 +29,7 @@ export type userViewModel = {
 
 
 export type userMongoModel = {
-    _id: ObjectId,
+    _id: mongoose.Types.ObjectId,
     accountData: {
         login: string,
         email: string,

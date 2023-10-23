@@ -7,6 +7,7 @@ import { UsersQueryRepository } from 'src/users/users.qurey.repo';
 import { userViewModel } from 'src/users/models/users-model';
 import { User } from 'src/users/models/users-schema';
 import { EmailAdapter } from "src/application/email-adapter";
+import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards } from '@nestjs/common';
 
 
 export class AuthService {
@@ -20,7 +21,7 @@ export class AuthService {
         const passwordHash = await this._generateHash(password, passwordSalt)
 
         const newUser: User = {
-            _id: new ObjectId(),
+            _id: new mongoose.Types.ObjectId(),
             accountData: {
                 login: login,
                 email: email,
@@ -56,21 +57,22 @@ export class AuthService {
         return hash;
     }
 
-    async confirmationCode(code: string): Promise<boolean> {
+    async confirmationCode(code: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST> {
         let user = await this.usersQueryRepository.findUserByCode(code)
-        if (!user) return false
-        if (user.emailConfirmation.isConfirmed === true) return false
-        if (user.emailConfirmation.confirmationCode !== code) return false
-        if (user.emailConfirmation.expiritionDate < new Date()) return false
+        if (user === HttpStatus.BAD_REQUEST) {return HttpStatus.BAD_REQUEST}
+        if (user.emailConfirmation.isConfirmed === true) return HttpStatus.BAD_REQUEST
+        if (user.emailConfirmation.confirmationCode !== code) return HttpStatus.BAD_REQUEST
+        if (user.emailConfirmation.expiritionDate < new Date()) return HttpStatus.BAD_REQUEST
 
         let result = await this.userRepository.updateConfirmation(user._id)
-        return result
+
+        return HttpStatus.NO_CONTENT
     }
 
-    async resendingEmail(email: string): Promise<null | boolean> {
+    async resendingEmail(email: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST> {
         let user = await this.usersQueryRepository.findUserByEmail(email)
-        if (user === null) return false
-        if (user.emailConfirmation.isConfirmed === true) return false
+        if (user === HttpStatus.NOT_FOUND) return HttpStatus.BAD_REQUEST
+        if (user.emailConfirmation.isConfirmed === true) return HttpStatus.BAD_REQUEST
 
         const confirmationCode = uuidv4();
         const expiritionDate = add(new Date(), {
@@ -79,30 +81,30 @@ export class AuthService {
         })
         await this.userRepository.updateCode(user._id, confirmationCode, expiritionDate)
         await this.emailAdapter.sendEmail(user.accountData.email, 'code', confirmationCode)
-        return true
+        return HttpStatus.NO_CONTENT
     }
 
 
-    async passwordRecovery(email: string): Promise<true> {
+    async passwordRecovery(email: string): Promise<HttpStatus.BAD_REQUEST | HttpStatus.NO_CONTENT> {
         let user = await this.usersQueryRepository.findUserByEmail(email)
-        if (user === null) return true
+        if (user === HttpStatus.NOT_FOUND) return HttpStatus.BAD_REQUEST
 
         const recoveryCode = uuidv4();
         await this.userRepository.updateRecoveryCode(user._id, recoveryCode)
         await this.emailAdapter.passwordRecovery(user.accountData.email, 'code', recoveryCode)
-        return true
+        return HttpStatus.NO_CONTENT
     }
 
 
-    async newPassword(newPassword: string, recoveryCode: string): Promise<boolean> {
+    async newPassword(newPassword: string, recoveryCode: string): Promise< HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST | HttpStatus.NOT_FOUND> {
 
         let result = await this.usersQueryRepository.findUserByRecoveryCode(recoveryCode)
-        if (result === null) { return false }
+        if (result === HttpStatus.NOT_FOUND) { return HttpStatus.NOT_FOUND }
 
         const passwordSalt = await bcrypt.genSalt(10)
         const passwordHash = await this._generateHash(newPassword, passwordSalt)
         const resultUpdatePassword = await this.userRepository.updatePassword(result._id, passwordSalt, passwordHash)
-        if (resultUpdatePassword === false) { return false }
-        return true
+        if (resultUpdatePassword === false) { return HttpStatus.BAD_REQUEST }
+        return HttpStatus.NO_CONTENT
     }
 }

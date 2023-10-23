@@ -1,26 +1,26 @@
 import { log } from 'console';
 import { settings } from './../settings';
 import jwt from 'jsonwebtoken'
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
 
 export class JwtService {
-    async createdJWTAccessToken (userId : ObjectId) {
+    async createdJWTAccessToken (userId : mongoose.Types.ObjectId) {
         const accessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 600})
         return accessToken
     }
 
-    async createJWTRefreshToken (userId: ObjectId, deviceId: string): Promise< string> {
+    async createJWTRefreshToken (userId: mongoose.Types.ObjectId, deviceId: string): Promise< string> {
         const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, settings.JWT_SECRET, {expiresIn: 200})
         return refreshToken
     }
 
     
-    async getUserIdByToken (token: string) : Promise<ObjectId | null> {
+    async getUserIdByToken (token: string) : Promise<mongoose.Types.ObjectId | null> {
        
         try {
             const result: any = jwt.verify(token, settings.JWT_SECRET)
-            return new ObjectId(result.userId)
+            return new mongoose.Types.ObjectId(result.userId)
         } 
         catch (e) {
             
@@ -28,9 +28,9 @@ export class JwtService {
         }
     }
 
-    async getUserIdByRefreshToken (token: string) : Promise<ObjectId> {
+    async getUserIdByRefreshToken (token: string) : Promise<mongoose.Types.ObjectId> {
             const result: any = jwt.decode(token)
-            return new ObjectId(result.userId)
+            return new mongoose.Types.ObjectId(result.userId)
         
     }
 

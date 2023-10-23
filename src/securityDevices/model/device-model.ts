@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose"
+import mongoose, { ObjectId } from "mongoose"
 
 export type refreshToken = {
     token: string,
@@ -6,24 +6,24 @@ export type refreshToken = {
 }
 
 export type devicesMongo = {
-    _id: ObjectId,
+    _id: mongoose.Types.ObjectId,
     issuedAt: string,
     expirationDate: string,
     deviceId: string,
     IP: string,
     deviceName: string,
-    userId: ObjectId
+    userId: mongoose.Types.ObjectId
 }
 
-export class DevicesMongo {
-    constructor(public _id: ObjectId,
-        public expirationDate: string,
-        public deviceId: string,
-        public IP: string,
-        public issuedAt: string,
-        public deviceName: string,
-        public userId: ObjectId) { }
-}
+// export class DevicesMongo {
+//     constructor(public _id: ObjectId,
+//         public expirationDate: string,
+//         public deviceId: string,
+//         public IP: string,
+//         public issuedAt: string,
+//         public deviceName: string,
+//         public userId: ObjectId) { }
+// }
 
 
 

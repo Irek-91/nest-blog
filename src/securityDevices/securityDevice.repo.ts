@@ -1,7 +1,7 @@
 import { InjectModel } from "@nestjs/mongoose";
 import { devicesMongo } from "./model/device-model";
 import { DevicesModel, DevicesModelDocument } from "./model/device-schema";
-import { Model, ObjectId } from "mongoose";
+import mongoose, { Model, ObjectId } from "mongoose";
 
 
 export class SecurityDeviceRepository {
@@ -51,7 +51,7 @@ export class SecurityDeviceRepository {
         return true
     }
 
-    async getTokenAndDevice(userId: ObjectId): Promise<DevicesModelDocument[] | null> {
+    async getTokenAndDevice(userId: mongoose.Types.ObjectId): Promise<DevicesModelDocument[] | null> {
 
         try {
             const res = await this.devicesMododel.find({ userId: userId }).lean();
@@ -70,7 +70,7 @@ export class SecurityDeviceRepository {
         catch (e) { return null }
     }
 
-    async deleteAllDevicesExceptOne(deviceId: string, userId: ObjectId): Promise<Boolean | null> {
+    async deleteAllDevicesExceptOne(deviceId: string, userId: mongoose.Types.ObjectId): Promise<Boolean | null> {
         //добавить фильтр по userId
 
         try {
