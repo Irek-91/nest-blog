@@ -24,14 +24,14 @@ export class RegistrationEmailResending {
 }
 
 
-export class NewPasswordRecoveryInputModel{
+export class NewPasswordRecoveryInputModel {
     @IsNotEmpty()
     @IsString()
     @MaxLength(20)
     @MinLength(6)
-    newPassword:string
-    
+    newPassword: string
+
     @IsNotEmpty()
     @IsString()
-    recoveryCode:string   
-    }
+    recoveryCode: string
+}

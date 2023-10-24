@@ -6,6 +6,6 @@ export enum LikeStatusEnum {
     None = 'None'
   }
 export class likeStatus {
-    @IsEnum(LikeStatusEnum)
+   // @IsEnum(LikeStatusEnum)
     likeStatus: string
 }
