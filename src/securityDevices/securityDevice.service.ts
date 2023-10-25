@@ -2,6 +2,7 @@ import { JwtService } from "src/application/jwt-service"
 import { DeviceViewModel, devicesMongo } from "./model/device-model"
 import { SecurityDeviceRepository } from "./securityDevice.repo"
 import mongoose, { ObjectId } from "mongoose"
+import { log } from "console"
 
 
 export class SecurityDeviceService {
@@ -70,7 +71,7 @@ export class SecurityDeviceService {
             IP,
             deviceName,
             userId}
-
+            
         const addTokenUser = await this.securityDeviceRepository.addRefreshToken(newDeviceAndRefreshToken)
         if (addTokenUser !== true) { return null }
         return refreshToken

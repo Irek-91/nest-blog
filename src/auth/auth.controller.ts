@@ -28,7 +28,6 @@ export class AuthController {
         if (newUser === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-
         const accessToken = await this.jwtService.createdJWTAccessToken(newUser._id)
         const refreshToken = await this.securityDeviceService.addDeviceIdRefreshToken(newUser._id, divicId, IP, title)
         if (accessToken !== null || refreshToken !== null) {

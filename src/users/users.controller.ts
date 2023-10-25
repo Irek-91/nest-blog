@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, Delete, Param, Query, HttpException, HttpStatus } from "@nestjs/common";
+import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { Pagination } from 'src/helpers/query-filter';
 import { CreatUserInputModel } from "./models/users-model";
 import { log } from "console";
+import { Controller} from "@nestjs/common/decorators/core";
 
 @Controller('users')
 export class UsersController {
