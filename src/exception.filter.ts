@@ -53,7 +53,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const errorResponse = {
         errorsMessages: [],
       };
-      console.log('filter', exception.getResponse());
+      //console.log('filter', exception.getResponse());
       const responseErr: any = exception.getResponse();
 
       if (typeof responseErr === 'string') {

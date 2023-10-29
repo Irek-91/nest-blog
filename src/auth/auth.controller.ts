@@ -40,7 +40,7 @@ export class AuthController {
         if (accessToken !== null || refreshToken !== null) {
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
             //res.status(200).send({ accessToken })
-            return res.send({ accessToken })
+            return res.status(200).send({ accessToken })
         }
         else {
             throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED);
@@ -88,21 +88,22 @@ export class AuthController {
 
 
     @Post('/registration')
-    async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel) {
+    async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel,
+    @Response() res: any) {
 
         const user = await this.authService.creatUser(inputData.login, inputData.password, inputData.email)
         if (user) {
             throw new HttpException('No content', HttpStatus.NO_CONTENT)
         }
         else {
-            throw new HttpException({
+            return res.status(HttpStatus.BAD_REQUEST).send({
                 errorsMessages: [
                     {
                         message: "if email is already confirmed",
                         field: "email"
                     }
                 ]
-            }, HttpStatus.BAD_REQUEST)
+            })
         }
     }
 
