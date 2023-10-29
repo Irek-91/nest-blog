@@ -75,7 +75,7 @@ import { BasicStrategy } from './auth/strategies/basic.strategy';
       secret: env.JWT_SECRET,
       signOptions: {expiresIn: '5m'}
     }),
-    //PassportModule
+    PassportModule
   ],
   controllers: [AppController, TestingController, UsersController, BlogsController, PostsController, CommentsController, AuthController],
   providers: [AppService,
