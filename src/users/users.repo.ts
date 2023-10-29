@@ -3,7 +3,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { FilterQuery, Model } from "mongoose";
 import { User, UserDocument } from "./models/users-schema";
 import { userMongoModel, userViewModel } from "./models/users-model";
-import { QueryPaginationTypeUser } from 'src/helpers/query-filter';
 import { log } from "console";
 
 

@@ -1,7 +1,6 @@
-import { QueryPaginationType } from "src/helpers/query-filter"
+import { QueryPaginationType } from './../helpers/query-filter';
 import { BlogsRepository } from "./blogs.repo"
 import { blogInput, blogMongoDB, blogOutput } from "./models/blogs-model"
-import { Blog } from "./models/blogs-schema"
 import mongoose from "mongoose"
 import { Injectable } from "@nestjs/common"
 

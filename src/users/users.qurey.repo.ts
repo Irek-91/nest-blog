@@ -1,10 +1,10 @@
+import { QueryPaginationTypeUser } from './../helpers/query-filter';
 import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { FilterQuery, Model } from "mongoose";
 import { User, UserDocument } from "./models/users-schema";
 import mongoose, { ObjectId } from "mongoose";
 import { userMongoModel, userViewModel } from "./models/users-model";
-import { QueryPaginationTypeUser } from 'src/helpers/query-filter';
 import { log } from "console";
 
 

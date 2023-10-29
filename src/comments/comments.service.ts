@@ -1,10 +1,10 @@
+import { QueryPaginationType } from './../helpers/query-filter';
+import { UsersRepository } from './../users/users.repo';
 import { UsersQueryRepository } from './../users/users.qurey.repo';
 import { Injectable, HttpStatus } from '@nestjs/common';
-import { UsersRepository } from 'src/users/users.repo';
 import { CommentsRepository } from './comments.repo';
 import { commentViewModel, paginatorComments } from './model/comments-model';
 import { Filter, ObjectId } from "mongodb";
-import { QueryPaginationType } from 'src/helpers/query-filter';
 
 
 @Injectable()

@@ -1,10 +1,10 @@
+import { BlogsRepository } from './../blogs/blogs.repo';
+import { QueryPaginationType } from './../helpers/query-filter';
 import { Post, PostSchema } from './model/post-schema';
 import {HttpStatus, Injectable } from "@nestjs/common"
 import { PostRepository } from "./post.repo"
-import { QueryPaginationType } from "src/helpers/query-filter"
 import { paginatorPost, postInputModel, postMongoDb, postOutput } from "./model/post-model"
 import { Filter, ObjectId } from "mongodb";
-import { BlogsRepository } from 'src/blogs/blogs.repo';
 
 
 @Injectable()

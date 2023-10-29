@@ -1,11 +1,11 @@
+import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
+import { Pagination } from './../helpers/query-filter';
 import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { Pagination } from 'src/helpers/query-filter';
 import { CreatUserInputModel } from "./models/users-model";
 import { log } from "console";
 import { Controller} from "@nestjs/common/decorators/core";
 import { AuthGuard } from "@nestjs/passport";
-import { BasicAuthGuard } from "src/auth/guards/basic-auth.guard";
 
 
 @UseGuards(BasicAuthGuard)

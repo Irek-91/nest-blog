@@ -1,12 +1,11 @@
-import { MeViewModel, userViewModel } from 'src/users/models/users-model';
+import { CreatUserInputModel,MeViewModel } from './models/users-model';
+import { QueryPaginationTypeUser } from './../helpers/query-filter';
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { UsersRepository } from "./users.repo";
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import mongoose, { ObjectId } from "mongoose";
 import bcrypt from 'bcrypt'
-import { CreatUserInputModel } from './models/users-model';
-import { QueryPaginationTypeUser } from 'src/helpers/query-filter';
 import { UsersQueryRepository } from "./users.qurey.repo";
 import { UserDocument } from "./models/users-schema";
 import { log } from 'console';

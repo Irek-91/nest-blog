@@ -1,4 +1,3 @@
-import { settings } from 'src/settings';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException, HttpStatus, HttpException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
@@ -13,9 +12,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             ignoreExpiration: false,
             secretOrKey: env.JWT_SECRET
         });
+        debugger
     }
 
+
     async validate(payload: any): Promise<any> {
-       return {userId: payload.sub}
+       return {userId: payload.userId}
     }
 }

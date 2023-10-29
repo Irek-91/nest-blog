@@ -1,12 +1,12 @@
+import { LikeDocument, Like } from './../likes/model/likes-schema';
+import { UserDocument, User } from './../users/models/users-schema';
+import { QueryPaginationType } from './../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Post, PostDocument } from "./model/post-schema"
 import { HydratedDocument, Model } from "mongoose"
-import { QueryPaginationType } from "src/helpers/query-filter"
 import { newestLikes, paginatorPost, postMongoDb, postOutput } from "./model/post-model"
 import { Filter, ObjectId } from "mongodb";
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from 'src/users/models/users-schema';
-import { Like, LikeDocument } from 'src/likes/model/likes-schema';
 import { log } from 'console';
 
 @Injectable()

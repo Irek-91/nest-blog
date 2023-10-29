@@ -1,7 +1,7 @@
+import { likeStatus } from './../likes/model/likes-model';
 import { Controller, Delete, Get, Put, HttpException, HttpStatus, Param, Body } from "@nestjs/common";
 import { CommentsService } from "./comments.service";
 import { commentInput } from "./model/comments-model";
-import { LikeStatusEnum, likeStatus } from "src/likes/model/likes-model";
 
 @Controller('comments')
 export class CommentsController {

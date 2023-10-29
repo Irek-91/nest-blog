@@ -1,17 +1,18 @@
+import { UsersService } from './../users/users.service';
+import { SecurityDeviceService } from './../securityDevices/securityDevice.service';
+import { JwtService } from './../application/jwt-service';
 import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response } from '@nestjs/common';
 import { log } from 'console';
 import { AuthGuard } from '@nestjs/passport';
 
 
-import { UsersService } from 'src/users/users.service';
 import { LoginInputModel, NewPasswordRecoveryInputModel, RegistrationConfirmationCodeModel, RegistrationEmailResending, RegistrationUserInputModel } from './model/auth.model';
 import { AuthService } from './auth.service';
-import { JwtService } from 'src/application/jwt-service';
-import { SecurityDeviceService } from 'src/securityDevices/securityDevice.service';
 import { v4 as uuidv4 } from 'uuid';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/local-jwt.guard';
+import de from 'date-fns/esm/locale/de/index.js';
 
 @Controller('auth')
 
@@ -81,7 +82,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Get('/me')
     async getInformationAboutCurrentUser(@Request() req: any) {
-        
+        debugger
         const user = await this.usersService.findByUserId(req.userId)
         return user
     }
