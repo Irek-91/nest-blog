@@ -35,3 +35,23 @@ export class NewPasswordRecoveryInputModel {
     @IsString()
     recoveryCode: string
 }
+
+
+export class RegistrationUserInputModel {
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(10)
+    @MinLength(3)
+    login: string
+
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(20)
+    @MinLength(6)
+    password: string
+           
+    @IsNotEmpty()
+    @IsString()
+    @IsEmail()
+    email: string
+}

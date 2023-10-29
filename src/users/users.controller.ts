@@ -1,10 +1,14 @@
-import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query } from "@nestjs/common";
+import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { Pagination } from 'src/helpers/query-filter';
 import { CreatUserInputModel } from "./models/users-model";
 import { log } from "console";
 import { Controller} from "@nestjs/common/decorators/core";
+import { AuthGuard } from "@nestjs/passport";
+import { BasicAuthGuard } from "src/auth/guards/basic-auth.guard";
 
+
+@UseGuards(BasicAuthGuard)
 @Controller('users')
 export class UsersController {
     constructor(protected usersService: UsersService,
@@ -23,10 +27,16 @@ export class UsersController {
         const queryFilter = this.pagination.getPaginationFromQueryUser(query);
         return await this.usersService.findUsers(queryFilter)
     }
+
     @Post()
     async createUser(@Body() inputModel: CreatUserInputModel) {
-        return await this.usersService.createUser(inputModel)
+        const result = await this.usersService.createUser(inputModel)
+        if (result === HttpStatus.BAD_REQUEST) {
+             throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
+        return result
+    }
+    
     
     @Delete(':id')
     async deleteUser(@Param('id') userId: string): Promise<Number> {

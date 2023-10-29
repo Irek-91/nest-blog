@@ -1,7 +1,9 @@
 //import { nodemailer } from 'nodemailer';
 
 import nodemailer from 'nodemailer'
+import { Injectable } from "@nestjs/common"
 
+@Injectable()
 export class EmailAdapter {
     async sendEmail(email: string, subject: string, code: string) {
         let transporter = nodemailer.createTransport({

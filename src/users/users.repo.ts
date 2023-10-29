@@ -15,7 +15,6 @@ export class UsersRepository {
 
   async createUser(newUser: User) {
     const userInstance = new this.userModel(newUser)
-
     await userInstance.save()
 
     const userViewVodel = {
@@ -26,7 +25,6 @@ export class UsersRepository {
     }
     return userViewVodel
   }
-
   async deleteUserId(userId: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
       let user = await this.userModel.deleteOne({ _id: new mongoose.Types.ObjectId(userId) })

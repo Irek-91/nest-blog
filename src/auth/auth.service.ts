@@ -7,9 +7,11 @@ import { UsersQueryRepository } from 'src/users/users.qurey.repo';
 import { userViewModel } from 'src/users/models/users-model';
 import { User } from 'src/users/models/users-schema';
 import { EmailAdapter } from "src/application/email-adapter";
-import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Injectable } from '@nestjs/common';
+import { log } from "console";
 
 
+@Injectable()
 export class AuthService {
     constructor(protected userRepository: UsersRepository,
         protected usersQueryRepository: UsersQueryRepository,
@@ -39,7 +41,6 @@ export class AuthService {
                 recoveryCode: uuidv4()
             }
         }
-
         const creatresult = await this.userRepository.createUser(newUser)
         try {
             await this.emailAdapter.sendEmail(newUser.accountData.email, 'code', newUser.emailConfirmation.confirmationCode)

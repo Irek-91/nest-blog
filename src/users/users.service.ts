@@ -9,6 +9,7 @@ import { CreatUserInputModel } from './models/users-model';
 import { QueryPaginationTypeUser } from 'src/helpers/query-filter';
 import { UsersQueryRepository } from "./users.qurey.repo";
 import { UserDocument } from "./models/users-schema";
+import { log } from 'console';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,10 @@ export class UsersService {
   }
 
   async createUser(inputModel: CreatUserInputModel) {
+    const userCheck: UserDocument | HttpStatus.NOT_FOUND = await this.usersQueryRepository.findUserByEmail(inputModel.email)
+    if (userCheck !==HttpStatus.NOT_FOUND) {
+      return HttpStatus.BAD_REQUEST;
+    }
     const createdAt = new Date().toISOString();
     const passwordSalt = await bcrypt.genSalt(10)
     const passwordHash = await this._generateHash(inputModel.password, passwordSalt)

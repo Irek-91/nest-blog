@@ -87,7 +87,6 @@ export class UsersQueryRepository {
     catch (e) { return HttpStatus.BAD_REQUEST }
   }
 
-
   async findUserByEmail(email: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
     try {
       let user = await this.userModel.findOne({ "accountData.email": email }).lean()

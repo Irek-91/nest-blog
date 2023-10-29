@@ -1,6 +1,6 @@
 import { CommentsService } from './comments/comments.service';
 import { ConfigModule } from '@nestjs/config';
-
+import { env } from 'process';
 import { Module } from '@nestjs/common';
 import { AppController, TestingController } from './app.controller';
 import { AppService } from './app.service';
@@ -31,6 +31,11 @@ import { DevicesModel, DevicesModelSchema } from './securityDevices/model/device
 import { SecurityDeviceRepository } from './securityDevices/securityDevice.repo';
 import { SecurityDeviceService } from './securityDevices/securityDevice.service';
 import { AuthController } from './auth/auth.controller';
+import { LocalStrategy } from './auth/strategies/local.strategy';
+import { JwtStrategy } from './auth/strategies/jwt.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { BasicStrategy } from './auth/strategies/basic.strategy';
 
 
 @Module({
@@ -66,12 +71,19 @@ import { AuthController } from './auth/auth.controller';
       }
 
     ]),
+    JwtModule.register({
+      secret: env.JWT_SECRET,
+      signOptions: {expiresIn: '5m'}
+    }),
+    //PassportModule
   ],
   controllers: [AppController, TestingController, UsersController, BlogsController, PostsController, CommentsController, AuthController],
   providers: [AppService,
-    AuthService, EmailAdapter, JwtService,
+    AuthService, 
+    EmailAdapter,
     Pagination,
-    EmailAdapter, JwtService, 
+    JwtService, JwtStrategy, LocalStrategy, 
+    BasicStrategy,
     UsersService, UsersRepository, UsersQueryRepository, 
     BlogsService, BlogsRepository, 
     PostsService, PostRepository, 
@@ -79,5 +91,6 @@ import { AuthController } from './auth/auth.controller';
     SecurityDeviceRepository, SecurityDeviceService
   ],
 })
+
 
 export class AppModule {}

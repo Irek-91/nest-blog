@@ -3,8 +3,9 @@ import { DeviceViewModel, devicesMongo } from "./model/device-model"
 import { SecurityDeviceRepository } from "./securityDevice.repo"
 import mongoose, { ObjectId } from "mongoose"
 import { log } from "console"
+import { Injectable } from "@nestjs/common"
 
-
+@Injectable()
 export class SecurityDeviceService {
     constructor(protected securityDeviceRepository: SecurityDeviceRepository,
         protected jwtService: JwtService) {}
@@ -60,10 +61,9 @@ export class SecurityDeviceService {
     }
 
     async addDeviceIdRefreshToken(userId: mongoose.Types.ObjectId, deviceId: string, IP: string, deviceName: string): Promise<null | string> {
-        const refreshToken = await  this.jwtService.createJWTRefreshToken(userId, deviceId)
+        const refreshToken = await this.jwtService.createdJWTRefreshToken(userId, deviceId)
         const issuedAt = await  this.jwtService.getIssueAttByRefreshToken(refreshToken)
         const expirationDate = await  this.jwtService.getExpiresAttByRefreshToken(refreshToken)
-        
         const newDeviceAndRefreshToken: devicesMongo = {_id: new mongoose.Types.ObjectId(),
             issuedAt,
             expirationDate,

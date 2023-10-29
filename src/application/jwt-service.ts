@@ -2,16 +2,17 @@ import { log } from 'console';
 import { settings } from './../settings';
 import jwt from 'jsonwebtoken'
 import mongoose from "mongoose";
+import { Injectable } from "@nestjs/common"
 
-
+@Injectable()
 export class JwtService {
     async createdJWTAccessToken (userId : mongoose.Types.ObjectId) {
         const accessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 600})
         return accessToken
     }
 
-    async createJWTRefreshToken (userId: mongoose.Types.ObjectId, deviceId: string): Promise< string> {
-        const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, settings.JWT_SECRET, {expiresIn: 200})
+    async createdJWTRefreshToken (userId: mongoose.Types.ObjectId, deviceId: string): Promise< string> {
+        const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, settings.JWT_SECRET, {expiresIn: 400})
         return refreshToken
     }
 

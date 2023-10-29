@@ -2,7 +2,9 @@ import { InjectModel } from "@nestjs/mongoose";
 import { devicesMongo } from "./model/device-model";
 import { DevicesModel, DevicesModelDocument } from "./model/device-schema";
 import mongoose, { Model, ObjectId } from "mongoose";
+import { Injectable } from "@nestjs/common"
 
+@Injectable()
 
 export class SecurityDeviceRepository {
     constructor(@InjectModel(DevicesModel.name) private devicesMododel: Model<DevicesModelDocument>,

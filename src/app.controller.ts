@@ -40,6 +40,7 @@ export class TestingController {
     await this.commentModel.deleteMany();
     await this.likeModel.deleteMany();
     await this.deviceModel.deleteMany();
+    console.log('Delete All')
     throw new HttpException('Not Found', HttpStatus.NO_CONTENT)
   }
 }
