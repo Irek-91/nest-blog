@@ -12,7 +12,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             ignoreExpiration: false,
             secretOrKey: env.JWT_SECRET
         });
-        debugger
     }
 
 
