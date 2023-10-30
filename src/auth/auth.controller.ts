@@ -1,7 +1,7 @@
 import { UsersService } from './../users/users.service';
 import { SecurityDeviceService } from './../securityDevices/securityDevice.service';
 import { JwtService } from './../application/jwt-service';
-import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response } from '@nestjs/common';
+import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response, BadRequestException } from '@nestjs/common';
 import { log } from 'console';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -13,7 +13,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/local-jwt.guard';
 import de from 'date-fns/esm/locale/de/index.js';
-import { EmailOrLoginGuard, emailRegistrationGuard } from './guards/auth.guard';
+import { EmailOrLoginGuard, confirmationCodeExistsGuard, emailRegistrationGuard } from './guards/auth.guard';
 
 @Controller('auth')
 
@@ -95,22 +95,12 @@ export class AuthController {
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
+
+    @UseGuards(confirmationCodeExistsGuard)
     @Post('/registration-confirmation')
     async confirmRegistrationCode(@Body() inputData: RegistrationConfirmationCodeModel) {
         const result = await this.authService.confirmationCode(inputData.code)
-        if (result === HttpStatus.NO_CONTENT) {
-            throw new HttpException('No content', HttpStatus.NO_CONTENT)
-        }
-        else {
-            throw new HttpException({
-                errorsMessages: [
-                    {
-                        message: "Error in code",
-                        field: "code"
-                    }
-                ]
-            }, HttpStatus.BAD_REQUEST)
-        }
+        throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
     @Post('/registration-email-resending')
@@ -120,14 +110,14 @@ export class AuthController {
             throw new HttpException('No content', HttpStatus.NO_CONTENT)
         }
         else {
-            throw new HttpException({
+            throw new BadRequestException({
                 errorsMessages: [
                     {
                         message: "if email is already confirmed",
                         field: "email"
                     }
                 ]
-            }, HttpStatus.BAD_REQUEST)
+            })
         }
     }
 
@@ -151,14 +141,14 @@ export class AuthController {
             throw new HttpException('No content', HttpStatus.NO_CONTENT)
         }
         else {
-            throw new HttpException({
+            throw new BadRequestException({
                 errorsMessages: [
                     {
                         message: "RecoveryCode is incorrect or expired",
                         field: "recoveryCode"
                     }
                 ]
-            }, HttpStatus.BAD_REQUEST)
+            })
         }
 
     }

@@ -63,9 +63,9 @@ export class AuthService {
     async confirmationCode(code: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST> {
         let user = await this.usersQueryRepository.findUserByCode(code)
         if (user === HttpStatus.BAD_REQUEST) {return HttpStatus.BAD_REQUEST}
-        if (user.emailConfirmation.isConfirmed === true) return HttpStatus.BAD_REQUEST
-        if (user.emailConfirmation.confirmationCode !== code) return HttpStatus.BAD_REQUEST
-        if (user.emailConfirmation.expiritionDate < new Date()) return HttpStatus.BAD_REQUEST
+        // if (user.emailConfirmation.isConfirmed === true) return HttpStatus.BAD_REQUEST
+        // if (user.emailConfirmation.confirmationCode !== code) return HttpStatus.BAD_REQUEST
+        // if (user.emailConfirmation.expiritionDate < new Date()) return HttpStatus.BAD_REQUEST
 
         let result = await this.userRepository.updateConfirmation(user._id)
 
