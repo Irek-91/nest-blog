@@ -89,23 +89,10 @@ export class AuthController {
 
     @UseGuards(emailRegistrationGuard)
     @Post('/registration')
-    async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel,
-    @Response() res: any) {
+    async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel) {
 
         const user = await this.authService.creatUser(inputData.login, inputData.password, inputData.email)
-        if (user) {
-            throw new HttpException('No content', HttpStatus.NO_CONTENT)
-        }
-        else {
-            return res.status(HttpStatus.BAD_REQUEST).send({
-                errorsMessages: [
-                    {
-                        message: "if email is already confirmed",
-                        field: "email"
-                    }
-                ]
-            })
-        }
+        throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
     @Post('/registration-confirmation')
