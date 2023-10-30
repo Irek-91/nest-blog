@@ -25,6 +25,7 @@ export class EmailOrLoginGuard implements CanActivate {
     }
 }
 
+@Injectable()
 export class emailRegistrationGuard implements CanActivate {
     constructor(protected usersServise: UsersService) {}
 
