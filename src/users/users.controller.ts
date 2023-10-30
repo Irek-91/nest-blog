@@ -1,3 +1,4 @@
+import { EmailOrLoginGuard } from './../auth/guards/auth.guard';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 import { Pagination } from './../helpers/query-filter';
 import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query, UseGuards } from "@nestjs/common";
@@ -27,13 +28,10 @@ export class UsersController {
         const queryFilter = this.pagination.getPaginationFromQueryUser(query);
         return await this.usersService.findUsers(queryFilter)
     }
-
+    @UseGuards(EmailOrLoginGuard)
     @Post()
     async createUser(@Body() inputModel: CreatUserInputModel) {
         const result = await this.usersService.createUser(inputModel)
-        if (result === HttpStatus.BAD_REQUEST) {
-             throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
-    }
         return result
     }
     

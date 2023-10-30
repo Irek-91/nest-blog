@@ -20,10 +20,7 @@ export class UsersService {
   }
 
   async createUser(inputModel: CreatUserInputModel) {
-    const userCheck: UserDocument | HttpStatus.NOT_FOUND = await this.usersQueryRepository.findUserByEmail(inputModel.email)
-    if (userCheck !==HttpStatus.NOT_FOUND) {
-      return HttpStatus.BAD_REQUEST;
-    }
+    
     const createdAt = new Date().toISOString();
     const passwordSalt = await bcrypt.genSalt(10)
     const passwordHash = await this._generateHash(inputModel.password, passwordSalt)
@@ -112,6 +109,16 @@ async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
 
     async findUserByEmail(email: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
       let user = await  this.usersQueryRepository.findUserByEmail(email)
+      if (user === HttpStatus.NOT_FOUND) {
+        return HttpStatus.NOT_FOUND
+      } else {
+        return user
+      }
+    }
+
+
+    async findUserByLogin(login: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+      let user = await  this.usersQueryRepository.findUserByLogin(login)
       if (user === HttpStatus.NOT_FOUND) {
         return HttpStatus.NOT_FOUND
       } else {
