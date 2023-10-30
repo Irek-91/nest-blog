@@ -1,11 +1,10 @@
 import { postInputModelSpecific } from './../posts/model/post-model';
 import { PostsService } from './../posts/posts.service';
 import { Pagination } from './../helpers/query-filter';
-import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus } from "@nestjs/common";
 import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
-import { HttpStatus, Injectable } from '@nestjs/common';
 
 @Controller('blogs')
 export class BlogsController {

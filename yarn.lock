@@ -2670,6 +2670,7 @@ __metadata:
     ts-loader: "npm:^9.4.3"
     ts-node: "npm:^10.9.1"
     tsconfig-paths: "npm:^4.2.0"
+    types: "npm:^0.1.1"
     typescript: "npm:^5.1.3"
     uuidv4: "npm:^6.2.13"
   languageName: unknown
@@ -10089,6 +10090,13 @@ __metadata:
   version: 0.0.6
   resolution: "typedarray@npm:0.0.6"
   checksum: 6005cb31df50eef8b1f3c780eb71a17925f3038a100d82f9406ac2ad1de5eb59f8e6decbdc145b3a1f8e5836e17b0c0002fb698b9fe2516b8f9f9ff602d36412
+  languageName: node
+  linkType: hard
+
+"types@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "types@npm:0.1.1"
+  checksum: 200b11ea12b7ef9449a74e32f5dd1f93c426f89369f1eaa7af9c5ecf59e011ab014544d4b09cc4ef7ffab05143f3eadb42ea3ff2f5b10d8d4246b193869d8bed
   languageName: node
   linkType: hard
 

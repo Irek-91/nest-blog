@@ -5,7 +5,6 @@ import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, R
 import { log } from 'console';
 import { AuthGuard } from '@nestjs/passport';
 
-
 import { LoginInputModel, NewPasswordRecoveryInputModel, RegistrationConfirmationCodeModel, RegistrationEmailResending, RegistrationUserInputModel } from './model/auth.model';
 import { AuthService } from './auth.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,6 +15,7 @@ import de from 'date-fns/esm/locale/de/index.js';
 import { EmailOrLoginGuard, confirmationCodeExistsGuard, emailRegistrationGuard } from './guards/auth.guard';
 
 @Controller('auth')
+
 
 export class AuthController {
     constructor(protected usersService: UsersService,
