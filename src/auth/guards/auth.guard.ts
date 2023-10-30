@@ -33,7 +33,7 @@ export class emailRegistrationGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest();
         const emailExists = await this.usersServise.findUserByEmail(req.body.email)
-        if (emailExists !== HttpStatus.NOT_FOUND) {
+        if (emailExists === HttpStatus.NOT_FOUND) {
             throw new BadRequestException([
                 { message: 'BAD REQUEST', field: 'email' },
             ])

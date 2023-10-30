@@ -101,23 +101,11 @@ export class AuthController {
         const result = await this.authService.confirmationCode(inputData.code)
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
-
+    @UseGuards(emailRegistrationGuard)
     @Post('/registration-email-resending')
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {
         const result = await this.authService.resendingEmail(inputData.email)
-        if (result === HttpStatus.NO_CONTENT) {
-            throw new HttpException('No content', HttpStatus.NO_CONTENT)
-        }
-        else {
-            throw new BadRequestException({
-                errorsMessages: [
-                    {
-                        message: "if email is already confirmed",
-                        field: "email"
-                    }
-                ]
-            })
-        }
+        throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
     @Post('/password-recovery')
