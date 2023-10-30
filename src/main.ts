@@ -11,7 +11,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      stopAtFirstError: false,
+      transform: true,
+      stopAtFirstError: true,
       exceptionFactory: (errors) => {
         const errorsForResponse: any = [];
         errors.forEach((e) => {

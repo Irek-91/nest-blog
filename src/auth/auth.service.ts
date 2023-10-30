@@ -18,9 +18,9 @@ export class AuthService {
         protected emailAdapter: EmailAdapter) {}
 
     async creatUser(login: string, password: string, email: string): Promise<userViewModel | null> {
-        const userFind = await this.usersQueryRepository.findUserByEmail(email)
-        debugger
-        if (userFind === HttpStatus.NOT_FOUND) {return null}
+        const userFindByEmail = await this.usersQueryRepository.findUserByEmail(email)
+        
+        if (userFindByEmail === HttpStatus.NOT_FOUND) {return null}
         const createdAt = new Date().toISOString();
         const passwordSalt = await bcrypt.genSalt(10)
         const passwordHash = await this._generateHash(password, passwordSalt)
