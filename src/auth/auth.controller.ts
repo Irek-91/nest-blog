@@ -13,7 +13,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/local-jwt.guard';
 import de from 'date-fns/esm/locale/de/index.js';
-import { emailRegistrationGuard } from './guards/auth.guard';
+import { EmailOrLoginGuard, emailRegistrationGuard } from './guards/auth.guard';
 
 @Controller('auth')
 
@@ -87,7 +87,7 @@ export class AuthController {
         return user
     }
 
-    @UseGuards(emailRegistrationGuard)
+    @UseGuards(EmailOrLoginGuard)
     @Post('/registration')
     async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel) {
 
