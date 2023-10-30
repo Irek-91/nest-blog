@@ -17,7 +17,6 @@ import { EmailOrLoginGuard, confirmationCodeExistsGuard, emailRegistrationGuard 
 
 @Controller('auth')
 
-
 export class AuthController {
     constructor(protected usersService: UsersService,
         protected jwtService: JwtService,

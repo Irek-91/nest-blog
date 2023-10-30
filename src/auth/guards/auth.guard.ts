@@ -1,6 +1,6 @@
+import { UsersService } from './../../users/users.service';
 import { HttpStatus, BadRequestException } from '@nestjs/common';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
 import { AuthService } from '../auth.service';
 
 
