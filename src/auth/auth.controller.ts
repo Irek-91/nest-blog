@@ -94,13 +94,13 @@ export class AuthController {
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
-
     @UseGuards(confirmationCodeExistsGuard)
     @Post('/registration-confirmation')
     async confirmRegistrationCode(@Body() inputData: RegistrationConfirmationCodeModel) {
         const result = await this.authService.confirmationCode(inputData.code)
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
+
     @UseGuards(emailRegistrationGuard)
     @Post('/registration-email-resending')
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {
