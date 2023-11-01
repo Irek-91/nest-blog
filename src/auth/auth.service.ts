@@ -83,7 +83,7 @@ export class AuthService {
             minutes: 2
         })
         await this.userRepository.updateCode(user._id, confirmationCode, expiritionDate)
-        await this.emailAdapter.sendEmail(user.accountData.email, 'code', confirmationCode)
+        this.emailAdapter.sendEmail(user.accountData.email, 'code', confirmationCode)
         return HttpStatus.NO_CONTENT
     }
 
