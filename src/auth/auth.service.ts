@@ -7,7 +7,7 @@ import mongoose, { ObjectId } from "mongoose";
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add'
-import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Injectable } from '@nestjs/common';
+import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Injectable, BadRequestException } from '@nestjs/common';
 import { log } from "console";
 
 @Injectable()
@@ -74,8 +74,8 @@ export class AuthService {
 
     async resendingEmail(email: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST> {
         let user = await this.usersQueryRepository.findUserByEmail(email)
-        if (user === HttpStatus.NOT_FOUND) return HttpStatus.BAD_REQUEST
-        if (user.emailConfirmation.isConfirmed === true) return HttpStatus.BAD_REQUEST
+        if (user === HttpStatus.NOT_FOUND) throw new BadRequestException()
+        if (user.emailConfirmation.isConfirmed === true)  throw new BadRequestException()
 
         const confirmationCode = uuidv4();
         const expiritionDate = add(new Date(), {

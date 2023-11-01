@@ -105,6 +105,7 @@ export class AuthController {
     @Post('/registration-email-resending')
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {
         const result = await this.authService.resendingEmail(inputData.email)
+        
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
