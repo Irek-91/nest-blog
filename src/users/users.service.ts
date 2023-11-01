@@ -1,4 +1,4 @@
-import { CreatUserInputModel,MeViewModel } from './models/users-model';
+import { CreatUserInputModel, MeViewModel } from './models/users-model';
 import { QueryPaginationTypeUser } from './../helpers/query-filter';
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { UsersRepository } from "./users.repo";
@@ -20,7 +20,7 @@ export class UsersService {
   }
 
   async createUser(inputModel: CreatUserInputModel) {
-    
+
     const createdAt = new Date().toISOString();
     const passwordSalt = await bcrypt.genSalt(10)
     const passwordHash = await this._generateHash(inputModel.password, passwordSalt)
@@ -56,7 +56,7 @@ export class UsersService {
     return await this.usersRepository.deleteUserId(id)
   }
 
-async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+  async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     return await this.usersRepository.deleteUsers()
   }
 
@@ -65,56 +65,53 @@ async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     return hash;
   }
 
-    async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
-      const user = await  this.usersQueryRepository.findByLoginOrEmailL(loginOrEmail)
-      if (user === HttpStatus.NOT_FOUND) {
-        return HttpStatus.NOT_FOUND
-      }
-      const passwordHash = await this._generateHash(passwordUser, user.accountData.salt)
-      if (user.accountData.hash !== passwordHash) {
-        return HttpStatus.NOT_FOUND
-      }
-      else {
-        return user
-      }
-    }
-
-
-    async deleteUserAll(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
-      return await  this.usersRepository.deleteUsers()
-    }
-
-    async findByUserId(userId: mongoose.Types.ObjectId): Promise< MeViewModel | HttpStatus.NOT_FOUND> {
-
-      const result = await  this.usersQueryRepository.findUserById(userId)
-      if (result !== HttpStatus.NOT_FOUND) {
-        const resultUserViewModel : MeViewModel = {
-          email: result.accountData.email,
-          login: result.accountData.login,
-          userId: result._id
-        }
-        return resultUserViewModel
-      }
+  async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+    const user = await this.usersQueryRepository.findByLoginOrEmailL(loginOrEmail)
+    if (user === HttpStatus.NOT_FOUND) {
       return HttpStatus.NOT_FOUND
     }
-
-    async findUserByCode(code: string): Promise<UserDocument | null> {
-      let user = await  this.usersQueryRepository.findUserByCode(code)
-      if (!user) return null
-        return user
+    const passwordHash = await this._generateHash(passwordUser, user.accountData.salt)
+    if (user.accountData.hash !== passwordHash) {
+      return HttpStatus.NOT_FOUND
     }
-
-    async findUserByEmail(email: string): Promise<UserDocument | null> {
-      return this.usersQueryRepository.findUserByEmail(email)
+    else {
+      return user
     }
+  }
 
 
-    async findUserByLogin(login: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
-      let user = await  this.usersQueryRepository.findUserByLogin(login)
-      if (user === HttpStatus.NOT_FOUND) {
-        return HttpStatus.NOT_FOUND
-      } else {
-        return user
-      }
+  async deleteUserAll(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+    return await this.usersRepository.deleteUsers()
+  }
+
+  async findByUserId(userId: mongoose.Types.ObjectId): Promise<MeViewModel> {
+
+    const result = await this.usersQueryRepository.findUserById(userId)
+    const resultUserViewModel: MeViewModel = {
+      email: result.accountData.email,
+      login: result.accountData.login,
+      userId: result._id
     }
+    return resultUserViewModel
+  }
+
+  async findUserByCode(code: string): Promise<UserDocument | null> {
+    let user = await this.usersQueryRepository.findUserByCode(code)
+    if (!user) return null
+    return user
+  }
+
+  async findUserByEmail(email: string): Promise<UserDocument | null> {
+    return this.usersQueryRepository.findUserByEmail(email)
+  }
+
+
+  async findUserByLogin(login: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+    let user = await this.usersQueryRepository.findUserByLogin(login)
+    if (user === HttpStatus.NOT_FOUND) {
+      return HttpStatus.NOT_FOUND
+    } else {
+      return user
+    }
+  }
 }

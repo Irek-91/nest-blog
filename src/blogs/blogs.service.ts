@@ -3,22 +3,24 @@ import { BlogsRepository } from "./blogs.repo"
 import { blogInput, blogMongoDB, blogOutput } from "./models/blogs-model"
 import mongoose from "mongoose"
 import { Injectable } from "@nestjs/common"
+import { BlogsQueryRepository } from './blogs.query.repo';
 
 @Injectable()
 export class BlogsService {
-    constructor (protected blogsRepository : BlogsRepository) {
+    constructor (protected blogsRepository : BlogsRepository,
+        protected blogsQueryRepository : BlogsQueryRepository) {
     }
     
     async findBlogs(paginationQuery: QueryPaginationType) {
-        return await this.blogsRepository.findBlogs(paginationQuery)
+        return await this.blogsQueryRepository.findBlogs(paginationQuery)
     }
 
-    async getBlogId(id: string): Promise<blogOutput | Number> {
-        return await this.blogsRepository.getBlogId(id)
+    async getBlogId(id: string): Promise<blogOutput> {
+        return await this.blogsQueryRepository.getBlogId(id)
     }
 
     async getBlogNameById(id: string): Promise<string | Number> {
-        return await this.blogsRepository.getBlogNameById(id)
+        return await this.blogsQueryRepository.getBlogNameById(id)
     }
 
     async createBlog(blogInputData: blogInput): Promise<blogOutput> {

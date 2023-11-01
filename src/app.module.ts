@@ -36,6 +36,9 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
+import { PostQueryRepository } from './posts/post.query.repo';
+import { CommentsQueryRepository } from './comments/comments.query.repo';
+import { BlogsQueryRepository } from './blogs/blogs.query.repo';
 
 
 @Module({
@@ -85,9 +88,9 @@ import { BasicStrategy } from './auth/strategies/basic.strategy';
     JwtService, JwtStrategy, LocalStrategy, 
     BasicStrategy,
     UsersService, UsersRepository, UsersQueryRepository, 
-    BlogsService, BlogsRepository, 
-    PostsService, PostRepository, 
-    CommentsService, CommentsRepository,
+    BlogsService, BlogsRepository, BlogsQueryRepository,
+    PostsService, PostRepository, PostQueryRepository,
+    CommentsService, CommentsRepository,CommentsQueryRepository,
     SecurityDeviceRepository, SecurityDeviceService
   ],
 })

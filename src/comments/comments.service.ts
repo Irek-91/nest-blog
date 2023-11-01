@@ -5,6 +5,7 @@ import { Injectable, HttpStatus } from '@nestjs/common';
 import { CommentsRepository } from './comments.repo';
 import { commentViewModel, paginatorComments } from './model/comments-model';
 import { Filter, ObjectId } from "mongodb";
+import { CommentsQueryRepository } from './comments.query.repo';
 
 
 @Injectable()
@@ -12,15 +13,13 @@ import { Filter, ObjectId } from "mongodb";
 export class CommentsService {
     constructor(protected usersRepository: UsersRepository, 
         protected usersQueryRepository:UsersQueryRepository, 
-        protected commentsRepository: CommentsRepository) { }
+        protected commentsRepository: CommentsRepository,
+        protected commentsQueryRepository: CommentsQueryRepository) { }
 
-    async createdCommentPostId(postId: string, userId: string, content: string): Promise<commentViewModel | HttpStatus.NOT_FOUND> {
+    async createdCommentPostId(postId: string, userId: string, content: string): Promise<commentViewModel> {
 
         const createdAt = new Date().toISOString();
         const user = await this.usersQueryRepository.findUserById(new ObjectId(userId))
-        if (user === HttpStatus.NOT_FOUND) {
-            return HttpStatus.NOT_FOUND
-        }
         const userLogin = user.accountData.login
         const creatComment = await this.commentsRepository.createdCommentPostId(postId, content, userId, userLogin, createdAt)
         return creatComment
@@ -28,7 +27,7 @@ export class CommentsService {
 
     async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | Number> {
 
-        const comment = await this.commentsRepository.findCommentById(commentId, userId)
+        const comment = await this.commentsQueryRepository.findCommentById(commentId, userId)
         if (comment === null) {
             return HttpStatus.NOT_FOUND
         }
@@ -38,7 +37,7 @@ export class CommentsService {
     }
     async updateContent(userId: string, commentsId: string, content: string): Promise<Number> {
         try {
-            const comment = await this.commentsRepository.findCommentById(commentsId, userId)
+            const comment = await this.commentsQueryRepository.findCommentById(commentsId, userId)
             if (comment === HttpStatus.NOT_FOUND) { return HttpStatus.NOT_FOUND }
 
             if (comment!.commentatorInfo.userId === userId) {
@@ -59,7 +58,7 @@ export class CommentsService {
     async deleteCommentById(commentsId: string, userId: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.FORBIDDEN |  HttpStatus.NOT_FOUND> {
 
         try {
-            const commentById = await this.commentsRepository.findCommentById(commentsId, userId)
+            const commentById = await this.commentsQueryRepository.findCommentById(commentsId, userId)
             if (commentById === HttpStatus.NOT_FOUND) {
                 return HttpStatus.NOT_FOUND
             }
@@ -78,7 +77,7 @@ export class CommentsService {
     }
 
     async findCommentsByPostId(postId: string, userId: string | null, pagination: QueryPaginationType): Promise<paginatorComments | HttpStatus.NOT_FOUND> {
-        return this.commentsRepository.findCommentsByPostId(postId, userId, pagination)
+        return this.commentsQueryRepository.findCommentsByPostId(postId, userId, pagination)
     }
 
     async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {

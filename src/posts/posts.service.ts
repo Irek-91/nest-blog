@@ -1,40 +1,49 @@
+import { BlogsQueryRepository } from './../blogs/blogs.query.repo';
 import { BlogsRepository } from './../blogs/blogs.repo';
 import { QueryPaginationType } from './../helpers/query-filter';
 import { Post, PostSchema } from './model/post-schema';
-import {HttpStatus, Injectable } from "@nestjs/common"
+import {HttpStatus, Injectable , HttpException} from "@nestjs/common"
 import { PostRepository } from "./post.repo"
 import { paginatorPost, postInputModel, postMongoDb, postOutput } from "./model/post-model"
 import { Filter, ObjectId } from "mongodb";
+import { PostQueryRepository } from './post.query.repo';
 
 
 @Injectable()
 
 export class PostsService {
 
-    constructor (protected postRepository: PostRepository, 
-        protected blogRepository: BlogsRepository) { }
+    constructor (protected postRepository: PostRepository,
+        protected postQueryRepo: PostQueryRepository,
+        protected blogQueryRepository: BlogsQueryRepository) { }
     async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost> {
-        return this.postRepository.findPost(paginationQuery, userId)
+        return this.postQueryRepo.findPost(paginationQuery, userId)
     }
 
 
     async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string|null): Promise<paginatorPost | Number> {
-        return this.postRepository.findPostsBlogId(paginationQuery, blogId, userId)
+        return this.postQueryRepo.findPostsBlogId(paginationQuery, blogId, userId)
     }
 
-    async getPostId(id: string, userId: string | null): Promise<postOutput | number> {
-        return this.postRepository.getPostId(id, userId)
+    async getPostId(id: string, userId: string | null): Promise<postOutput> {
+        return this.postQueryRepo.getPostId(id, userId)
     }
 
-    async deletePostId(id: string): Promise<Number> {
-        return await this.postRepository.deletePostId(id)
+    async deletePostId(id: string): Promise<Boolean | null> {
+        const result = await this.postRepository.deletePostId(id)
+        if (!result) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return true
+        }
+
     }
 
     async createdPostBlogId(postData : postInputModel): Promise<postOutput | Number> {
         
         const newPostId = new ObjectId()
         const createdAt = new Date().toISOString();
-        let blodName = await this.blogRepository.getBlogNameById(postData.blogId)
+        let blodName = await this.blogQueryRepository.getBlogNameById(postData.blogId)
         if (blodName === typeof Number) {
             return HttpStatus.NOT_FOUND
         }
@@ -76,9 +85,9 @@ export class PostsService {
 
     async updatePostId(postInputData: postInputModel, postId: string): Promise<Number> {
         //100
-        const post = await this.postRepository.getPostById(postId)
+        const post = await this.postQueryRepo.getPostById(postId)
         if(!post) {
-            return HttpStatus.NOT_FOUND
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
 
         post.title = postInputData.title
@@ -89,7 +98,7 @@ export class PostsService {
         await this.postRepository.savePost(post)
         //0
 
-        return HttpStatus.NO_CONTENT
+        throw new HttpException('No content', HttpStatus.NO_CONTENT)
         //return await this.postRepository.updatePostId(id, title, shortDescription, content, blogId)
     }
 

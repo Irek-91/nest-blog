@@ -1,5 +1,5 @@
 import { QueryPaginationTypeUser } from './../helpers/query-filter';
-import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpCode, HttpStatus, Injectable, HttpException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { FilterQuery, Model } from "mongoose";
 import { User, UserDocument } from "./models/users-schema";
@@ -52,16 +52,16 @@ export class UsersQueryRepository {
     }
   }
 
-  async findUserById(userId: mongoose.Types.ObjectId): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+  async findUserById(userId: mongoose.Types.ObjectId): Promise<UserDocument> {
     try {
       let user = await this.userModel.findOne({ _id: userId });
       if (user === null) {
-        return HttpStatus.NOT_FOUND
+        throw new HttpException ('Not found',HttpStatus.NOT_FOUND)
       }
       else {
         return user
       }
-    } catch (e) { return HttpStatus.NOT_FOUND }
+    } catch (e) { throw new HttpException ('Not found',HttpStatus.NOT_FOUND) }
   }
 
   async findByLoginOrEmailL(loginOrEmail: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {

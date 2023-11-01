@@ -40,13 +40,8 @@ export class PostsController {
     @Get(':id')
     async getPostId(@Param('id') postId: string) {
         const userId = null //поменять когда будет авторизация
-
         let post: postOutput | number = await this.postsService.getPostId(postId, userId)
-        if (post === HttpStatus.NOT_FOUND) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        } else {
-            return post
-        }
+        return post
     }
     @Get(':postId/comments')
     async getCommentsBuPostId(@Param('postId') postId: string,
@@ -62,25 +57,13 @@ export class PostsController {
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const resultPostId = await this.postsService.getPostId(postId, userId)
-        if (resultPostId === HttpStatus.NOT_FOUND) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        }
-        else {
-            const commentsPostId = await this.commentsService.findCommentsByPostId(postId, userId, pagination)
-            if (commentsPostId !== null) {
-                return commentsPostId
-            }
-            else {
-                throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-            }
-        }
+        const commentsPostId = await this.commentsService.findCommentsByPostId(postId, userId, pagination)
+        return commentsPostId
     }
+
     @Post()
     async createdPost(@Body() postInputData: postInputModel) {
         const blogId = await this.blogsService.getBlogId(postInputData.blogId)
-        if (!blogId) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        }
         let post = await this.postsService.createdPostBlogId(postInputData)
         if (post === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -97,29 +80,14 @@ export class PostsController {
         //const userId = req.user._id.toString()
         const userId = "null"
         const post = await this.postsService.getPostId(postId, userId)
-        log(post)
-        if (post === HttpStatus.NOT_FOUND) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
-        }
-
         let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
-        if (comment === HttpStatus.NOT_FOUND) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
-        }
-        else {
-            return comment
-        }
+        return comment
     }
 
     @Put(':id')
     async updatePostId(@Body() postInputData: postInputModel,
         @Param('id') postId: string) {
         let postResult = await this.postsService.updatePostId(postInputData, postId)
-        if (postResult === HttpStatus.NOT_FOUND) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        } else {
-            throw new HttpException('Not Found', HttpStatus.NO_CONTENT);
-        }
     }
 
     @Put(':postId/like-status')
@@ -132,7 +100,7 @@ export class PostsController {
         const userId = 'sdvsvd'
         const resultUpdateLikeStatusPost = await this.postsService.updateLikeStatusPostId(postId, userId, likeStatus.likeStatus)
         if (resultUpdateLikeStatusPost) {
-            throw new HttpException('Not Found', HttpStatus.NO_CONTENT);
+            throw new HttpException('No content', HttpStatus.NO_CONTENT);
         }
         else {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -144,10 +112,10 @@ export class PostsController {
         @Param('id') postId: string
     ) {
         let post = await this.postsService.deletePostId(postId);
-        if (post === HttpStatus.NO_CONTENT) {
-            throw new HttpException('Not Found', HttpStatus.NO_CONTENT);
-        } else {
+        if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        } else {
+            throw new HttpException('No content', HttpStatus.NO_CONTENT);
         }
     }
 }
