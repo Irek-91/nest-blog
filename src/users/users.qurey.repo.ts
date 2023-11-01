@@ -75,28 +75,20 @@ export class UsersQueryRepository {
   }
 
 
-  async findUserByCode(code: string): Promise<UserDocument | HttpStatus.BAD_REQUEST> {
+  async findUserByCode(code: string): Promise<UserDocument | null> {
     try {
-      let user = await this.userModel.findOne({ "emailConfirmation.confirmationCode": code }).lean()
-      if (user !== null) {
-        return user
-      } else {
-        return HttpStatus.BAD_REQUEST
-      }
+      return this.userModel.findOne({ "emailConfirmation.confirmationCode": code })
     }
-    catch (e) { return HttpStatus.BAD_REQUEST }
+    catch (e) {
+       return null
+       }
   }
 
-  async findUserByEmail(email: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+  async findUserByEmail(email: string): Promise<UserDocument | null> {
     try {
-      let user = await this.userModel.findOne({ "accountData.email": email }).lean()
-      if (user !== null) {
-        return user
-      } else {
-        return HttpStatus.NOT_FOUND
-      }
+      return this.userModel.findOne({ "accountData.email": email })
     }
-    catch (e) { return HttpStatus.NOT_FOUND }
+    catch (e) { return null }
   }
 
   async findUserByLogin(login: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {

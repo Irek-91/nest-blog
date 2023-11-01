@@ -1,7 +1,7 @@
 import { UsersService } from './../users/users.service';
 import { SecurityDeviceService } from './../securityDevices/securityDevice.service';
 import { JwtService } from './../application/jwt-service';
-import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response, BadRequestException, HttpCode } from '@nestjs/common';
 import { log } from 'console';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -11,8 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/local-jwt.guard';
-import de from 'date-fns/esm/locale/de/index.js';
-import { EmailOrLoginGuard, confirmationCodeExistsGuard, emailRegistrationGuard } from './guards/auth.guard';
+import { EmailOrLoginGuard } from './guards/auth.guard';
 
 @Controller('auth')
 
@@ -94,19 +93,16 @@ export class AuthController {
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
-    @UseGuards(confirmationCodeExistsGuard)
+    @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-confirmation')
     async confirmRegistrationCode(@Body() inputData: RegistrationConfirmationCodeModel) {
-        const result = await this.authService.confirmationCode(inputData.code)
-        throw new HttpException('No content', HttpStatus.NO_CONTENT)
+        return this.authService.confirmationCode(inputData.code)
     }
 
-    @UseGuards(emailRegistrationGuard)
+    @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-email-resending')
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {
-        const result = await this.authService.resendingEmail(inputData.email)
-        
-        throw new HttpException('No content', HttpStatus.NO_CONTENT)
+        return this.authService.resendingEmail(inputData.email)
     }
 
     @Post('/password-recovery')

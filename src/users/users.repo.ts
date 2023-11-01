@@ -45,13 +45,17 @@ export class UsersRepository {
   }
 
   async updateConfirmation(_id: mongoose.Types.ObjectId): Promise<boolean> {
-    let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.isConfirmed": true } })
-    return result.modifiedCount === 1
+    let result = await this.userModel.updateOne({ _id }, { $set: { 
+        "emailConfirmation.isConfirmed": true,
+        "emailConfirmation.confirmationCode": null,
+        "emailConfirmation.expiritionDate": null,
+    } })
+    return result.matchedCount === 1
   }
 
   async updateCode(_id: mongoose.Types.ObjectId, code: string, expiritionDate: Date): Promise<boolean> {
     let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.confirmationCode": code, "emailConfirmation.expiritionDate": expiritionDate } })
-    return result.modifiedCount === 2
+    return result.matchedCount === 1
   }
 
   async updatePassword(_id: mongoose.Types.ObjectId, salt: string, hash: string): Promise<boolean> {

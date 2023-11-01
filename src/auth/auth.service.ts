@@ -60,22 +60,25 @@ export class AuthService {
         return hash;
     }
 
-    async confirmationCode(code: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST> {
+    async confirmationCode(code: string): Promise<void> {
         let user = await this.usersQueryRepository.findUserByCode(code)
-        if (user === HttpStatus.BAD_REQUEST) {return HttpStatus.BAD_REQUEST}
+        if (!user) throw new BadRequestException([{message: 'wrong code', field: `code`}])
+        if(user.emailConfirmation.isConfirmed) throw new BadRequestException([{message: 'wrong code', field: `code`}])
+        if(user.emailConfirmation.expiritionDate < new Date()) throw new BadRequestException([{message: 'wrong code', field: `code`}])
         // if (user.emailConfirmation.isConfirmed === true) return HttpStatus.BAD_REQUEST
         // if (user.emailConfirmation.confirmationCode !== code) return HttpStatus.BAD_REQUEST
         // if (user.emailConfirmation.expiritionDate < new Date()) return HttpStatus.BAD_REQUEST
 
-        let result = await this.userRepository.updateConfirmation(user._id)
-
-        return HttpStatus.NO_CONTENT
+        await this.userRepository.updateConfirmation(user._id)
+        return
     }
 
-    async resendingEmail(email: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST> {
+    
+    async resendingEmail(email: string): Promise<void> {
         let user = await this.usersQueryRepository.findUserByEmail(email)
-        if (user === HttpStatus.NOT_FOUND) throw new BadRequestException()
-        if (user.emailConfirmation.isConfirmed === true)  throw new BadRequestException()
+        const errMsg = [{message: 'wrong email', field: `email`}]
+        if (!user) throw new BadRequestException(errMsg)
+        if (user.emailConfirmation.isConfirmed) throw new BadRequestException(errMsg)
 
         const confirmationCode = uuidv4();
         const expiritionDate = add(new Date(), {
@@ -83,14 +86,15 @@ export class AuthService {
             minutes: 2
         })
         await this.userRepository.updateCode(user._id, confirmationCode, expiritionDate)
-        this.emailAdapter.sendEmail(user.accountData.email, 'code', confirmationCode)
-        return HttpStatus.NO_CONTENT
+        await this.emailAdapter.sendEmail(user.accountData.email, 'code', confirmationCode)
+        return
+    
     }
 
 
     async passwordRecovery(email: string): Promise<HttpStatus.BAD_REQUEST | HttpStatus.NO_CONTENT> {
         let user = await this.usersQueryRepository.findUserByEmail(email)
-        if (user === HttpStatus.NOT_FOUND) return HttpStatus.BAD_REQUEST
+        if (!user) return HttpStatus.BAD_REQUEST
 
         const recoveryCode = uuidv4();
         await this.userRepository.updateRecoveryCode(user._id, recoveryCode)

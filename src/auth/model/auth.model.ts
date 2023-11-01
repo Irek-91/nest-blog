@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator"
+import { IsEmail, IsNotEmpty, IsString, IsUUID, MaxLength, MinLength } from "class-validator"
 
 export class LoginInputModel {
     @IsNotEmpty()
@@ -11,15 +11,16 @@ export class LoginInputModel {
 }
 
 export class RegistrationConfirmationCodeModel {
-    @IsNotEmpty()
+    @IsUUID()
     @IsString()
+    @IsNotEmpty()
     code: string
 }
 
 export class RegistrationEmailResending {
-    @IsNotEmpty()
-    @IsString()
     @IsEmail()
+    @IsString()
+    @IsNotEmpty()
     email: string
 }
 

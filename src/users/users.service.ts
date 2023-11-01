@@ -98,22 +98,14 @@ async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
       return HttpStatus.NOT_FOUND
     }
 
-    async findUserByCode(code: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+    async findUserByCode(code: string): Promise<UserDocument | null> {
       let user = await  this.usersQueryRepository.findUserByCode(code)
-      if (user === HttpStatus.BAD_REQUEST) {
-        return HttpStatus.NOT_FOUND
-      } else {
+      if (!user) return null
         return user
-      }
     }
 
-    async findUserByEmail(email: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
-      let user = await  this.usersQueryRepository.findUserByEmail(email)
-      if (user === HttpStatus.NOT_FOUND) {
-        return HttpStatus.NOT_FOUND
-      } else {
-        return user
-      }
+    async findUserByEmail(email: string): Promise<UserDocument | null> {
+      return this.usersQueryRepository.findUserByEmail(email)
     }
 
 

@@ -17,7 +17,7 @@ export class EmailOrLoginGuard implements CanActivate {
                 { message: 'BAD REQUEST', field: 'login' },
             ])
         }
-        if (emailExists !== HttpStatus.NOT_FOUND) {
+        if (emailExists) {
             throw new BadRequestException([
                 { message: 'BAD REQUEST', field: 'email' },
             ])
@@ -26,35 +26,35 @@ export class EmailOrLoginGuard implements CanActivate {
     }
 }
 
-@Injectable()
-export class emailRegistrationGuard implements CanActivate {
-    constructor(protected usersServise: UsersService) {}
+// @Injectable()
+// export class emailRegistrationGuard implements CanActivate {
+//     constructor(protected usersServise: UsersService) {}
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        const req = context.switchToHttp().getRequest();
-        const emailExists = await this.usersServise.findUserByEmail(req.body.email)
-        if (emailExists === HttpStatus.NOT_FOUND) {
-            throw new BadRequestException([
-                { message: 'BAD REQUEST', field: 'email' },
-            ])
-        }
-        return true
-    }
-}
+//     async canActivate(context: ExecutionContext): Promise<boolean> {
+//         const req = context.switchToHttp().getRequest();
+//         const emailExists = await this.usersServise.findUserByEmail(req.body.email)
+//         if (emailExists === HttpStatus.NOT_FOUND) {
+//             throw new BadRequestException([
+//                 { message: 'BAD REQUEST', field: 'email' },
+//             ])
+//         }
+//         return true
+//     }
+// }
 
 
-@Injectable()
-export class confirmationCodeExistsGuard implements CanActivate {
-    constructor(protected authService: AuthService) {}
+// @Injectable()
+// export class confirmationCodeExistsGuard implements CanActivate {
+//     constructor(protected authService: AuthService) {}
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        const req = context.switchToHttp().getRequest();
-        const codeExists = await this.authService.confirmationCode(req.body.code)
-        if (codeExists === HttpStatus.BAD_REQUEST) {
-            throw new BadRequestException([
-                { message: 'BAD REQUEST', field: 'code' },
-            ])
-        }
-        return true
-    }
-}
+//     async canActivate(context: ExecutionContext): Promise<boolean> {
+//         const req = context.switchToHttp().getRequest();
+//         const codeExists = await this.authService.confirmationCode(req.body.code)
+//         if (codeExists === HttpStatus.BAD_REQUEST) {
+//             throw new BadRequestException([
+//                 { message: 'BAD REQUEST', field: 'code' },
+//             ])
+//         }
+//         return true
+//     }
+// }
