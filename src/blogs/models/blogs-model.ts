@@ -24,19 +24,20 @@ export type blogOutput = {
 
 export class blogInput {
   //@IsDefined()
-  @IsNotEmpty()
-  @IsString()
+
   @MaxLength(15)
-  name: string;
-  
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
+  name: string;
+
   @MaxLength(500)
+  @IsString()
+  @IsNotEmpty()
   description: string;
-  
+
+  @MaxLength(100)
   @IsString()
   @IsUrl(undefined, {message: 'URL is not valid'})
-  @MaxLength(100)
   websiteUrl: string
 }
 

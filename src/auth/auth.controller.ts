@@ -104,7 +104,8 @@ export class AuthController {
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {
         return this.authService.resendingEmail(inputData.email)
     }
-
+    
+    @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/password-recovery')
     async passwordRecoveryViaEmail(@Body() inputData: RegistrationEmailResending) {
         const result = await this.authService.passwordRecovery(inputData.email)

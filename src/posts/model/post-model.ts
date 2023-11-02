@@ -3,23 +3,23 @@ import mongoose from "mongoose";
 
 
 export class postInputModel {
-  @IsNotEmpty()
+  @MaxLength(30)
   @IsString()
-  @MaxLength(30)  
+  @IsNotEmpty()
   title: string
 
-  @IsNotEmpty()
+  @MaxLength(100)
   @IsString()
-  @MaxLength(100) 
+  @IsNotEmpty()
   shortDescription: string
-  
-  @IsNotEmpty()
-  @IsString()
+
   @MaxLength(1000)
+  @IsString()
+  @IsNotEmpty()
   content: string
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   blogId: string
 }
 
@@ -69,9 +69,9 @@ export type postOutput = {
 }
 export type postsCollectionsType = postOutput[];
 export type paginatorPost = {
-    pagesCount: number,
-    page: number,
-    pageSize: number,
-    totalCount: number,
-    items: postOutput[]
+  pagesCount: number,
+  page: number,
+  pageSize: number,
+  totalCount: number,
+  items: postOutput[]
 }

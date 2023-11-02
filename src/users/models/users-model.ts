@@ -2,21 +2,22 @@ import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-valid
 import mongoose from "mongoose";
 
 export class CreatUserInputModel {
-    @IsNotEmpty()
-    @IsString()
     @MaxLength(10)
     @MinLength(3)
+    @IsString()
+    @IsNotEmpty()
     login: string
 
-    @IsNotEmpty()
-    @IsString()
+
     @MaxLength(20)
     @MinLength(6)
+    @IsString()
+    @IsNotEmpty()
     password: string
 
-    @IsNotEmpty()
-    @IsString()
     @IsEmail()
+    @IsString()
+    @IsNotEmpty()
     email: string
 };
 

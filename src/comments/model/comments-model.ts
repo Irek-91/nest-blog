@@ -3,10 +3,11 @@ import { ObjectId } from "mongodb"
 
 
 export class commentInput {
-  @IsNotEmpty()
-  @IsString()
+  
   @MaxLength(300)
   @MinLength(20)
+  @IsString()
+  @IsNotEmpty()
   content: string
 }
 

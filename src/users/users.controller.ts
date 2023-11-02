@@ -4,9 +4,9 @@ import { Pagination } from './../helpers/query-filter';
 import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreatUserInputModel } from "./models/users-model";
-import { log } from "console";
 import { Controller} from "@nestjs/common/decorators/core";
-import { AuthGuard } from "@nestjs/passport";
+import { HttpCode} from "@nestjs/common/decorators";
+
 
 
 @UseGuards(BasicAuthGuard)
@@ -15,6 +15,8 @@ export class UsersController {
     constructor(protected usersService: UsersService,
         private readonly pagination : Pagination
     ) { }
+    
+    @HttpCode(HttpStatus.OK)
     @Get()
     async getUsers(@Query()
     query: {
@@ -28,6 +30,8 @@ export class UsersController {
         const queryFilter = this.pagination.getPaginationFromQueryUser(query);
         return await this.usersService.findUsers(queryFilter)
     }
+
+    @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(EmailOrLoginGuard)
     @Post()
     async createUser(@Body() inputModel: CreatUserInputModel) {
@@ -35,7 +39,7 @@ export class UsersController {
         return result
     }
     
-    
+    @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
     async deleteUser(@Param('id') userId: string): Promise<Number> {
         const userDelete = await this.usersService.deleteUserId(userId)
