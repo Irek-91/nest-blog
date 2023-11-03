@@ -1,12 +1,14 @@
 import { UsersService } from './../../users/users.service';
 import { HttpStatus, BadRequestException } from '@nestjs/common';
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
+import { JwtService } from 'src/application/jwt-service';
+import { SecurityDeviceService } from 'src/securityDevices/securityDevice.service';
 
 
 @Injectable()
 export class EmailOrLoginGuard implements CanActivate {
-    constructor(protected usersServise: UsersService) {}
+    constructor(protected usersServise: UsersService) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const req = context.switchToHttp().getRequest();
@@ -25,6 +27,9 @@ export class EmailOrLoginGuard implements CanActivate {
         return true
     }
 }
+
+
+
 
 // @Injectable()
 // export class emailRegistrationGuard implements CanActivate {

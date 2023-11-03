@@ -92,26 +92,27 @@ export class AuthService {
     }
 
 
-    async passwordRecovery(email: string): Promise<HttpStatus.BAD_REQUEST | HttpStatus.NO_CONTENT> {
+    async passwordRecovery(email: string): Promise<true> {
         let user = await this.usersQueryRepository.findUserByEmail(email)
-        if (!user) return HttpStatus.BAD_REQUEST
+        const errMsg = [{message: 'wrong email', field: `email`}]
+        if (!user) throw new BadRequestException(errMsg)
 
         const recoveryCode = uuidv4();
         await this.userRepository.updateRecoveryCode(user._id, recoveryCode)
         await this.emailAdapter.passwordRecovery(user.accountData.email, 'code', recoveryCode)
-        return HttpStatus.NO_CONTENT
+        return true
     }
 
 
-    async newPassword(newPassword: string, recoveryCode: string): Promise< HttpStatus.NO_CONTENT | HttpStatus.BAD_REQUEST | HttpStatus.NOT_FOUND> {
+    async newPassword(newPassword: string, recoveryCode: string): Promise<true> {
 
         let result = await this.usersQueryRepository.findUserByRecoveryCode(recoveryCode)
-        if (result === HttpStatus.NOT_FOUND) { return HttpStatus.NOT_FOUND }
+        const errMsg = {message: "RecoveryCode is incorrect or expired", field: "recoveryCode"}
+        if (!result) throw new BadRequestException(errMsg)
 
         const passwordSalt = await bcrypt.genSalt(10)
         const passwordHash = await this._generateHash(newPassword, passwordSalt)
         const resultUpdatePassword = await this.userRepository.updatePassword(result._id, passwordSalt, passwordHash)
-        if (resultUpdatePassword === false) { return HttpStatus.BAD_REQUEST }
-        return HttpStatus.NO_CONTENT
+        return true
     }
 }

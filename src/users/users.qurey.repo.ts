@@ -104,17 +104,17 @@ export class UsersQueryRepository {
   }
 
 
-  async findUserByRecoveryCode(recoveryCode: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+  async findUserByRecoveryCode(recoveryCode: string): Promise<UserDocument | null> {
     try {
       let user = await this.userModel.findOne({ "emailConfirmation.recoveryCode": recoveryCode }).lean()
       if (user !== null) {
         return user
       } else {
-        return HttpStatus.NOT_FOUND
+        return null
       }
     }
     catch (e) {
-      return HttpStatus.NOT_FOUND
+      return null
     }
   }
 }

@@ -12,6 +12,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/local-jwt.guard';
 import { EmailOrLoginGuard } from './guards/auth.guard';
+import { Cookies } from './guards/cookies.guard';
 
 @Controller('auth')
 
@@ -30,10 +31,7 @@ export class AuthController {
         const divicId = uuidv4();
         const IP = req.ip
         const title = req.headers['user-agent'] || 'custom-ua'
-        // const user = await this.usersService.checkCredentials(loginInputData.loginOrEmail, loginInputData.password);
-        // if (user === HttpStatus.NOT_FOUND) {
-        //     throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED);
-        // }
+      
         const accessToken = await this.jwtService.createdJWTAccessToken(req.user._id)
         const refreshToken = await this.securityDeviceService.addDeviceIdRefreshToken(req.user._id, divicId, IP, title)
         if (accessToken !== null || refreshToken !== null) {
@@ -45,19 +43,21 @@ export class AuthController {
             throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED);
         }
     }
+    
 
     @Post('/refresh-token')
-    async generateNewPairOfAccessAndRefreshTokens() {
-        const cookiesRefreshToken = ''//req.cookies.refreshToken
-        const IP = ''//req.ip
-        const title = ''//req.headers['user-agent'] || 'custom-ua'
-
+    async generateNewPairOfAccessAndRefreshTokens(@Request() req: any,
+    @Response() res: any,
+    @Cookies('refreshToken') refreshToken: string) {
+        const cookiesRefreshToken = refreshToken
+        const IP = req.ip
+        const title = req.headers['user-agent'] || 'custom-ua'
         const newAccessToken = await this.securityDeviceService.updateAccessToken(cookiesRefreshToken)
         const newRefreshToken = await this.securityDeviceService.updateDevicesModelClass(cookiesRefreshToken, IP, title)
 
         if (newAccessToken !== null || newRefreshToken !== null) {
-            //res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true })
-            //res.status(200).send({ accessToken: newAccessToken })
+            res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true })
+            res.status(200).send({ accessToken: newAccessToken })
             return { newAccessToken }
         }
         else {
@@ -88,7 +88,6 @@ export class AuthController {
     @UseGuards(EmailOrLoginGuard)
     @Post('/registration')
     async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel) {
-
         const user = await this.authService.creatUser(inputData.login, inputData.password, inputData.email)
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
@@ -104,37 +103,18 @@ export class AuthController {
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {
         return this.authService.resendingEmail(inputData.email)
     }
-    
+
     @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/password-recovery')
     async passwordRecoveryViaEmail(@Body() inputData: RegistrationEmailResending) {
         const result = await this.authService.passwordRecovery(inputData.email)
-        if (result === HttpStatus.NO_CONTENT) {
-            throw new HttpException('No content', HttpStatus.NO_CONTENT)
-        } else {
-            throw new HttpException('Bad request', HttpStatus.BAD_REQUEST)
-        }
     }
 
+    @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/new-password')
     async confirmNewPasswordRecovery(@Body() inputData: NewPasswordRecoveryInputModel) {
         const newPassword = inputData.newPassword
         const recoveryCode = inputData.recoveryCode
         const result = await this.authService.newPassword(newPassword, recoveryCode)
-        if (result === HttpStatus.NO_CONTENT) {
-            //res.sendStatus(204)
-            throw new HttpException('No content', HttpStatus.NO_CONTENT)
-        }
-        else {
-            throw new BadRequestException({
-                errorsMessages: [
-                    {
-                        message: "RecoveryCode is incorrect or expired",
-                        field: "recoveryCode"
-                    }
-                ]
-            })
-        }
-
     }
 }
