@@ -31,7 +31,7 @@ export class UsersController {
         return await this.usersService.findUsers(queryFilter)
     }
 
-    @HttpCode(HttpStatus.NO_CONTENT)
+    //@HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(EmailOrLoginGuard)
     @Post()
     async createUser(@Body() inputModel: CreatUserInputModel) {

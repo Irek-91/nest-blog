@@ -8,6 +8,7 @@ import {
 import { Request, Response } from 'express';
 import * as process from 'process';
 
+
 // @Catch(Error)
 // export class ErrorExceptionFilter implements ExceptionFilter {
 //   catch(exception: any, host: ArgumentsHost) {
@@ -29,15 +30,15 @@ import * as process from 'process';
 //     }
 //     response.status(HttpStatus.BAD_REQUEST).json(errorResponse);
 
-    // В будущем разделить вывод ошибок для теста, и для прода
-    // if (process.env.environment !== 'production') {
-    //   response.status(500).json({
-    //     error: exception.toString(),
-    //     stack: exception.stack ? exception.stack.toString() : 'Some stack',
-    //   });
-    // } else {
-    //   response.status(500).send('some error occurred');
-    // }
+//     //В будущем разделить вывод ошибок для теста, и для прода
+//     if (process.env.environment !== 'production') {
+//       response.status(500).json({
+//         error: exception.toString(),
+//         stack: exception.stack ? exception.stack.toString() : 'Some stack',
+//       });
+//     } else {
+//       response.status(500).send('some error occurred');
+//     }
 //   }
 // }
 

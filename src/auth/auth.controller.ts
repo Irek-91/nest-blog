@@ -37,7 +37,7 @@ export class AuthController {
         if (accessToken !== null || refreshToken !== null) {
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
             //res.status(200).send({ accessToken })
-            return res.status(200).send({ accessToken })
+            res.status(200).send({ accessToken })
         }
         else {
             throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED);
