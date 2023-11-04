@@ -5,7 +5,7 @@ import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, 
 import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
-import { LocalAuthGuard } from './../auth/guards/local-auth.guard';
+import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -59,14 +59,14 @@ export class BlogsController {
         }
     }
 
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Post()
     async createBlog(@Body() blogInputData: blogInput) {
         const blog = await this.blogsService.createBlog(blogInputData)
         return blog
     }
 
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Post(':blogId/posts')
     async createPostByBlog(@Param('blogId') blogId: string,
         @Body() inputData: postInputModelSpecific) {
@@ -88,7 +88,7 @@ export class BlogsController {
     }
 
 
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Put(':id')
     async updateBlog(@Param('id') blogId: string,
         @Body() blogInputData: blogInput) {
@@ -101,7 +101,7 @@ export class BlogsController {
         }
     }
 
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Delete(':id')
     async deletBlog(@Param('id') blogId: string) {
         let result = await this.blogsService.deleteBlogId(blogId)
@@ -111,12 +111,5 @@ export class BlogsController {
             throw new HttpException('No Content', HttpStatus.NO_CONTENT)
         }
     }
-
-
-
-
-
-
-
 
 }

@@ -8,7 +8,7 @@ import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, P
 import { PostsService } from './posts.service';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { log } from 'console';
-import { LocalAuthGuard } from './../auth/guards/local-auth.guard';
+import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 
 
 @Controller('posts')
@@ -63,7 +63,7 @@ export class PostsController {
         return commentsPostId
     }
 
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Post()
     async createdPost(@Body() postInputData: postInputModel) {
         const blogId = await this.blogsService.getBlogId(postInputData.blogId)
@@ -76,7 +76,6 @@ export class PostsController {
     }
 
 
-    @UseGuards(AuthGuard)
     @Post(':postId/comments')
     async createdCommentPostId(@Body() commentInputData: commentInput,
         @Param('postId') postId: string) {
@@ -87,7 +86,7 @@ export class PostsController {
         return comment
     }
 
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Put(':id')
     async updatePostId(@Body() postInputData: postInputModel,
         @Param('id') postId: string) {
@@ -112,7 +111,7 @@ export class PostsController {
         }
     }
 
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(BasicAuthGuard)
     @Delete(':id')
     async deletePost(
         @Param('id') postId: string
