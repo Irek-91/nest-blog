@@ -8,6 +8,8 @@ import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, P
 import { PostsService } from './posts.service';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { log } from 'console';
+import { LocalAuthGuard } from './../auth/guards/local-auth.guard';
+
 
 @Controller('posts')
 export class PostsController {
@@ -61,6 +63,7 @@ export class PostsController {
         return commentsPostId
     }
 
+    @UseGuards(LocalAuthGuard)
     @Post()
     async createdPost(@Body() postInputData: postInputModel) {
         const blogId = await this.blogsService.getBlogId(postInputData.blogId)
@@ -84,12 +87,14 @@ export class PostsController {
         return comment
     }
 
+    @UseGuards(LocalAuthGuard)
     @Put(':id')
     async updatePostId(@Body() postInputData: postInputModel,
         @Param('id') postId: string) {
         let postResult = await this.postsService.updatePostId(postInputData, postId)
     }
 
+    
     @Put(':postId/like-status')
     async updateLikeStatusPostId(@Param('postId') postId: string,
         @Body() likeStatus: likeStatus) {
@@ -107,6 +112,7 @@ export class PostsController {
         }
     }
 
+    @UseGuards(LocalAuthGuard)
     @Delete(':id')
     async deletePost(
         @Param('id') postId: string

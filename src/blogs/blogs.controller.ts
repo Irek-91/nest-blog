@@ -1,10 +1,11 @@
 import { postInputModelSpecific } from './../posts/model/post-model';
 import { PostsService } from './../posts/posts.service';
 import { Pagination } from './../helpers/query-filter';
-import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards } from "@nestjs/common";
 import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
+import { LocalAuthGuard } from './../auth/guards/local-auth.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -58,12 +59,14 @@ export class BlogsController {
         }
     }
 
+    @UseGuards(LocalAuthGuard)
     @Post()
     async createBlog(@Body() blogInputData: blogInput) {
         const blog = await this.blogsService.createBlog(blogInputData)
         return blog
     }
 
+    @UseGuards(LocalAuthGuard)
     @Post(':blogId/posts')
     async createPostByBlog(@Param('blogId') blogId: string,
         @Body() inputData: postInputModelSpecific) {
@@ -85,7 +88,7 @@ export class BlogsController {
     }
 
 
-
+    @UseGuards(LocalAuthGuard)
     @Put(':id')
     async updateBlog(@Param('id') blogId: string,
         @Body() blogInputData: blogInput) {
@@ -98,7 +101,7 @@ export class BlogsController {
         }
     }
 
-
+    @UseGuards(LocalAuthGuard)
     @Delete(':id')
     async deletBlog(@Param('id') blogId: string) {
         let result = await this.blogsService.deleteBlogId(blogId)
