@@ -71,14 +71,15 @@ export class CommentsController {
     }
 
 
-
+    @UseGuards(JwtAuthGuard)
     @Delete(':commentId')
-    async deleteCommentById(@Param('commentId') commentId: string) {
-        // if (!req.user) { return res.sendStatus(401) }
-
-        // const commentsId = req.params.commentsId
-        // const userId = req.user._id.toString() 
-        const userId = 'sds'
+    async deleteCommentById(@Param('commentId') commentId: string,
+    @Request() req: any
+    ) {
+        if (!req.user) {
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        }
+        const userId = req.user
         const result = await this.commentsService.deleteCommentById(commentId, userId)
         if (result === 403) {
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
