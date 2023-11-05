@@ -39,13 +39,13 @@ export class PostsService {
 
     }
 
-    async createdPostBlogId(postData : postInputModel): Promise<postOutput | Number> {
+    async createdPostBlogId(postData : postInputModel): Promise<postOutput | null> {
         
         const newPostId = new ObjectId()
         const createdAt = new Date().toISOString();
         let blodName = await this.blogQueryRepository.getBlogNameById(postData.blogId)
         if (blodName === typeof Number) {
-            return HttpStatus.NOT_FOUND
+            return null
         }
         const newPost: postMongoDb = {
             _id: newPostId,
@@ -65,7 +65,7 @@ export class PostsService {
         }
         const result = await this.postRepository.createdPost(newPost)
 
-        if (result !== HttpStatus.CREATED) {return HttpStatus.NOT_FOUND}
+        if (!result) {return null}
         return {
             id: newPost._id.toString(),
             title: newPost.title,

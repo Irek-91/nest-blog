@@ -85,7 +85,7 @@ export class BlogsController {
         
         const newPost = await this.postsService.createdPostBlogId(inputDataModel);
 
-        if (newPost === HttpStatus.NOT_FOUND) {
+        if (!newPost) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         } else {
             return newPost

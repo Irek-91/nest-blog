@@ -89,7 +89,7 @@ export class PostsController {
     async createdPost(@Body() postInputData: postInputModel) {
         const blogId = await this.blogsService.getBlogId(postInputData.blogId)
         let post = await this.postsService.createdPostBlogId(postInputData)
-        if (post === HttpStatus.NOT_FOUND) {
+        if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
             return post
@@ -101,10 +101,10 @@ export class PostsController {
     async createdCommentPostId(@Body() commentInputData: commentInput,
         @Request() req: any,
         @Param('postId') postId: string) {
-            if (!req.user) {
-                throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+            if (!req.userId) {
+                throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
             }
-        const userId = req.user
+        const userId = req.userId
         const post = await this.postsService.getPostId(postId, userId)
         let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
         return comment

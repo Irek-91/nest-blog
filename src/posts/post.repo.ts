@@ -32,12 +32,12 @@ export class PostRepository {
     }
 
 
-    async createdPost(newPost: postMongoDb): Promise<Number> {
+    async createdPost(newPost: postMongoDb): Promise<true> {
 
         const postInstance = new this.postModel(newPost)
         await postInstance.save()
 
-        return HttpStatus.CREATED
+        return true
 
     }
 
