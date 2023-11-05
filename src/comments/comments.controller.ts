@@ -20,6 +20,7 @@ export class CommentsController {
             return comment
         }
     }
+    
     @Put(':commentId')
     async updateCommentId(@Param('commentId') commentId: string,
         @Body() commentInputData: commentInput) {

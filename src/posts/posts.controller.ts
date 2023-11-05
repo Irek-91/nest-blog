@@ -45,7 +45,7 @@ export class PostsController {
     @Get(':id')
     async getPostId(@Param('id') postId: string,
         @Request() req: any) {
-        const userId = req.userId //поменять когда будет авторизация
+        const userId = req.user //поменять когда будет авторизация
         let post: postOutput | number = await this.postsService.getPostId(postId, userId)
         return post
     }
@@ -62,7 +62,7 @@ export class PostsController {
             pageNumber?: string;
             pageSize?: string;
         }) {
-        const userId = req.userId //поменять когда будет авторизация
+        const userId = req.user //поменять когда будет авторизация
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const resultPostId = await this.postsService.getPostId(postId, userId)
@@ -87,7 +87,7 @@ export class PostsController {
     async createdCommentPostId(@Body() commentInputData: commentInput,
         @Request() req: any,
         @Param('postId') postId: string) {
-        const userId = req.userId //поменять когда будет авторизация
+        const userId = req.user //поменять когда будет авторизация
         const post = await this.postsService.getPostId(postId, userId)
         let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
         return comment
@@ -108,7 +108,7 @@ export class PostsController {
         if (!req.user) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        const userId = req.userId
+        const userId = req.user
         // const likeStatus = req.body.likeStatus
         const resultUpdateLikeStatusPost = await this.postsService.updateLikeStatusPostId(postId, userId, likeStatus.likeStatus)
         if (resultUpdateLikeStatusPost) {

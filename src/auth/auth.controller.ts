@@ -81,7 +81,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Get('/me')
     async getInformationAboutCurrentUser(@Request() req: any) {
-        const user = await this.usersService.findByUserId(req.userId)
+        const user = await this.usersService.findByUserId(req.user)
         return user
     }
 

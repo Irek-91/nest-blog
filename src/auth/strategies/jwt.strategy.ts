@@ -3,6 +3,7 @@ import { Injectable, UnauthorizedException, HttpStatus, HttpException } from '@n
 import { AuthService } from '../auth.service';
 import {ExtractJwt, Strategy} from 'passport-jwt'
 import { env } from 'process';
+import { log } from 'console';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,6 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
 
     async validate(payload: any): Promise<any> {
-       return {userId: payload.userId}
+       return payload.userId
     }
 }
