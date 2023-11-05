@@ -78,6 +78,7 @@ export class BlogsController {
         }
         
         const blog = await this.blogsService.getBlogId(blogId)
+        
         const newPost = await this.postsService.createdPostBlogId(inputDataModel);
 
         if (newPost === HttpStatus.NOT_FOUND) {

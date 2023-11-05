@@ -23,10 +23,20 @@ export class postInputModel {
   blogId: string
 }
 
-export type postInputModelSpecific = {
-  title: string,
-  shortDescription: string,
-  content: string,
+export class postInputModelSpecific {
+  @IsString()
+  @IsNotEmpty()
+  title: string
+
+  @MaxLength(100)
+  @IsString()
+  @IsNotEmpty()
+  shortDescription: string
+  
+  @MaxLength(1000)
+  @IsString()
+  @IsNotEmpty()
+  content: string
 }
 
 export type newestLikes = {

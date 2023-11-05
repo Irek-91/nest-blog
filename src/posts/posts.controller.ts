@@ -4,11 +4,12 @@ import { commentInput } from './../comments/model/comments-model';
 import { CommentsService } from './../comments/comments.service';
 import { Pagination } from './../helpers/query-filter';
 import { BlogsService } from './../blogs/blogs.service';
-import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { log } from 'console';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
 
 
 @Controller('posts')
@@ -20,6 +21,7 @@ export class PostsController {
 
     ) {
     }
+
     @Get()
     async getPosts(@Query()
     query: {
@@ -39,14 +41,19 @@ export class PostsController {
             return posts
         }
     }
+    @UseGuards(JwtAuthGuard)
     @Get(':id')
-    async getPostId(@Param('id') postId: string) {
-        const userId = null //поменять когда будет авторизация
+    async getPostId(@Param('id') postId: string,
+        @Request() req: any) {
+        const userId = req.userId //поменять когда будет авторизация
         let post: postOutput | number = await this.postsService.getPostId(postId, userId)
         return post
     }
+
+    @UseGuards(JwtAuthGuard)
     @Get(':postId/comments')
     async getCommentsBuPostId(@Param('postId') postId: string,
+        @Request() req: any,
         @Query()
         query: {
             searchNameTerm?: string;
@@ -55,7 +62,7 @@ export class PostsController {
             pageNumber?: string;
             pageSize?: string;
         }) {
-        const userId = null //поменять когда будет авторизация
+        const userId = req.userId //поменять когда будет авторизация
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const resultPostId = await this.postsService.getPostId(postId, userId)
@@ -75,12 +82,12 @@ export class PostsController {
         }
     }
 
-
+    @UseGuards(JwtAuthGuard)
     @Post(':postId/comments')
     async createdCommentPostId(@Body() commentInputData: commentInput,
+        @Request() req: any,
         @Param('postId') postId: string) {
-        //const userId = req.user._id.toString()
-        const userId = "null"
+        const userId = req.userId //поменять когда будет авторизация
         const post = await this.postsService.getPostId(postId, userId)
         let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
         return comment
@@ -93,15 +100,16 @@ export class PostsController {
         let postResult = await this.postsService.updatePostId(postInputData, postId)
     }
 
-    
+    @UseGuards(JwtAuthGuard)
     @Put(':postId/like-status')
     async updateLikeStatusPostId(@Param('postId') postId: string,
+        @Request() req: any,
         @Body() likeStatus: likeStatus) {
-        // if (!req.user) { return res.sendStatus(404) }
-        // const postId = req.params.postId;
-        // const userId = req.user!._id.toString()
+        if (!req.user) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
+        const userId = req.userId
         // const likeStatus = req.body.likeStatus
-        const userId = 'sdvsvd'
         const resultUpdateLikeStatusPost = await this.postsService.updateLikeStatusPostId(postId, userId, likeStatus.likeStatus)
         if (resultUpdateLikeStatusPost) {
             throw new HttpException('No content', HttpStatus.NO_CONTENT);
