@@ -24,6 +24,7 @@ export class postInputModel {
 }
 
 export class postInputModelSpecific {
+  @MaxLength(30)
   @IsString()
   @IsNotEmpty()
   title: string

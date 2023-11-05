@@ -26,6 +26,7 @@ export class EmailOrLoginGuard implements CanActivate {
         return true
     }
 }
+
 @Injectable()
 export class userAuthGuard implements CanActivate {
     constructor(protected jwtService: JwtService
@@ -34,9 +35,9 @@ export class userAuthGuard implements CanActivate {
         const req = context.switchToHttp().getRequest();
         if (!req.headers.authorization) return true
         const token = req.headers.authorization.split(' ')[1]
-        const payload: any = await this.jwtService.getPayloadByRefreshToken(token)
+        const userId: any = await this.jwtService.getPayloadByRefreshToken(token)
 
-        req.userId = payload.userId ? payload.userId : null
+        req.userId = userId ? userId : null
         return true
     }
 }
