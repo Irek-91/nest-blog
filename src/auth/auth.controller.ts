@@ -75,7 +75,7 @@ export class AuthController {
             throw new HttpException('No content', HttpStatus.NO_CONTENT)
         }
         else {
-            throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED)
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
     }
     @UseGuards(JwtAuthGuard)

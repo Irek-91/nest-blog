@@ -1,11 +1,13 @@
 import { postInputModelSpecific } from './../posts/model/post-model';
 import { PostsService } from './../posts/posts.service';
 import { Pagination } from './../helpers/query-filter';
-import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards, Request } from "@nestjs/common";
 import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
+
 
 @Controller('blogs')
 export class BlogsController {
@@ -33,6 +35,7 @@ export class BlogsController {
         return blog
     }
 
+    //@UseGuards(JwtAuthGuard)
     @Get(':blogId/posts')
     async getPostsByBlogId(@Query()
     query: {
@@ -42,9 +45,13 @@ export class BlogsController {
         pageNumber?: string;
         pageSize?: string;
     },
+    @Request() req: any,
         @Param('blogId') blogId: string) {
-        const userId = null//исправить после авторизации
-
+        let userId = req.user//исправить после авторизации
+        if (!userId) {
+            userId = null
+        }
+        log(userId)
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const blog = await this.blogsService.getBlogId(blogId)
@@ -53,8 +60,6 @@ export class BlogsController {
         if (foundPosts === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         } else {
-            log(foundPosts)
-
             return foundPosts
         }
     }

@@ -21,7 +21,7 @@ export class PostsController {
 
     ) {
     }
-
+    @UseGuards(JwtAuthGuard)
     @Get()
     async getPosts(@Query()
     query: {
@@ -30,9 +30,13 @@ export class PostsController {
         sortDirection?: string;
         pageNumber?: string;
         pageSize?: string;
-    }) {
-        const userId = null //поменять когда будет авторизация
-
+    },
+        @Request() req: any
+    ) {
+        let userId = req.user//исправить после авторизации
+        if (!userId) {
+            userId = null
+        }
         const paginationPost = this.pagination.getPaginationFromQuery(query)
         const posts: paginatorPost = await this.postsService.findPost(paginationPost, userId);
         if (!posts) {
@@ -41,28 +45,37 @@ export class PostsController {
             return posts
         }
     }
+
     @UseGuards(JwtAuthGuard)
     @Get(':id')
     async getPostId(@Param('id') postId: string,
         @Request() req: any) {
-        const userId = req.user //поменять когда будет авторизация
+        let userId = req.user//исправить после авторизации
+        if (!userId) {
+            userId = null
+        }
         let post: postOutput | number = await this.postsService.getPostId(postId, userId)
         return post
     }
 
     @UseGuards(JwtAuthGuard)
     @Get(':postId/comments')
-    async getCommentsBuPostId(@Param('postId') postId: string,
+    async getCommentsBuPostId(
+        @Param('postId') postId: string,
         @Request() req: any,
         @Query()
-        query: {
-            searchNameTerm?: string;
-            sortBy?: string;
-            sortDirection?: string;
-            pageNumber?: string;
-            pageSize?: string;
-        }) {
-        const userId = req.user //поменять когда будет авторизация
+            query: {
+                searchNameTerm?: string;
+                sortBy?: string;
+                sortDirection?: string;
+                pageNumber?: string;
+                pageSize?: string;
+            }
+        ) {
+        let userId = req.user//исправить после авторизации
+        if (!userId) {
+            userId = null
+        }
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const resultPostId = await this.postsService.getPostId(postId, userId)
@@ -87,7 +100,10 @@ export class PostsController {
     async createdCommentPostId(@Body() commentInputData: commentInput,
         @Request() req: any,
         @Param('postId') postId: string) {
-        const userId = req.user //поменять когда будет авторизация
+            if (!req.user) {
+                throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+            }
+        const userId = req.user
         const post = await this.postsService.getPostId(postId, userId)
         let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
         return comment
