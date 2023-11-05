@@ -1,9 +1,8 @@
 import { UsersService } from './../../users/users.service';
 import { HttpStatus, BadRequestException } from '@nestjs/common';
 import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
-import { AuthService } from '../auth.service';
+import { log } from 'console';
 import { JwtService } from 'src/application/jwt-service';
-import { SecurityDeviceService } from 'src/securityDevices/securityDevice.service';
 
 
 @Injectable()
@@ -27,8 +26,20 @@ export class EmailOrLoginGuard implements CanActivate {
         return true
     }
 }
+@Injectable()
+export class userAuthGuard implements CanActivate {
+    constructor(protected jwtService: JwtService
+    ) { }
+    async canActivate(context: ExecutionContext): Promise<any> {
+        const req = context.switchToHttp().getRequest();
+        if (!req.headers.authorization) return true
+        const token = req.headers.authorization.split(' ')[1]
+        const payload: any = await this.jwtService.getPayloadByRefreshToken(token)
 
-
+        req.userId = payload.userId ? payload.userId : null
+        return true
+    }
+}
 
 
 // @Injectable()

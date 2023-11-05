@@ -66,8 +66,10 @@ export class AuthController {
     }
 
     @Post('/logout')
-    async sendCorrectRefreshTokenThatWillBeRevoked() {
-        const cookiesRefreshToken = ''//req.cookies.refreshToken
+    async sendCorrectRefreshTokenThatWillBeRevoked(
+        @Cookies('refreshToken') refreshToken: string
+    ) {
+        const cookiesRefreshToken = refreshToken
         const result = await this.securityDeviceService.deleteDeviceIdRefreshToken(cookiesRefreshToken)
         if (result === true) {
             //res.clearCookie('refreshToken')

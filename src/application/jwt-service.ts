@@ -34,7 +34,11 @@ export class JwtService {
             return new mongoose.Types.ObjectId(result.userId)
         
     }
-
+    async getPayloadByRefreshToken (token: string) : Promise<mongoose.Types.ObjectId> {
+        const payload: any = jwt.decode(token)
+        return payload
+    
+}
     async getDeviceIdByRefreshToken (token: string) : Promise<string> {
             const result: any = jwt.decode(token)
             return result.deviceId

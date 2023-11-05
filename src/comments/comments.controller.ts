@@ -3,19 +3,21 @@ import { Controller, Delete, Get, Put, HttpException, HttpStatus, Param, Body, U
 import { CommentsService } from "./comments.service";
 import { commentInput } from "./model/comments-model";
 import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
+import { userAuthGuard } from './../auth/guards/auth.guard';
+
 
 @Controller('comments')
 export class CommentsController {
     constructor(protected commentsService: CommentsService
     ) { }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Get(':commentId')
     async getCommentById(
         @Param('commentId') commentId: string,
         @Request() req: any
         ) {
-        let userId = req.user//исправить после авторизации
+        let userId = req.userId//исправить после авторизации
         if (!userId) {
             userId = null
         }
@@ -29,16 +31,16 @@ export class CommentsController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Put(':commentId')
     async updateCommentId(@Param('commentId') commentId: string,
         @Body() commentInputData: commentInput,
         @Request() req: any
         ) {
-        if (!req.user) {
+        if (!req.userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
-        const userId = req.user
+        const userId = req.userId
         let resultContent = await this.commentsService.updateContent(userId, commentId, commentInputData.content)
         if (resultContent === 403) {
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
@@ -51,16 +53,16 @@ export class CommentsController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Put(':commentId/like-status')
     async updateStatusByCommentId(@Param('commentId') commentId: string,
     @Body() likeStatus: likeStatus,
     @Request() req: any
     ) {
-        if (!req.user) {
+        if (!req.userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
-        const userId = req.user
+        const userId = req.userId
         const result = await this.commentsService.updateLikeStatus(commentId, userId, likeStatus.likeStatus)
         if (result === 204) {
             throw new HttpException('No Content', HttpStatus.NO_CONTENT)
@@ -71,15 +73,15 @@ export class CommentsController {
     }
 
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Delete(':commentId')
     async deleteCommentById(@Param('commentId') commentId: string,
     @Request() req: any
     ) {
-        if (!req.user) {
+        if (!req.userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
-        const userId = req.user
+        const userId = req.userId
         const result = await this.commentsService.deleteCommentById(commentId, userId)
         if (result === 403) {
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)

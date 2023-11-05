@@ -10,6 +10,7 @@ import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { log } from 'console';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
+import { userAuthGuard } from './../auth/guards/auth.guard';
 
 
 @Controller('posts')
@@ -21,7 +22,7 @@ export class PostsController {
 
     ) {
     }
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Get()
     async getPosts(@Query()
     query: {
@@ -33,7 +34,7 @@ export class PostsController {
     },
         @Request() req: any
     ) {
-        let userId = req.user//исправить после авторизации
+        let userId = req.userId//исправить после авторизации
         if (!userId) {
             userId = null
         }
@@ -46,11 +47,11 @@ export class PostsController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Get(':id')
     async getPostId(@Param('id') postId: string,
         @Request() req: any) {
-        let userId = req.user//исправить после авторизации
+        let userId = req.userId//исправить после авторизации
         if (!userId) {
             userId = null
         }
@@ -58,7 +59,7 @@ export class PostsController {
         return post
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Get(':postId/comments')
     async getCommentsBuPostId(
         @Param('postId') postId: string,
@@ -72,7 +73,7 @@ export class PostsController {
                 pageSize?: string;
             }
         ) {
-        let userId = req.user//исправить после авторизации
+        let userId = req.userId//исправить после авторизации
         if (!userId) {
             userId = null
         }
@@ -95,7 +96,7 @@ export class PostsController {
         }
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Post(':postId/comments')
     async createdCommentPostId(@Body() commentInputData: commentInput,
         @Request() req: any,
@@ -116,16 +117,15 @@ export class PostsController {
         let postResult = await this.postsService.updatePostId(postInputData, postId)
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Put(':postId/like-status')
     async updateLikeStatusPostId(@Param('postId') postId: string,
         @Request() req: any,
         @Body() likeStatus: likeStatus) {
-        if (!req.user) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        if (!req.userId) {
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
-        const userId = req.user
-        // const likeStatus = req.body.likeStatus
+        const userId = req.userId
         const resultUpdateLikeStatusPost = await this.postsService.updateLikeStatusPostId(postId, userId, likeStatus.likeStatus)
         if (resultUpdateLikeStatusPost) {
             throw new HttpException('No content', HttpStatus.NO_CONTENT);

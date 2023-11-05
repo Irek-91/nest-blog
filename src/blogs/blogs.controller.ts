@@ -6,7 +6,7 @@ import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
-import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
+import { userAuthGuard } from './../auth/guards/auth.guard';
 
 
 @Controller('blogs')
@@ -35,7 +35,7 @@ export class BlogsController {
         return blog
     }
 
-    //@UseGuards(JwtAuthGuard)
+    @UseGuards(userAuthGuard)
     @Get(':blogId/posts')
     async getPostsByBlogId(@Query()
     query: {
@@ -47,11 +47,10 @@ export class BlogsController {
     },
     @Request() req: any,
         @Param('blogId') blogId: string) {
-        let userId = req.user//исправить после авторизации
+        let userId = req.userId//исправить после авторизации
         if (!userId) {
             userId = null
         }
-        log(userId)
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const blog = await this.blogsService.getBlogId(blogId)

@@ -1,3 +1,4 @@
+import { Transform } from "class-transformer";
 import { IsString, IsInt, MaxLength, IsDefined, isURL, IsOptional, IsNotEmpty, IsUrl } from "class-validator";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
@@ -27,11 +28,13 @@ export class blogInput {
 
   @MaxLength(15)
   @IsString()
+  @Transform(({value}) => value?.trim())
   @IsNotEmpty()
   name: string;
 
   @MaxLength(500)
   @IsString()
+  @Transform(({value}) => value?.trim())
   @IsNotEmpty()
   description: string;
 
