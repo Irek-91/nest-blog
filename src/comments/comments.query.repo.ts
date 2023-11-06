@@ -14,11 +14,11 @@ export class CommentsQueryRepository {
   constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     @InjectModel(Like.name) private likeModel: Model<LikeDocument>) { }
 
-  async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | HttpStatus.NOT_FOUND> {
+  async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | null> {
     try {
       const comment = await this.commentModel.findOne({ _id: new ObjectId(commentId) })
       if (!comment) {
-        return HttpStatus.NOT_FOUND
+        return null
       }
 
       let myStatus = 'None'
@@ -45,7 +45,7 @@ export class CommentsQueryRepository {
       return commentViewModel
     }
     catch (e) {
-      return HttpStatus.NOT_FOUND
+      return null
     }
   }
 

@@ -25,11 +25,11 @@ export class CommentsService {
         return creatComment
     }
 
-    async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | Number> {
+    async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | null> {
 
         const comment = await this.commentsQueryRepository.findCommentById(commentId, userId)
         if (comment === null) {
-            return HttpStatus.NOT_FOUND
+            return null
         }
         else {
             return comment
@@ -38,7 +38,7 @@ export class CommentsService {
     async updateContent(userId: string, commentsId: string, content: string): Promise<Number> {
         try {
             const comment = await this.commentsQueryRepository.findCommentById(commentsId, userId)
-            if (comment === HttpStatus.NOT_FOUND) { return HttpStatus.NOT_FOUND }
+            if (!comment) { return HttpStatus.NOT_FOUND }
 
             if (comment!.commentatorInfo.userId === userId) {
                 const result = await this.commentsRepository.updateCommentId(commentsId, content)
@@ -59,7 +59,7 @@ export class CommentsService {
 
         try {
             const commentById = await this.commentsQueryRepository.findCommentById(commentsId, userId)
-            if (commentById === HttpStatus.NOT_FOUND) {
+            if (!commentById) {
                 return HttpStatus.NOT_FOUND
             }
             if (commentById.commentatorInfo.userId === userId) {

@@ -22,10 +22,9 @@ export class CommentsController {
             userId = null
         }
         let comment = await this.commentsService.findCommentById(commentId, userId)
-        if (comment === null) {
+        if (!comment) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-
         else {
             return comment
         }
