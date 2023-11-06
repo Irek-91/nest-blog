@@ -88,13 +88,12 @@ export class PostsController {
     @Post()
     async createdPost(@Body() postInputData: postInputModel,
     ) {
-        const blogId = await this.blogsService.getBlogId(postInputData.blogId)
         let post = await this.postsService.createdPostBlogId(postInputData)
-        if (!post) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        } else {
+        // if (!post) {
+        //     throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        // } else {
             return post
-        }
+        // }
     }
 
     @UseGuards(UserAuthGuard)
