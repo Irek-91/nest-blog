@@ -1,9 +1,12 @@
 import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 import mongoose from "mongoose";
 import { Transform } from "class-transformer";
+import { BlogsQueryRepository } from '../../blogs/blogs.query.repo';
 
 
 export class postInputModel {
+//   constructor (protected blogsQueryRepository : BlogsQueryRepository) {
+// }
   @MaxLength(30)
   @Transform(({value}) => value?.trim())
   @IsString()

@@ -86,7 +86,8 @@ export class PostsController {
 
     @UseGuards(BasicAuthGuard)
     @Post()
-    async createdPost(@Body() postInputData: postInputModel) {
+    async createdPost(@Body() postInputData: postInputModel,
+    ) {
         const blogId = await this.blogsService.getBlogId(postInputData.blogId)
         let post = await this.postsService.createdPostBlogId(postInputData)
         if (!post) {
