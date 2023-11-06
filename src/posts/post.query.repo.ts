@@ -85,7 +85,7 @@ export class PostQueryRepository {
             const postsOutput: postOutput[] = await Promise.all(posts.map(async(b) => {
             let myStatus = 'None'
             if (userId) {
-                const status = await this.likeModel.findOne({ userId, postId: b._id.toString() })
+                const status = await this.likeModel.findOne({ userId, postIdOrCommentId: b._id.toString() })
                 if (status) {
                     myStatus = status.status
                 }
