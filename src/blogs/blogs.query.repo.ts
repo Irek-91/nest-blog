@@ -65,4 +65,16 @@ export class BlogsQueryRepository {
       return HttpStatus.NOT_FOUND
     }
   }
+
+
+  async getByBlogId(id: string): Promise< BlogDocument | null> {
+    try {
+      const blog = await this.blogModel.findOne({ _id: new ObjectId(id) }).lean()
+      if (!blog) {return null}//return HttpStatus.NOT_FOUND
+      else {return blog}
+    }
+    catch (e) {
+      return null
+    }
+  }
 }

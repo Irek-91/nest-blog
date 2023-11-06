@@ -2,6 +2,7 @@ import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 import mongoose from "mongoose";
 import { Transform } from "class-transformer";
 import { BlogsQueryRepository } from '../../blogs/blogs.query.repo';
+import { ValidateBlog } from "../../blogs/models/blog.decorator";
 
 
 export class postInputModel {
@@ -25,6 +26,7 @@ export class postInputModel {
   @IsNotEmpty()
   content: string
 
+  @ValidateBlog()
   @IsString()
   @IsNotEmpty()
   blogId: string
