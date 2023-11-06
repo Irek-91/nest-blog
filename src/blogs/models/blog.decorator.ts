@@ -4,13 +4,20 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { Injectable } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, Injectable } from '@nestjs/common';
 import { BlogsQueryRepository } from '../blogs.query.repo';
 import { BlogDocument } from './blogs-schema';
 
-@ValidatorConstraint({ name: 'ValidateBlog', async: true })
 
 @Injectable()
+
+
+// export const User = createParamDecorator(
+//   (data: unknown, ctx: ExecutionContext) => {
+//     const request = ctx.switchToHttp().getRequest();
+//     return request.user;
+//   },
+// );
 export class ValidateBlogConstraint implements ValidatorConstraintInterface {
   constructor(private readonly blogsQueryRepo: BlogsQueryRepository) {}
 
@@ -28,13 +35,3 @@ export class ValidateBlogConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function ValidateBlog(validationOptions?: ValidationOptions) {
-  return function (object: any, propertyName: string) {
-    registerDecorator({
-      target: object.constructor,
-      propertyName: propertyName,
-      options: validationOptions,
-      validator: ValidateBlogConstraint,
-    });
-  };
-}

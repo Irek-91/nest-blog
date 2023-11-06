@@ -55,7 +55,10 @@ export class UserAuthGuard implements CanActivate {
         }
         const token = req.headers.authorization.split(' ')[1]
         const userId: any = await this.jwtService.getPayloadByRefreshToken(token)
-
+        if (!userId) {
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        }
+        
         req.userId = userId ? userId : null
         return true
     }
