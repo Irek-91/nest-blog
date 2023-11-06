@@ -28,7 +28,7 @@ export class EmailOrLoginGuard implements CanActivate {
 }
 
 @Injectable()
-export class userAuthGuard implements CanActivate {
+export class GetUserIdByAuth implements CanActivate {
     constructor(protected jwtService: JwtService
     ) { }
     async canActivate(context: ExecutionContext): Promise<any> {
@@ -44,6 +44,22 @@ export class userAuthGuard implements CanActivate {
     }
 }
 
+@Injectable()
+export class UserAuthGuard implements CanActivate {
+    constructor(protected jwtService: JwtService
+    ) { }
+    async canActivate(context: ExecutionContext): Promise<any> {
+        const req = context.switchToHttp().getRequest();
+        if (!req.headers.authorization || req.headers.authorization === undefined) {
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        }
+        const token = req.headers.authorization.split(' ')[1]
+        const userId: any = await this.jwtService.getPayloadByRefreshToken(token)
+
+        req.userId = userId ? userId : null
+        return true
+    }
+}
 
 // @Injectable()
 // export class emailRegistrationGuard implements CanActivate {

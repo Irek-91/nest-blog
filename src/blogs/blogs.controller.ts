@@ -6,7 +6,7 @@ import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
-import { userAuthGuard } from './../auth/guards/auth.guard';
+import { GetUserIdByAuth } from './../auth/guards/auth.guard';
 
 
 @Controller('blogs')
@@ -35,7 +35,7 @@ export class BlogsController {
         return blog
     }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(GetUserIdByAuth)
     @Get(':blogId/posts')
     async getPostsByBlogId(@Query()
     query: {

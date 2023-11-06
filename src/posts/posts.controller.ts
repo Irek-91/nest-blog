@@ -10,7 +10,7 @@ import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { log } from 'console';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
-import { userAuthGuard } from './../auth/guards/auth.guard';
+import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
 
 
 @Controller('posts')
@@ -22,7 +22,7 @@ export class PostsController {
 
     ) {
     }
-    @UseGuards(userAuthGuard)
+    @UseGuards(GetUserIdByAuth)
     @Get()
     async getPosts(@Query()
     query: {
@@ -47,7 +47,7 @@ export class PostsController {
         }
     }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(GetUserIdByAuth)
     @Get(':id')
     async getPostId(@Param('id') postId: string,
         @Request() req: any) {
@@ -59,7 +59,7 @@ export class PostsController {
         return post
     }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(GetUserIdByAuth)
     @Get(':postId/comments')
     async getCommentsBuPostId(
         @Param('postId') postId: string,
@@ -97,14 +97,12 @@ export class PostsController {
         }
     }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(UserAuthGuard)
     @Post(':postId/comments')
     async createdCommentPostId(@Body() commentInputData: commentInput,
         @Request() req: any,
         @Param('postId') postId: string) {
-            if (!req.userId) {
-                throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
-            }
+            
         const userId = req.userId
         const post = await this.postsService.getPostId(postId, userId)
         let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
@@ -118,14 +116,12 @@ export class PostsController {
         let postResult = await this.postsService.updatePostId(postInputData, postId)
     }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(UserAuthGuard)
     @Put(':postId/like-status')
     async updateLikeStatusPostId(@Param('postId') postId: string,
         @Request() req: any,
         @Body() likeStatus: likeStatus) {
-        if (!req.userId) {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
-        }
+        
         const userId = req.userId
         const resultUpdateLikeStatusPost = await this.postsService.updateLikeStatusPostId(postId, userId, likeStatus.likeStatus)
         if (resultUpdateLikeStatusPost) {

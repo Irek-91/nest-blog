@@ -26,7 +26,7 @@ export class postInputModel {
   @IsNotEmpty()
   content: string
 
-  @ValidateBlog()
+  //@ValidateBlog()
   @IsString()
   @IsNotEmpty()
   blogId: string

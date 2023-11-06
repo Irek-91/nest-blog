@@ -3,7 +3,7 @@ import { Controller, Delete, Get, Put, HttpException, HttpStatus, Param, Body, U
 import { CommentsService } from "./comments.service";
 import { commentInput } from "./model/comments-model";
 import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
-import { userAuthGuard } from './../auth/guards/auth.guard';
+import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
 
 
 @Controller('comments')
@@ -11,7 +11,7 @@ export class CommentsController {
     constructor(protected commentsService: CommentsService
     ) { }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(GetUserIdByAuth)
     @Get(':commentId')
     async getCommentById(
         @Param('commentId') commentId: string,
@@ -30,15 +30,12 @@ export class CommentsController {
         }
     }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(UserAuthGuard)
     @Put(':commentId')
     async updateCommentId(@Param('commentId') commentId: string,
         @Body() commentInputData: commentInput,
         @Request() req: any
         ) {
-        if (!req.userId) {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
-        }
         const userId = req.userId
         let resultContent = await this.commentsService.updateContent(userId, commentId, commentInputData.content)
         if (resultContent === 403) {
@@ -52,15 +49,12 @@ export class CommentsController {
         }
     }
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(UserAuthGuard)
     @Put(':commentId/like-status')
     async updateStatusByCommentId(@Param('commentId') commentId: string,
     @Body() likeStatus: likeStatus,
     @Request() req: any
     ) {
-        if (!req.userId) {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
-        }
         const userId = req.userId
         const result = await this.commentsService.updateLikeStatus(commentId, userId, likeStatus.likeStatus)
         if (result === 204) {
@@ -72,14 +66,12 @@ export class CommentsController {
     }
 
 
-    @UseGuards(userAuthGuard)
+    @UseGuards(UserAuthGuard)
     @Delete(':commentId')
     async deleteCommentById(@Param('commentId') commentId: string,
     @Request() req: any
     ) {
-        if (!req.userId) {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
-        }
+        
         const userId = req.userId
         const result = await this.commentsService.deleteCommentById(commentId, userId)
         if (result === 403) {
