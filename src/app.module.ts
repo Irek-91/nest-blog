@@ -39,6 +39,7 @@ import { BasicStrategy } from './auth/strategies/basic.strategy';
 import { PostQueryRepository } from './posts/post.query.repo';
 import { CommentsQueryRepository } from './comments/comments.query.repo';
 import { BlogsQueryRepository } from './blogs/blogs.query.repo';
+import { ValidateBlogConstraint } from './blogs/models/blog.decorator';
 
 
 @Module({
@@ -88,7 +89,7 @@ import { BlogsQueryRepository } from './blogs/blogs.query.repo';
     JwtService, JwtStrategy, LocalStrategy, 
     BasicStrategy,
     UsersService, UsersRepository, UsersQueryRepository, 
-    BlogsService, BlogsRepository, BlogsQueryRepository,
+    BlogsService, BlogsRepository, BlogsQueryRepository, ValidateBlogConstraint,
     PostsService, PostRepository, PostQueryRepository,
     CommentsService, CommentsRepository,CommentsQueryRepository,
     SecurityDeviceRepository, SecurityDeviceService
