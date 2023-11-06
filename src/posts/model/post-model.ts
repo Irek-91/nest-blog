@@ -1,19 +1,23 @@
 import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 import mongoose from "mongoose";
+import { Transform } from "class-transformer";
 
 
 export class postInputModel {
   @MaxLength(30)
+  @Transform(({value}) => value?.trim())
   @IsString()
   @IsNotEmpty()
   title: string
 
   @MaxLength(100)
+  @Transform(({value}) => value?.trim())
   @IsString()
   @IsNotEmpty()
   shortDescription: string
 
   @MaxLength(1000)
+  @Transform(({value}) => value?.trim())
   @IsString()
   @IsNotEmpty()
   content: string
@@ -25,16 +29,19 @@ export class postInputModel {
 
 export class postInputModelSpecific {
   @MaxLength(30)
+  @Transform(({value}) => value?.trim())
   @IsString()
   @IsNotEmpty()
   title: string
 
   @MaxLength(100)
+  @Transform(({value}) => value?.trim())
   @IsString()
   @IsNotEmpty()
   shortDescription: string
   
   @MaxLength(1000)
+  @Transform(({value}) => value?.trim())
   @IsString()
   @IsNotEmpty()
   content: string

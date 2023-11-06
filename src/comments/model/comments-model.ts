@@ -1,11 +1,13 @@
 import { IsEnum, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator"
 import { ObjectId } from "mongodb"
+import { Transform } from "class-transformer";
 
 
 export class commentInput {
   
   @MaxLength(300)
   @MinLength(20)
+  @Transform(({value}) => value?.trim())
   @IsString()
   @IsNotEmpty()
   content: string
