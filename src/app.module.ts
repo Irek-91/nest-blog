@@ -89,7 +89,7 @@ import { IsBlogIdAlreadyExistConstraint } from './blogs/models/blog.decorator';
     JwtService, JwtStrategy, LocalStrategy, 
     BasicStrategy,
     UsersService, UsersRepository, UsersQueryRepository, 
-    BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdAlreadyExistConstraint,
+    BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdAlreadyExistConstraint, 
     PostsService, PostRepository, PostQueryRepository,
     CommentsService, CommentsRepository,CommentsQueryRepository,
     SecurityDeviceRepository, SecurityDeviceService

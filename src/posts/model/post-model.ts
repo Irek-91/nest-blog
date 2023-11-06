@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 import mongoose from "mongoose";
 import { Transform } from "class-transformer";
 import { BlogsQueryRepository } from '../../blogs/blogs.query.repo';
-import { IsUserAlreadyExist } from "../../blogs/models/blog.decorator";
+import { IsBLogIdExist } from "../../blogs/models/blog.decorator";
 
 
 export class postInputModel {
@@ -26,9 +26,7 @@ export class postInputModel {
   @IsNotEmpty()
   content: string
 
-  @IsUserAlreadyExist({
-    message: 'BlogId not found',
-  })
+  @IsBLogIdExist()
   @IsString()
   @IsNotEmpty()
   blogId: string
