@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './exception.filter';
 import cookieParser from 'cookie-parser';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,7 +30,7 @@ async function bootstrap() {
     })
   );
 
-
+  
   app.useGlobalFilters( new HttpExceptionFilter())
   // const config = new DocumentBuilder()
   //   .setTitle('Nest-blog example')
@@ -39,7 +40,7 @@ async function bootstrap() {
   //   .build();
   // const document = SwaggerModule.createDocument(app, config);
   // SwaggerModule.setup('swagger', app, document);
-
+  useContainer(app.select(AppModule), {fallbackOnErrors: true})
   await app.listen(3000);
 }
 bootstrap();

@@ -10,14 +10,15 @@ import { BlogsQueryRepository } from '../blogs.query.repo';
 import { log } from 'console';
 import { BlogDocument } from './blogs-schema';
 
-
 @ValidatorConstraint({ name: 'IsBLogIdExist', async: true })
 @Injectable()
 export class IsBlogIdAlreadyExistConstraint implements ValidatorConstraintInterface {
-  constructor(private readonly blogsQueryRepo: BlogsQueryRepository) { }
+  
+  constructor(protected blogsQueryRepo: BlogsQueryRepository) { }
   async validate(value: any): Promise<boolean> {
+    debugger
     const foundBlog: BlogDocument | null =
-      await BlogsQueryRepository.prototype.getByBlogId(value);
+      await this.blogsQueryRepo.getByBlogId(value);
     if (!foundBlog) {
       return false;
     }
@@ -31,6 +32,7 @@ export class IsBlogIdAlreadyExistConstraint implements ValidatorConstraintInterf
 export function IsBLogIdExist(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
     registerDecorator({
+      name: 'IsBLogIdExist',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,

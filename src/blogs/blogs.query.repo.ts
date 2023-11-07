@@ -6,6 +6,7 @@ import { Filter, ObjectId } from "mongodb";
 import { Model } from "mongoose"
 import { blogInput, blogMongoDB, blogOutput, paginatorBlog } from "./models/blogs-model"
 import { InjectModel } from '@nestjs/mongoose';
+import { log } from 'console';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -40,7 +41,7 @@ export class BlogsQueryRepository {
 
   async getBlogId(id: string): Promise<blogOutput> {
     try {
-      const blog = await this.blogModel.findOne({ _id: new ObjectId(id) }).lean()
+      const blog = await this.blogModel.findOne({ _id: id }).lean()
       if (!blog) throw new HttpException('Not found', HttpStatus.NOT_FOUND)//return HttpStatus.NOT_FOUND
       return {
         id: blog._id.toString(),
@@ -57,7 +58,7 @@ export class BlogsQueryRepository {
   }
   async getBlogNameById(id: string): Promise<string | Number> {
     try {
-      const blog = await this.blogModel.findOne({ _id: new ObjectId(id) }).lean()
+      const blog = await this.blogModel.findOne({ _id: id}).lean()
       if (!blog) return HttpStatus.NOT_FOUND
       return blog.name
     }
@@ -69,9 +70,8 @@ export class BlogsQueryRepository {
 
   async getByBlogId(id: string): Promise< BlogDocument | null> {
     try {
-      const blog = await this.blogModel.findOne({ _id: new ObjectId(id) }).lean()
-      if (!blog) {return null}//return HttpStatus.NOT_FOUND
-      else {return blog}
+      const blog = await this.blogModel.findOne({ _id: id }).lean()
+      return blog
     }
     catch (e) {
       return null
