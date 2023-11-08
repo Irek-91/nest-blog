@@ -31,10 +31,11 @@ export class SecurityDeviceController {
         @Cookies('refreshToken') refreshToken: string) {
         const resultDelete = await this.securityDeviceService.deleteAllDevicesExceptOne(refreshToken)
         if (!resultDelete) {
-            throw new HttpException('No Content', HttpStatus.NO_CONTENT)
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+
         }
         else {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+            throw new HttpException('No Content', HttpStatus.NO_CONTENT)
         }
     }
     @UseGuards(ChekRefreshToken)

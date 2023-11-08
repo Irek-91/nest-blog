@@ -76,10 +76,10 @@ export class SecurityDeviceRepository {
         //добавить фильтр по userId
 
         try {
-            const checkUserIdByDeviceId = await this.devicesMododel.find({ userId: userId, deviceId: deviceId })
+            const checkUserIdByDeviceId = await this.devicesMododel.find({ userId: userId, deviceId: deviceId }).lean()
             if (checkUserIdByDeviceId.length === 0) { return null }
             const res = await this.devicesMododel.deleteMany({ deviceId: { $ne: deviceId } });
-            if (res === null) { return null }
+            if (res.deletedCount === 0) { return null }
             return res.acknowledged
         }
         catch (e) { return null }
