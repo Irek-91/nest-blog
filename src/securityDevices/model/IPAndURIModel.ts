@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 
+@Schema()
 export class IPAndURIModel {
     @Prop({
         required: true,

@@ -13,6 +13,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/local-jwt.guard';
 import { ChekRefreshToken, EmailOrLoginGuard, FilterCountIPAndURL } from './guards/auth.guard';
 import { Cookies } from './guards/cookies.guard';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('auth')
 
@@ -24,7 +25,7 @@ export class AuthController {
         protected authService: AuthService) { }
 
     @HttpCode(HttpStatus.OK)
-    @UseGuards(FilterCountIPAndURL, LocalAuthGuard)
+    @UseGuards(ThrottlerGuard, LocalAuthGuard)
     @Post('/login')
     async loginUserToTheSystem(@Request() req: any,
         @Body() loginInputData: LoginInputModel,
@@ -90,20 +91,20 @@ export class AuthController {
         const user = await this.usersService.findByUserId(req.user)
         return user
     }
-    @UseGuards(FilterCountIPAndURL, EmailOrLoginGuard)
+    @UseGuards(ThrottlerGuard, EmailOrLoginGuard)
     @Post('/registration')
     async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel) {
         const user = await this.authService.creatUser(inputData.login, inputData.password, inputData.email)
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
-    @UseGuards(FilterCountIPAndURL)
+    @UseGuards(ThrottlerGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-confirmation')
     async confirmRegistrationCode(@Body() inputData: RegistrationConfirmationCodeModel) {
         return this.authService.confirmationCode(inputData.code)
     }
-    @UseGuards(FilterCountIPAndURL)
+    @UseGuards(ThrottlerGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-email-resending')
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {

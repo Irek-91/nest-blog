@@ -42,10 +42,17 @@ import { BlogsQueryRepository } from './blogs/blogs.query.repo';
 import { IsBlogIdAlreadyExistConstraint } from './blogs/models/blog.decorator';
 import { IPAndURIModel, IPAndURISchema } from './securityDevices/model/IPAndURIModel';
 import { SecurityDeviceController } from './securityDevices/securityDevice-controller';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     ConfigModule.forRoot(),
     MongooseModule.forRoot('mongodb+srv://admin:admin1@atlascluster.0x495z3.mongodb.net/BlogPlatform?retryWrites=true&w=majority'),
       //'mongodb+srv://admin:admin1@atlascluster.0x495z3.mongodb.net/BlogPlatform?retryWrites=true&w=majority'),
