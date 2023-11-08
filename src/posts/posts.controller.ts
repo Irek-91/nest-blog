@@ -9,7 +9,6 @@ import { PostsService } from './posts.service';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { log } from 'console';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
-import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
 import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
 
 

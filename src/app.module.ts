@@ -83,7 +83,7 @@ import { SecurityDeviceController } from './securityDevices/securityDevice-contr
     ]),
     JwtModule.register({
       secret: env.JWT_SECRET,
-      signOptions: {expiresIn: '10'}
+      signOptions: {expiresIn: 10}
     }),
     PassportModule
   ],

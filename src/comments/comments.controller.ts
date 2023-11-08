@@ -2,7 +2,6 @@ import { likeStatus } from './../likes/model/likes-model';
 import { Controller, Delete, Get, Put, HttpException, HttpStatus, Param, Body, UseGuards, Request } from "@nestjs/common";
 import { CommentsService } from "./comments.service";
 import { commentInput } from "./model/comments-model";
-import { JwtAuthGuard } from './../auth/guards/local-jwt.guard';
 import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
 
 

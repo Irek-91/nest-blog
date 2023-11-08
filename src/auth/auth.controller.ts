@@ -23,6 +23,7 @@ export class AuthController {
         protected securityDeviceService: SecurityDeviceService,
         protected authService: AuthService) { }
 
+    @HttpCode(HttpStatus.OK)
     @UseGuards(LocalAuthGuard)
     @Post('/login')
     async loginUserToTheSystem(@Request() req: any,
@@ -43,11 +44,12 @@ export class AuthController {
             throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED);
         }
     }
-    
+
+    @HttpCode(HttpStatus.OK)
     @UseGuards(ChekRefreshToken)
     @Post('/refresh-token')
     async generateNewPairOfAccessAndRefreshTokens(@Request() req: any,
-    @Response() res: any,
+    @Response({ passthrough: true }) res: any,
     @Cookies('refreshToken') refreshToken: string,
     ) {
         
@@ -59,8 +61,7 @@ export class AuthController {
 
         if (newAccessToken !== null || newRefreshToken !== null) {
             res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true })
-            res.status(200).send({ accessToken: newAccessToken })
-            return { newAccessToken }
+            return { accessToken: newAccessToken }
         }
         else {
             throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED)
