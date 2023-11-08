@@ -38,6 +38,7 @@ export class SecurityDeviceController {
             throw new HttpException('No Content', HttpStatus.NO_CONTENT)
         }
     }
+    
     @UseGuards(ChekRefreshToken)
     @Delete('/devices/:deviceId')
     async deleteDeviceByUserId(
