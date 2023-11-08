@@ -46,7 +46,7 @@ export class SecurityDeviceService {
         }
         else {
             const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+            throw new HttpException('No Content', HttpStatus.NO_CONTENT)
         }
     }
 
