@@ -8,7 +8,6 @@ import { Model } from 'mongoose';
 import { IPAndURIDocument, IPAndURIModel, IPAndURISchema } from '../../securityDevices/model/IPAndURIModel';
 import { JwtService } from '../../application/jwt-service';
 import { SecurityDeviceService } from 'src/securityDevices/securityDevice.service';
-import { Cookies } from './cookies.guard';
 
 
 @Injectable()
@@ -106,11 +105,9 @@ export class ChekRefreshToken {
     constructor(protected jwtService: JwtService,
         protected securityDeviceService: SecurityDeviceService
     ) { }
-    async canActivate(context: ExecutionContext,
-        @Cookies('refreshToken') refreshToken: string
-        ): Promise<any> {
+    async canActivate(context: ExecutionContext): Promise<any> {
         const req = context.switchToHttp().getRequest();
-        const cookiesRefreshToken = refreshToken
+        const cookiesRefreshToken = req.cookies.refreshToken
         if (!cookiesRefreshToken) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         const validationToken = await this.jwtService.checkingTokenKey(cookiesRefreshToken)
         if (validationToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)    
