@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAuthGuard } from './guards/local-jwt.guard';
-import { EmailOrLoginGuard } from './guards/auth.guard';
+import { ChekRefreshToken, EmailOrLoginGuard } from './guards/auth.guard';
 import { Cookies } from './guards/cookies.guard';
 
 @Controller('auth')
@@ -44,11 +44,13 @@ export class AuthController {
         }
     }
     
-
+    @UseGuards(ChekRefreshToken)
     @Post('/refresh-token')
     async generateNewPairOfAccessAndRefreshTokens(@Request() req: any,
     @Response() res: any,
-    @Cookies('refreshToken') refreshToken: string) {
+    @Cookies('refreshToken') refreshToken: string,
+    ) {
+        
         const cookiesRefreshToken = refreshToken
         const IP = req.ip
         const title = req.headers['user-agent'] || 'custom-ua'
@@ -65,6 +67,7 @@ export class AuthController {
         }
     }
 
+    @UseGuards(ChekRefreshToken)
     @Post('/logout')
     async sendCorrectRefreshTokenThatWillBeRevoked(
         @Cookies('refreshToken') refreshToken: string

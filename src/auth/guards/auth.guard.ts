@@ -7,6 +7,7 @@ import { addSeconds } from 'date-fns';
 import { Model } from 'mongoose';
 import { IPAndURIDocument, IPAndURIModel, IPAndURISchema } from '../../securityDevices/model/IPAndURIModel';
 import { JwtService } from '../../application/jwt-service';
+import { SecurityDeviceService } from 'src/securityDevices/securityDevice.service';
 
 
 @Injectable()
@@ -39,7 +40,8 @@ export class GetUserIdByAuth implements CanActivate {
         const req = context.switchToHttp().getRequest();
         if (!req.headers.authorization || req.headers.authorization === undefined) {
             req.userId = null
-            return true}
+            return true
+        }
         const token = req.headers.authorization.split(' ')[1]
         const userId: any = await this.jwtService.getPayloadByRefreshToken(token)
 
@@ -62,7 +64,7 @@ export class UserAuthGuard implements CanActivate {
         if (!userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
-        
+
         req.userId = userId ? userId : null
         return true
     }
@@ -73,30 +75,49 @@ export class FilterCountIPAndURL implements CanActivate {
     constructor(@InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<IPAndURIDocument>) { }
 
 
-        async canActivate(context: ExecutionContext): Promise<any> {
-            const req = context.switchToHttp().getRequest();
-            const connectionDate = new Date()
-            const IP = req.ip
-            const URL = req.originalUrl //|| req.baseUrl 
-            const newAPI = {
-                IP,
-                URL,
-                date: connectionDate.toISOString()
-            }
-            const count = await this.ipAndURIModel.countDocuments({ IP: newAPI.IP, URL: newAPI.URL, date: { $gte: addSeconds(connectionDate, -10).toISOString() } })
-        
-            if (count + 1 > 5) {
-                return true
-            }
-            //await IPAndURIModelClass.insertOne({...newAPI})
-            const IPAndURIInstance = new this.ipAndURIModel(newAPI)
-            IPAndURIInstance.IP = IP
-            IPAndURIInstance.URL = URL
-            IPAndURIInstance.date = connectionDate.toISOString()
-            await IPAndURIInstance.save()
-           return true
+    async canActivate(context: ExecutionContext): Promise<any> {
+        const req = context.switchToHttp().getRequest();
+        const connectionDate = new Date()
+        const IP = req.ip
+        const URL = req.originalUrl //|| req.baseUrl 
+        const newAPI = {
+            IP,
+            URL,
+            date: connectionDate.toISOString()
+        }
+        const count = await this.ipAndURIModel.countDocuments({ IP: newAPI.IP, URL: newAPI.URL, date: { $gte: addSeconds(connectionDate, -10).toISOString() } })
+
+        if (count + 1 > 5) {
+            return true
+        }
+        //await IPAndURIModelClass.insertOne({...newAPI})
+        const IPAndURIInstance = new this.ipAndURIModel(newAPI)
+        IPAndURIInstance.IP = IP
+        IPAndURIInstance.URL = URL
+        IPAndURIInstance.date = connectionDate.toISOString()
+        await IPAndURIInstance.save()
+        return true
+    }
 }
+
+@Injectable()
+export class ChekRefreshToken {
+    constructor(protected jwtService: JwtService,
+        protected securityDeviceService: SecurityDeviceService
+    ) { }
+    async canActivate(context: ExecutionContext): Promise<any> {
+        const req = context.switchToHttp().getRequest();
+        const cookiesRefreshToken = req.cookies.refreshToken
+        if (!cookiesRefreshToken) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        const validationToken = await this.jwtService.checkingTokenKey(cookiesRefreshToken)
+        if (validationToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)    
+        const expiredToken = await this.securityDeviceService.findTokenAndDevice(cookiesRefreshToken)
+        if (expiredToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        return true
+    }
 }
+
+
 // @Injectable()
 // export class emailRegistrationGuard implements CanActivate {
 //     constructor(protected usersServise: UsersService) {}
