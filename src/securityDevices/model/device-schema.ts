@@ -40,7 +40,7 @@ export class DevicesModel {
         required: true,
         type: String
     })
-    userId: mongoose.Types.ObjectId
+    userId: string
 }
 
 export const DevicesModelSchema = SchemaFactory.createForClass(DevicesModel);

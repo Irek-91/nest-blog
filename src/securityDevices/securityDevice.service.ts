@@ -3,7 +3,7 @@ import { DeviceViewModel, devicesMongo } from "./model/device-model"
 import { SecurityDeviceRepository } from "./securityDevice.repo"
 import mongoose, { ObjectId } from "mongoose"
 import { log } from "console"
-import { Injectable } from "@nestjs/common"
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
 
 @Injectable()
 export class SecurityDeviceService {
@@ -36,12 +36,17 @@ export class SecurityDeviceService {
     async deleteDeviceByUserId(refreshToken: string, deviceId: string): Promise<number> {
 
         const resultDeviceId = await this.securityDeviceRepository.findOneDeviceId(deviceId)
-        if (!resultDeviceId) { return 404 }
+        if (!resultDeviceId) { 
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)    
+        }
         const resultUserId = await this.jwtService.getUserIdByToken(refreshToken)
-        if (resultDeviceId.userId.toString() !== resultUserId!.toString()) { return 403 }
+
+        if (resultDeviceId.userId !== resultUserId!) { 
+            throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
+        }
         else {
             const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
-            return 204
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
     }
 
@@ -60,7 +65,7 @@ export class SecurityDeviceService {
         else { return null }
     }
 
-    async addDeviceIdRefreshToken(userId: mongoose.Types.ObjectId, deviceId: string, IP: string, deviceName: string): Promise<null | string> {
+    async addDeviceIdRefreshToken(userId: string, deviceId: string, IP: string, deviceName: string): Promise<null | string> {
         const refreshToken = await this.jwtService.createdJWTRefreshToken(userId, deviceId)
         const issuedAt = await  this.jwtService.getIssueAttByRefreshToken(refreshToken)
         const expirationDate = await  this.jwtService.getExpiresAttByRefreshToken(refreshToken)

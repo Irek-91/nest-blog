@@ -53,7 +53,7 @@ export class SecurityDeviceRepository {
         return true
     }
 
-    async getTokenAndDevice(userId: mongoose.Types.ObjectId): Promise<DevicesModelDocument[] | null> {
+    async getTokenAndDevice(userId: string): Promise<DevicesModelDocument[] | null> {
 
         try {
             const res = await this.devicesMododel.find({ userId: userId }).lean();
@@ -72,7 +72,7 @@ export class SecurityDeviceRepository {
         catch (e) { return null }
     }
 
-    async deleteAllDevicesExceptOne(deviceId: string, userId: mongoose.Types.ObjectId): Promise<Boolean | null> {
+    async deleteAllDevicesExceptOne(deviceId: string, userId: string): Promise<Boolean | null> {
         //добавить фильтр по userId
 
         try {

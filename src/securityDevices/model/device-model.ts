@@ -12,7 +12,7 @@ export type devicesMongo = {
     deviceId: string,
     IP: string,
     deviceName: string,
-    userId: mongoose.Types.ObjectId
+    userId: string
 }
 
 // export class DevicesMongo {

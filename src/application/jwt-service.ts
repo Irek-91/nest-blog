@@ -6,22 +6,22 @@ import { Injectable } from "@nestjs/common"
 
 @Injectable()
 export class JwtService {
-    async createdJWTAccessToken (userId : mongoose.Types.ObjectId) {
+    async createdJWTAccessToken (userId : string) {
         const accessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 10})
         return accessToken
     }
 
-    async createdJWTRefreshToken (userId: mongoose.Types.ObjectId, deviceId: string): Promise< string> {
+    async createdJWTRefreshToken (userId: string, deviceId: string): Promise< string> {
         const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, settings.JWT_SECRET, {expiresIn: 20})
         return refreshToken
     }
 
     
-    async getUserIdByToken (token: string) : Promise<mongoose.Types.ObjectId | null> {
+    async getUserIdByToken (token: string) : Promise<string | null> {
        
         try {
             const result: any = jwt.verify(token, settings.JWT_SECRET)
-            return new mongoose.Types.ObjectId(result.userId)
+            return result.userId
         } 
         catch (e) {
             
@@ -29,9 +29,9 @@ export class JwtService {
         }
     }
 
-    async getUserIdByRefreshToken (token: string) : Promise<mongoose.Types.ObjectId> {
+    async getUserIdByRefreshToken (token: string) : Promise<string> {
             const result: any = jwt.decode(token)
-            return new mongoose.Types.ObjectId(result.userId)
+            return result.userId
         
     }
     async getPayloadByRefreshToken (token: string) : Promise<any> {
