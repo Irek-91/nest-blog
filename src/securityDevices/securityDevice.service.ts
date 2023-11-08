@@ -103,7 +103,7 @@ export class SecurityDeviceService {
 
         const result = await this.addDeviceIdRefreshToken(userId, deviceId, IP, deviceName)
 
-        if (!result) {
+        if (result) {
             return result
         }
         else { return null }
