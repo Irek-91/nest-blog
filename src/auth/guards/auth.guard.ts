@@ -117,6 +117,24 @@ export class ChekRefreshToken {
 }
 
 
+
+@Injectable()
+export class ChekRefreshTokenDeleteDevice {
+    constructor(protected jwtService: JwtService,
+        protected securityDeviceService: SecurityDeviceService
+    ) { }
+    async canActivate(context: ExecutionContext): Promise<any> {
+        const req = context.switchToHttp().getRequest();
+        const cookiesRefreshToken = req.cookies.refreshToken
+        if (!cookiesRefreshToken) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        const validationToken = await this.jwtService.checkingTokenKey(cookiesRefreshToken)
+        if (validationToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)    
+       
+        return true
+    }
+}
+
+
 // @Injectable()
 // export class emailRegistrationGuard implements CanActivate {
 //     constructor(protected usersServise: UsersService) {}

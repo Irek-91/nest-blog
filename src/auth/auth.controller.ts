@@ -75,8 +75,7 @@ export class AuthController {
         @Response({ passthrough: true }) res: any,
         @Cookies('refreshToken') refreshToken: string
     ) {
-        const cookiesRefreshToken = refreshToken
-        const result = await this.securityDeviceService.deleteDeviceIdRefreshToken(cookiesRefreshToken)
+        const result = await this.securityDeviceService.deleteDeviceIdRefreshToken(refreshToken)
         if (result === true) {
             res.clearCookie('refreshToken')
             throw new HttpException('No content', HttpStatus.NO_CONTENT)

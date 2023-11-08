@@ -1,6 +1,6 @@
 import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request } from '@nestjs/common';
 import { SecurityDeviceService } from './securityDevice.service';
-import { ChekRefreshToken } from './../auth/guards/auth.guard';
+import { ChekRefreshToken, ChekRefreshTokenDeleteDevice } from './../auth/guards/auth.guard';
 import { Cookies } from './../auth/guards/cookies.guard';
 
 @Controller('security')
@@ -39,7 +39,7 @@ export class SecurityDeviceController {
         }
     }
     
-    @UseGuards(ChekRefreshToken)
+    @UseGuards(ChekRefreshTokenDeleteDevice)
     @Delete('/devices/:deviceId')
     async deleteDeviceByUserId(
         @Request() req: any,
