@@ -71,13 +71,13 @@ export class AuthController {
     @UseGuards(ChekRefreshToken)
     @Post('/logout')
     async sendCorrectRefreshTokenThatWillBeRevoked(
+        @Response({ passthrough: true }) res: any,
         @Cookies('refreshToken') refreshToken: string
     ) {
         const cookiesRefreshToken = refreshToken
         const result = await this.securityDeviceService.deleteDeviceIdRefreshToken(cookiesRefreshToken)
         if (result === true) {
-            //res.clearCookie('refreshToken')
-            //res.sendStatus(204)
+            res.clearCookie('refreshToken')
             throw new HttpException('No content', HttpStatus.NO_CONTENT)
         }
         else {
