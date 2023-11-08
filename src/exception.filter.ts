@@ -76,3 +76,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
   }
 }
+
+
+export class TooManyRequests extends HttpException {
+  constructor() {
+    super('Too Many Requests', HttpStatus.FORBIDDEN);
+  }
+}

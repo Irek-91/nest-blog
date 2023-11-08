@@ -1,8 +1,12 @@
 import { UsersService } from './../../users/users.service';
 import { HttpStatus, BadRequestException } from '@nestjs/common';
 import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { log } from 'console';
-import { JwtService } from 'src/application/jwt-service';
+import { addSeconds } from 'date-fns';
+import { Model } from 'mongoose';
+import { IPAndURIDocument, IPAndURIModel, IPAndURISchema } from '../../securityDevices/model/IPAndURIModel';
+import { JwtService } from '../../application/jwt-service';
 
 
 @Injectable()
@@ -64,6 +68,35 @@ export class UserAuthGuard implements CanActivate {
     }
 }
 
+@Injectable()
+export class FilterCountIPAndURL implements CanActivate {
+    constructor(@InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<IPAndURIDocument>) { }
+
+
+        async canActivate(context: ExecutionContext): Promise<any> {
+            const req = context.switchToHttp().getRequest();
+            const connectionDate = new Date()
+            const IP = req.ip
+            const URL = req.originalUrl //|| req.baseUrl 
+            const newAPI = {
+                IP,
+                URL,
+                date: connectionDate.toISOString()
+            }
+            const count = await this.ipAndURIModel.countDocuments({ IP: newAPI.IP, URL: newAPI.URL, date: { $gte: addSeconds(connectionDate, -10).toISOString() } })
+        
+            if (count + 1 > 5) {
+                return true
+            }
+            //await IPAndURIModelClass.insertOne({...newAPI})
+            const IPAndURIInstance = new this.ipAndURIModel(newAPI)
+            IPAndURIInstance.IP = IP
+            IPAndURIInstance.URL = URL
+            IPAndURIInstance.date = connectionDate.toISOString()
+            await IPAndURIInstance.save()
+           return true
+}
+}
 // @Injectable()
 // export class emailRegistrationGuard implements CanActivate {
 //     constructor(protected usersServise: UsersService) {}

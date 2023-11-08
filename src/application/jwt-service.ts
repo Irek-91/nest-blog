@@ -7,12 +7,12 @@ import { Injectable } from "@nestjs/common"
 @Injectable()
 export class JwtService {
     async createdJWTAccessToken (userId : mongoose.Types.ObjectId) {
-        const accessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 600})
+        const accessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 10})
         return accessToken
     }
 
     async createdJWTRefreshToken (userId: mongoose.Types.ObjectId, deviceId: string): Promise< string> {
-        const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, settings.JWT_SECRET, {expiresIn: 400})
+        const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, settings.JWT_SECRET, {expiresIn: 20})
         return refreshToken
     }
 
