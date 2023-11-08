@@ -65,8 +65,8 @@ export class SecurityDeviceRepository {
 
     async deleteDeviceId(deviceId: string): Promise<null | boolean> {
         try {
-            const res = await this.devicesMododel.deleteOne({ deviceId: deviceId });
-            if (res === null) { return null }
+            const res = (await this.devicesMododel.deleteOne({ deviceId: deviceId }));
+            if (res.acknowledged === true) { return null }
             return res.acknowledged
         }
         catch (e) { return null }
