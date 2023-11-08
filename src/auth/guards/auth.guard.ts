@@ -88,7 +88,7 @@ export class FilterCountIPAndURL implements CanActivate {
         const count = await this.ipAndURIModel.countDocuments({ IP: newAPI.IP, URL: newAPI.URL, date: { $gte: addSeconds(connectionDate, -10).toISOString() } })
 
         if (count + 1 > 5) {
-            return true
+           throw new HttpException('429', HttpStatus.FAILED_DEPENDENCY)
         }
         //await IPAndURIModelClass.insertOne({...newAPI})
         const IPAndURIInstance = new this.ipAndURIModel(newAPI)
