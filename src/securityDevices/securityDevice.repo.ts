@@ -78,7 +78,7 @@ export class SecurityDeviceRepository {
         try {
             const checkUserIdByDeviceId = await this.devicesMododel.find({ userId: userId, deviceId: deviceId }).countDocuments()
             if (checkUserIdByDeviceId === 0) { return null }
-            const res = await this.devicesMododel.deleteMany({ deviceId: { $ne: deviceId } });
+            const res = await this.devicesMododel.deleteMany({ userId: userId, deviceId: { $ne: deviceId } });
             if (res.deletedCount === 0) { return null }
             return res.acknowledged
         }
