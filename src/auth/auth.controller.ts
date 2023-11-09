@@ -42,7 +42,7 @@ export class AuthController {
             res.status(200).send({ accessToken })
         }
         else {
-            throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED);
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -65,7 +65,7 @@ export class AuthController {
             return { accessToken: newAccessToken }
         }
         else {
-            throw new HttpException('Not Found', HttpStatus.UNAUTHORIZED)
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
     }
 
