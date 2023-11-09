@@ -44,6 +44,11 @@ export class SecurityDeviceService {
         if (resultDeviceId.userId !== resultUserId!) { 
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
         }
+        const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
+
+        const validateIssuedAt = await this.securityDeviceRepository.findTokenAndDeviceByissuedAt(issuedAt!)
+        if (validateIssuedAt === null) { throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED) }
+
         else {
             const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
             throw new HttpException('No Content', HttpStatus.NO_CONTENT)

@@ -108,8 +108,10 @@ export class ChekRefreshToken {
         const req = context.switchToHttp().getRequest();
         const cookiesRefreshToken = req.cookies.refreshToken
         if (!cookiesRefreshToken) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+
         const validationToken = await this.jwtService.checkingTokenKey(cookiesRefreshToken)
         if (validationToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)    
+        
         const expiredToken = await this.securityDeviceService.findTokenAndDevice(cookiesRefreshToken)
         if (expiredToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         return true
