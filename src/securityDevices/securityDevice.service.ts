@@ -117,6 +117,9 @@ export class SecurityDeviceService {
         const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
         if (issuedAt === null) { return null }
 
+        const validateIssuedAt = await this.securityDeviceRepository.findTokenAndDeviceByissuedAt(issuedAt)
+        if (validateIssuedAt === null) { return null }
+
         const resultDelete = await this.securityDeviceRepository.deleteTokenAndDevice(issuedAt)
         if (resultDelete === null) { return null }
         return true
