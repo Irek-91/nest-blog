@@ -1,4 +1,4 @@
-import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request, HttpCode } from '@nestjs/common';
 import { SecurityDeviceService } from './securityDevice.service';
 import { ChekRefreshToken, ChekRefreshTokenDeleteDevice } from './../auth/guards/auth.guard';
 import { Cookies } from './../auth/guards/cookies.guard';
@@ -8,7 +8,7 @@ import { Cookies } from './../auth/guards/cookies.guard';
 export class SecurityDeviceController {
     constructor(protected securityDeviceService: SecurityDeviceService) {}
     
-    
+    @HttpCode(HttpStatus.OK)
     @UseGuards(ChekRefreshToken)
     @Get('/devices')
     async getDeviceByToken(
@@ -17,12 +17,12 @@ export class SecurityDeviceController {
         const IP = req.ip
         const resultGetDevice = await this.securityDeviceService.getDeviceByToken(refreshToken, IP)
 
-        if (resultGetDevice) {
+        // if (resultGetDevice) {
             return resultGetDevice
-        }
-        else {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
-        }
+        // }
+        // else {
+        //     throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        // }
     }
     
     @UseGuards(ChekRefreshToken)
