@@ -48,6 +48,5 @@ export class SecurityDeviceController {
         const deviceId = req.params.deviceId
         const result = await this.securityDeviceService.deleteDeviceByUserId(refreshToken, deviceId)
         res.clearCookie('refreshToken')
-
     }
 }
