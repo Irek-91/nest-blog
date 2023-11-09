@@ -39,7 +39,7 @@ export class SecurityDeviceController {
         }
     }
     
-    @UseGuards(ChekRefreshTokenDeleteDevice)
+    @UseGuards(ChekRefreshToken)
     @Delete('/devices/:deviceId')
     async deleteDeviceByUserId(
         @Request() req: any,
