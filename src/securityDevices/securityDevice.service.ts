@@ -44,11 +44,6 @@ export class SecurityDeviceService {
         if (resultDeviceId.userId !== resultUserId!) { 
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
         }
-        const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
-
-        // const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(resultDeviceId.userId, deviceId)
-        // if (device === null) { throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)  }
-        // if (device.issuedAt !== issuedAt) {throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED) }
 
         const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
         return result        
@@ -103,15 +98,12 @@ export class SecurityDeviceService {
         const deviceId = await  this.jwtService.getDeviceIdByRefreshToken(refreshToken)
         if (deviceId === null) { return null }
         
-        const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
-        if (issuedAt === null) { return null }
+        // const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
+        // if (issuedAt === null) { return null }
 
-        const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(userId, deviceId)
-        if (device === null) { return null }
-        if (device.issuedAt !== issuedAt) { return null }
-
-        // const resultDelete = await this.securityDeviceRepository.deleteTokenAndDevice(issuedAt)//deviceId
-        // if (resultDelete === null) { return null }
+        // const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(userId, deviceId)
+        // if (device === null) { return null }
+        // if (device.issuedAt !== issuedAt) { return null }
 
         const result = await this.securityDeviceRepository.updateRefreshToken(userId, deviceId, IP, deviceName)
 
@@ -129,11 +121,11 @@ export class SecurityDeviceService {
         const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
         if (issuedAt === null) { return null }
 
-        const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(userId, deviceId)
-        if (device === null) { return null }
-        if (device.issuedAt !== issuedAt) { return null }
+        // const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(userId, deviceId)
+        // if (device === null) { return null }
+        // if (device.issuedAt !== issuedAt) { return null }
 
-        const resultDelete = await this.securityDeviceRepository.deleteTokenAndDevice(issuedAt)
+        const resultDelete = await this.securityDeviceRepository.deleteTokenAndDevice(userId, deviceId)
         if (resultDelete === null) { return null }
         return true
     }

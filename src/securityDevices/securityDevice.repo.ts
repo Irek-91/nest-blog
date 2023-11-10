@@ -59,9 +59,9 @@ export class SecurityDeviceRepository {
         catch (e) { return null }
     }
 
-    async deleteTokenAndDevice(issuedAt: string): Promise<true | null> {
+    async deleteTokenAndDevice(userId: string, deviceId: string): Promise<true | null> {
         try {
-            const res = await this.devicesMododel.deleteOne({ issuedAt: issuedAt })
+            const res = await this.devicesMododel.deleteOne({userId: userId, deviceId: deviceId })
             if (res === null) { return null }
             return true
         }
