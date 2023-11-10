@@ -43,6 +43,7 @@ import { IsBlogIdAlreadyExistConstraint } from './blogs/models/blog.decorator';
 import { IPAndURIModel, IPAndURISchema } from './securityDevices/model/IPAndURIModel';
 import { SecurityDeviceController } from './securityDevices/securityDevice-controller';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { TokenExpiration, TokenExpirationSchema } from './auth/model/token.validate.schema';
 
 
 @Module({
@@ -85,8 +86,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
       {
         name: IPAndURIModel.name,
         schema: IPAndURISchema
+      },
+      {
+        name: TokenExpiration.name,
+        schema: TokenExpirationSchema
       }
-
     ]),
     JwtModule.register({
       secret: env.JWT_SECRET,

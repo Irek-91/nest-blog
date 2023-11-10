@@ -114,6 +114,9 @@ export class ChekRefreshToken {
         
         const expiredToken = await this.securityDeviceService.findTokenAndDevice(cookiesRefreshToken)
         if (expiredToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        if (expiredToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        const validateREfreshToken = await this.securityDeviceService.findValidateRefreshToken(cookiesRefreshToken)
+        if (validateREfreshToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         return true
     }
 }

@@ -95,6 +95,8 @@ export class SecurityDeviceService {
     }
 
     async updateDevicesModelClass(refreshToken: string, IP: string, deviceName: string): Promise<string | null> {
+        const addValidateToken = await this.securityDeviceRepository.addValidateREfreshToken(refreshToken)
+
         const userId = await  this.jwtService.getUserIdByRefreshToken(refreshToken)
         if (userId === null) { return null }
         const deviceId = await  this.jwtService.getDeviceIdByRefreshToken(refreshToken)
@@ -119,6 +121,8 @@ export class SecurityDeviceService {
 
 
     async deleteDeviceIdRefreshToken(refreshToken: string): Promise<true | null> {
+        const addValidateToken = await this.securityDeviceRepository.addValidateREfreshToken(refreshToken)
+
         const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
         if (issuedAt === null) { return null }
 
@@ -129,5 +133,10 @@ export class SecurityDeviceService {
         if (resultDelete === null) { return null }
         return true
     }
+    async findValidateRefreshToken(refreshToken: string) {
+        return await this.securityDeviceRepository.findValidateRefreshToken(refreshToken)
+    }
+
+
 }
 

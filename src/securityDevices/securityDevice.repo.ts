@@ -3,11 +3,13 @@ import { devicesMongo } from "./model/device-model";
 import { DevicesModel, DevicesModelDocument } from "./model/device-schema";
 import mongoose, { Model, ObjectId } from "mongoose";
 import { Injectable } from "@nestjs/common"
+import { TokenExpiration, TokenExpirationDocument } from "./../auth/model/token.validate.schema";
 
 @Injectable()
 
 export class SecurityDeviceRepository {
     constructor(@InjectModel(DevicesModel.name) private devicesMododel: Model<DevicesModelDocument>,
+    @InjectModel(TokenExpiration.name) private tokenExpiration: Model<TokenExpirationDocument>,
 
     ) { }
     
@@ -94,5 +96,25 @@ export class SecurityDeviceRepository {
         catch (e) { return null }
     }
 
+    async addValidateREfreshToken(refreshToken: string) {
+        try {
+            const validateREfreshToken = {
+                _id: new mongoose.Types.ObjectId(),
+                refreshToken: refreshToken
+            }
+            const res = await this.tokenExpiration.insertMany({ ...validateREfreshToken })
+            return true
+        }
+        catch (e) { return null }
+    }
+
+    async findValidateRefreshToken(refreshToken: string) {
+        try {
+            const res = await this.tokenExpiration.findOne({ refreshToken: refreshToken });
+            if (res === null) { return true }
+            return null
+        }
+        catch (e) { return null }
+    }
 
 }
