@@ -3,20 +3,38 @@ import { devicesMongo } from "./model/device-model";
 import { DevicesModel, DevicesModelDocument } from "./model/device-schema";
 import mongoose, { Model, ObjectId } from "mongoose";
 import { Injectable } from "@nestjs/common"
-import { TokenExpiration, TokenExpirationDocument } from "./../auth/model/token.validate.schema";
+import { JwtService } from "./../application/jwt-service";
 
 @Injectable()
 
 export class SecurityDeviceRepository {
     constructor(@InjectModel(DevicesModel.name) private devicesMododel: Model<DevicesModelDocument>,
-    @InjectModel(TokenExpiration.name) private tokenExpiration: Model<TokenExpirationDocument>,
+    protected jwtService: JwtService
 
     ) { }
-    
+
     async addRefreshToken(newDeviceAndRefreshToken: devicesMongo): Promise<boolean | null> {
         try {
             const res = await this.devicesMododel.insertMany({ ...newDeviceAndRefreshToken })
             return true
+        }
+        catch (e) { return null }
+    }
+
+    async updateRefreshToken(userId: string, deviceId: string, IP: string, deviceName: string): Promise<string | null> {
+        try {
+            const device = await this.findDeviceByIdAndUserId(userId, deviceId)
+            const refreshToken = await this.jwtService.createdJWTRefreshToken(userId, deviceId)
+            const issuedAt = await this.jwtService.getIssueAttByRefreshToken(refreshToken)
+            const expirationDate = await this.jwtService.getExpiresAttByRefreshToken(refreshToken)
+            device!.userId = userId
+            device!.deviceId = deviceId
+            device!.issuedAt = issuedAt
+            device!.expirationDate = expirationDate
+            device!.IP = IP
+            device!.deviceName = deviceName
+            device!.save()
+            return refreshToken
         }
         catch (e) { return null }
     }
@@ -31,12 +49,12 @@ export class SecurityDeviceRepository {
     //     catch (e) { return null }
     // }
 
-    async findTokenAndDeviceByissuedAt(issuedAt: string): Promise<true | null> {
+    async findDeviceByIdAndUserId(userId: string, deviceId: string): Promise<DevicesModelDocument | null> {
 
         try {
-            const res = await this.devicesMododel.findOne({ issuedAt: issuedAt })
+            const res = await this.devicesMododel.findOne({ userId: userId, deviceId: deviceId })
             if (res === null) { return null }
-            return true
+            return res
         }
         catch (e) { return null }
     }
@@ -92,27 +110,6 @@ export class SecurityDeviceRepository {
             const res = await this.devicesMododel.findOne({ deviceId: deviceId });
             if (res === null) { return null }
             return res
-        }
-        catch (e) { return null }
-    }
-
-    async addValidateREfreshToken(refreshToken: string) {
-        try {
-            const validateREfreshToken = {
-                _id: new mongoose.Types.ObjectId(),
-                refreshToken: refreshToken
-            }
-            const res = await this.tokenExpiration.insertMany({ ...validateREfreshToken })
-            return true
-        }
-        catch (e) { return null }
-    }
-
-    async findValidateRefreshToken(refreshToken: string) {
-        try {
-            const res = await this.tokenExpiration.findOne({ refreshToken: refreshToken });
-            if (res === null) { return true }
-            return null
         }
         catch (e) { return null }
     }

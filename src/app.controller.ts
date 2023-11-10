@@ -10,7 +10,6 @@ import { Comment, CommentDocument } from './comments/model/comments-schema';
 import { Like, LikeDocument } from './likes/model/likes-schema';
 import { DevicesModel, DevicesModelDocument } from './securityDevices/model/device-schema';
 import { IPAndURIModel } from './securityDevices/model/IPAndURIModel';
-import { TokenExpiration, TokenExpirationDocument } from './auth/model/token.validate.schema';
 
 @Controller()
 export class AppController {
@@ -32,8 +31,7 @@ export class TestingController {
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
     @InjectModel(DevicesModel.name) private deviceModel: Model<DevicesModelDocument>,
-    @InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>,
-    @InjectModel(TokenExpiration.name) private tokenExpiration: Model<TokenExpirationDocument>
+    @InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>
 
   ) { }
 
@@ -46,7 +44,6 @@ export class TestingController {
     await this.likeModel.deleteMany();
     await this.deviceModel.deleteMany();
     await this.ipAndURIModel.deleteMany()
-    await this.tokenExpiration.deleteMany()
     console.log('Delete All')
     throw new HttpException('Not Found', HttpStatus.NO_CONTENT)
   }
