@@ -62,7 +62,7 @@ export class AuthController {
 
         if (newAccessToken !== null || newRefreshToken !== null) {
             res.cookie('refreshToken', newRefreshToken, { httpOnly: true, secure: true })
-            return { accessToken: newAccessToken }
+            res.status(200).send({ accessToken: newAccessToken })
         }
         else {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
