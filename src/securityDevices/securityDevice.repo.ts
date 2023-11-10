@@ -83,11 +83,11 @@ export class SecurityDeviceRepository {
         catch (e) { return null }
     }
 
-    async deleteDeviceId(deviceId: string): Promise<null | boolean> {
+    async deleteDeviceId(deviceId: string): Promise<null | true> {
         try {
             const res = (await this.devicesMododel.deleteOne({ deviceId: deviceId }));
             if (res.acknowledged === true) { return null }
-            return res.acknowledged
+            return true
         }
         catch (e) { return null }
     }

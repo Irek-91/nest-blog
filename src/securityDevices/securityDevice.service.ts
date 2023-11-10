@@ -33,7 +33,7 @@ export class SecurityDeviceService {
         return result
     }
 
-    async deleteDeviceByUserId(refreshToken: string, deviceId: string): Promise<number> {
+    async deleteDeviceByUserId(refreshToken: string, deviceId: string): Promise<null | true> {
 
         const resultDeviceId = await this.securityDeviceRepository.findOneDeviceId(deviceId)
         if (!resultDeviceId) { 
@@ -51,8 +51,7 @@ export class SecurityDeviceService {
         // if (device.issuedAt !== issuedAt) {throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED) }
 
         const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
-        throw new HttpException('No Content', HttpStatus.NO_CONTENT)
-        
+        return result        
     }
 
     async deleteAllDevicesExceptOne(refreshToken: string): Promise<Boolean | null> {
