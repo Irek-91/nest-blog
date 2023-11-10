@@ -39,6 +39,7 @@ export class SecurityDeviceController {
         }
     }
 
+    @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(ChekRefreshToken)
     @Delete('/devices/:deviceId')
     async deleteDeviceByUserId(
@@ -47,9 +48,6 @@ export class SecurityDeviceController {
         @Cookies('refreshToken') refreshToken: string) {
         const deviceId = req.params.deviceId
         const result = await this.securityDeviceService.deleteDeviceByUserId(refreshToken, deviceId)
-        if (result) {
-            res.clearCookie('refreshToken')
-            throw new HttpException('No Content', HttpStatus.NO_CONTENT)
-        }
+        res.clearCookie('refreshToken')
     }
 }
