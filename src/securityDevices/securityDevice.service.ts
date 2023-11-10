@@ -46,15 +46,13 @@ export class SecurityDeviceService {
         }
         const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
 
-        const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(resultDeviceId.userId, deviceId)
-        if (device === null) { throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)  }
-        if (device.issuedAt !== issuedAt) {throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED) }
+        // const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(resultDeviceId.userId, deviceId)
+        // if (device === null) { throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)  }
+        // if (device.issuedAt !== issuedAt) {throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED) }
 
-
-        else {
-            const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
-            throw new HttpException('No Content', HttpStatus.NO_CONTENT)
-        }
+        const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
+        throw new HttpException('No Content', HttpStatus.NO_CONTENT)
+        
     }
 
     async deleteAllDevicesExceptOne(refreshToken: string): Promise<Boolean | null> {
