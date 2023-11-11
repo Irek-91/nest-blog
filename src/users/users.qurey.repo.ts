@@ -15,7 +15,7 @@ export class UsersQueryRepository {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
   async findUsers(paginatorUser: QueryPaginationTypeUser) {
-    const filter: FilterQuery<userMongoModel> = {};
+    const filter:  FilterQuery<userMongoModel> = {};
 
     if (paginatorUser.searchLoginTerm || paginatorUser.searchEmailTerm) {
       filter.$or = []

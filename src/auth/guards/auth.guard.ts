@@ -7,7 +7,7 @@ import { addSeconds } from 'date-fns';
 import { Model } from 'mongoose';
 import { IPAndURIDocument, IPAndURIModel, IPAndURISchema } from '../../securityDevices/model/IPAndURIModel';
 import { JwtService } from '../../application/jwt-service';
-import { SecurityDeviceService } from 'src/securityDevices/securityDevice.service';
+import { SecurityDeviceService } from '../../securityDevices/securityDevice.service';
 
 
 @Injectable()
