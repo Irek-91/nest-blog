@@ -1,6 +1,6 @@
 import { QueryPaginationType } from './../helpers/query-filter';
-import { UsersRepository } from './../users/users.repo';
-import { UsersQueryRepository } from './../users/users.qurey.repo';
+import { UsersRepository } from '../users/db-mongo/users.repo';
+import { UsersQueryRepository } from '../users/db-mongo/users.qurey.repo';
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { CommentsRepository } from './comments.repo';
 import { commentViewModel, paginatorComments } from './model/comments-model';

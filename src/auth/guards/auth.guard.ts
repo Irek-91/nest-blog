@@ -18,12 +18,12 @@ export class EmailOrLoginGuard implements CanActivate {
         const req = context.switchToHttp().getRequest();
         const loginExists = await this.usersServise.findUserByLogin(req.body.login)
         const emailExists = await this.usersServise.findUserByEmail(req.body.email)
-        if (loginExists !== HttpStatus.NOT_FOUND) {
+        if (loginExists !== null) {
             throw new BadRequestException([
                 { message: 'BAD REQUEST', field: 'login' },
             ])
         }
-        if (emailExists) {
+        if (emailExists !== null) {
             throw new BadRequestException([
                 { message: 'BAD REQUEST', field: 'email' },
             ])

@@ -1,8 +1,8 @@
 import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { FilterQuery, Model } from "mongoose";
-import { User, UserDocument } from "./models/users-schema";
-import { userMongoModel, userViewModel } from "./models/users-model";
+import { User, UserDocument } from "../models/users-schema";
+import { userMongoModel, userViewModel } from "../models/users-model";
 import { log } from "console";
 
 

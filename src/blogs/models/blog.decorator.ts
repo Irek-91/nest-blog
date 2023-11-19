@@ -16,7 +16,6 @@ export class IsBlogIdAlreadyExistConstraint implements ValidatorConstraintInterf
   
   constructor(protected blogsQueryRepo: BlogsQueryRepository) { }
   async validate(value: any): Promise<boolean> {
-    debugger
     const foundBlog: BlogDocument | null =
       await this.blogsQueryRepo.getByBlogId(value);
     if (!foundBlog) {

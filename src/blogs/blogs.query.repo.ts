@@ -15,7 +15,7 @@ export class BlogsQueryRepository {
   async findBlogs(pagination: QueryPaginationType): Promise<paginatorBlog> {
     const blogs = await this.blogModel.
       find({ name: { $regex: pagination.searchNameTerm, $options: 'i' } }).
-      sort([[pagination.sortBy, pagination.sortDirection]]).
+      //sort([[pagination.sortBy, pagination.sortDirection]]).
       skip(pagination.skip).
       limit(pagination.pageSize).
       lean()
