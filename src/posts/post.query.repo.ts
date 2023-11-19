@@ -21,7 +21,7 @@ export class PostQueryRepository {
 
     async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost> {
         const posts = await this.postModel.find({}).
-            sort([[paginationQuery.sortBy, paginationQuery.sortDirection]]).
+            //sort([[paginationQuery.sortBy, paginationQuery.sortDirection]]).
             skip(paginationQuery.skip).
             limit(paginationQuery.pageSize)
         const totalCount = await this.postModel.countDocuments()
@@ -75,7 +75,7 @@ export class PostQueryRepository {
             const filter = { blogId: blogId }
             const posts = await this.postModel
                 .find(filter)
-                .sort([[paginationQuery.sortBy, paginationQuery.sortDirection]])
+                //.sort([[paginationQuery.sortBy, paginationQuery.sortDirection]])
                 .skip(paginationQuery.skip)
                 .limit(paginationQuery.pageSize)
                 .lean();

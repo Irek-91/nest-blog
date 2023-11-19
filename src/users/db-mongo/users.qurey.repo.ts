@@ -1,10 +1,10 @@
-import { QueryPaginationTypeUser } from './../helpers/query-filter';
+import { QueryPaginationTypeUser } from '../../helpers/query-filter';
 import { HttpCode, HttpStatus, Injectable, HttpException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { FilterQuery, Model } from "mongoose";
-import { User, UserDocument } from "./models/users-schema";
+import { User, UserDocument } from "../models/users-schema";
 import mongoose, { ObjectId } from "mongoose";
-import { userMongoModel, userViewModel } from "./models/users-model";
+import { userMongoModel, userViewModel } from "../models/users-model";
 import { log } from "console";
 
 
@@ -26,10 +26,9 @@ export class UsersQueryRepository {
         filter.$or.push({ 'accountData.email': { $regex: paginatorUser.searchEmailTerm, $options: 'i' } })
       }
     }
-
     const users = await this.userModel.find().
       where(filter).
-      sort([[`accountData.${paginatorUser.sortBy}`, paginatorUser.sortDirection]]).
+      //sort([[`accountData.${paginatorUser.sortBy}`, paginatorUser.sortDirection]]).
       skip(paginatorUser.skip).
       limit(paginatorUser.pageSize).
       lean()

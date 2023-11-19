@@ -1,8 +1,8 @@
 import { EmailAdapter } from './../application/email-adapter';
 import { User } from './../users/models/users-schema';
 import { userViewModel } from './../users/models/users-model';
-import { UsersQueryRepository } from './../users/users.qurey.repo';
-import { UsersRepository } from './../users/users.repo';
+import { UsersQueryRepository } from '../users/db-mongo/users.qurey.repo';
+import { UsersRepository } from '../users/db-mongo/users.repo';
 import mongoose, { ObjectId } from "mongoose";
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';

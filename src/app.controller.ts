@@ -10,6 +10,8 @@ import { Comment, CommentDocument } from './comments/model/comments-schema';
 import { Like, LikeDocument } from './likes/model/likes-schema';
 import { DevicesModel, DevicesModelDocument } from './securityDevices/model/device-schema';
 import { IPAndURIModel } from './securityDevices/model/IPAndURIModel';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 @Controller()
 export class AppController {
@@ -25,7 +27,7 @@ export class AppController {
 @Controller('testing/all-data')
 export class TestingController {
   constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private userModel: UsersService,
     @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
@@ -37,7 +39,7 @@ export class TestingController {
 
   @Delete()
   async deleteAll() {
-    await this.userModel.deleteMany();
+    await this.userModel.deleteUserAll();
     await this.blogModel.deleteMany();
     await this.postModel.deleteMany();
     await this.commentModel.deleteMany();

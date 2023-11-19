@@ -53,7 +53,7 @@ export class CommentsQueryRepository {
     try {
       const filter = { postId: postId }
       const comments = await this.commentModel.find(filter).
-        sort([[pagination.sortBy, pagination.sortDirection]]).
+        //sort([[pagination.sortBy, pagination.sortDirection]]).
         skip(pagination.skip).
         limit(pagination.pageSize).
         lean()

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common"
 
 export type QueryPaginationTypeUser = {
   sortBy: string
-  sortDirection: 1 | -1
+  sortDirection: 'ASC' | 'DESC',
   pageNumber: number
   pageSize: number
   searchLoginTerm: string
@@ -12,7 +12,7 @@ export type QueryPaginationTypeUser = {
 export type QueryPaginationType = {
   searchNameTerm: string
   sortBy: string
-  sortDirection: 'asc' | 'desc'
+  sortDirection: 'ASC' | 'DESC'
   pageNumber: number
   pageSize: number
   skip: number
@@ -23,7 +23,7 @@ export class Pagination {
   getPaginationFromQueryUser = (query: any): QueryPaginationTypeUser => {
    const defaultValuesUsers: QueryPaginationTypeUser = {
      sortBy: 'createdAt',
-     sortDirection: -1,
+     sortDirection: 'ASC',
      pageNumber: 1,
      pageSize: 10,
      searchLoginTerm: '',
@@ -48,7 +48,7 @@ export class Pagination {
     const defaultValues: QueryPaginationType = {
       searchNameTerm: '',
       sortBy: 'createdAt',
-      sortDirection: 'desc',
+      sortDirection: 'DESC',
       pageNumber: 1,
       pageSize: 10,
       skip: 0
