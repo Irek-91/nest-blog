@@ -9,6 +9,7 @@ import { appSettings } from './app.settings';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import { env } from 'process';
 
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   appSettings(app)
