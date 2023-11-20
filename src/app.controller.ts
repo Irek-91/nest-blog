@@ -37,6 +37,7 @@ export class TestingController {
 
   ) { }
 
+  
   @Delete()
   async deleteAll() {
     await this.userModel.deleteUserAll();
