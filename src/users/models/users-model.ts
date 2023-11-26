@@ -27,6 +27,24 @@ export type userViewModel = {
     email: string,
     createdAt: string
 }
+export type userModelPSQL = {
+    _id: string,
+    login: string,
+    email: string,
+    createdAt: string,
+    salt: string,
+    hash: string
+}
+
+export type emailConfirmationPSQL = {
+    userId: string,
+    confirmationCode: string,
+    expiritionDate: any,
+    isConfirmed: boolean,
+    recoveryCode: string
+}
+
+
 
 
 export type userMongoModel = {
@@ -51,4 +69,9 @@ export type MeViewModel = {
     login: string,
     email: string,
     userId: mongoose.Types.ObjectId
+}
+export type userInputModel = {
+    email: string,
+    login: string,
+    password: string,
 }

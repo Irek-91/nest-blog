@@ -2,10 +2,10 @@ import request from 'supertest'
 import { log } from 'console';
 import { blogInput } from './models/blogs-model';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from './../app.module';
+import { AppModule } from '../app.module';
 import { BlogsService } from './blogs.service';
-import { AppController } from './../app.controller';
-import { appSettings } from './../app.settings';
+import { AppController } from '../app.controller';
+import { appSettings } from '../app.settings';
 import { NestFactory } from '@nestjs/core'
 import { INestApplication} from '@nestjs/common';
 

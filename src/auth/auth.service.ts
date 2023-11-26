@@ -9,11 +9,13 @@ import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add'
 import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Injectable, BadRequestException } from '@nestjs/common';
 import { log } from "console";
+import { UsersRepositoryPSQL } from './../users/db-psql/users.repo.PSQL';
+import { UsersQueryRepoPSQL } from './../users/db-psql/users.qurey.repo.PSQL';
 
 @Injectable()
 export class AuthService {
-    constructor(protected userRepository: UsersRepository,
-        protected usersQueryRepository: UsersQueryRepository,
+    constructor(protected userRepository: UsersRepositoryPSQL,
+        protected usersQueryRepository: UsersQueryRepoPSQL,
         protected emailAdapter: EmailAdapter) {}
 
     async creatUser(login: string, password: string, email: string): Promise<userViewModel | null> {
@@ -45,7 +47,7 @@ export class AuthService {
         }
         const creatresult = await this.userRepository.createUser(newUser)
         try {
-            await this.emailAdapter.sendEmail(newUser.accountData.email, 'code', newUser.emailConfirmation.confirmationCode)
+            this.emailAdapter.sendEmail(newUser.accountData.email, 'code', newUser.emailConfirmation.confirmationCode)
         } catch (e) {
             //const idNewUser = await userRepository.findByLoginOrEmailL(newUser.accountData.email)
             //if (idNewUser) {
@@ -63,13 +65,13 @@ export class AuthService {
     async confirmationCode(code: string): Promise<void> {
         let user = await this.usersQueryRepository.findUserByCode(code)
         if (!user) throw new BadRequestException([{message: 'wrong code', field: `code`}])
-        if(user.emailConfirmation.isConfirmed) throw new BadRequestException([{message: 'wrong code', field: `code`}])
-        if(user.emailConfirmation.expiritionDate < new Date()) throw new BadRequestException([{message: 'wrong code', field: `code`}])
+        if(user.isConfirmed) throw new BadRequestException([{message: 'wrong code', field: `code`}])
+        if(user.expiritionDate < new Date()) throw new BadRequestException([{message: 'wrong code', field: `code`}])
         // if (user.emailConfirmation.isConfirmed === true) return HttpStatus.BAD_REQUEST
         // if (user.emailConfirmation.confirmationCode !== code) return HttpStatus.BAD_REQUEST
         // if (user.emailConfirmation.expiritionDate < new Date()) return HttpStatus.BAD_REQUEST
 
-        await this.userRepository.updateConfirmation(user._id)
+        await this.userRepository.updateConfirmation(user.userId)
         return
     }
 
@@ -78,7 +80,8 @@ export class AuthService {
         let user = await this.usersQueryRepository.findUserByEmail(email)
         const errMsg = [{message: 'wrong email', field: `email`}]
         if (!user) throw new BadRequestException(errMsg)
-        if (user.emailConfirmation.isConfirmed) throw new BadRequestException(errMsg)
+        let result = await this.usersQueryRepository.findUserByEmailConfirmation(user._id)
+        if (result !== null && result!.isConfirmed) throw new BadRequestException(errMsg)
 
         const confirmationCode = uuidv4();
         const expiritionDate = add(new Date(), {
@@ -86,7 +89,7 @@ export class AuthService {
             minutes: 2
         })
         await this.userRepository.updateCode(user._id, confirmationCode, expiritionDate)
-        await this.emailAdapter.sendEmail(user.accountData.email, 'code', confirmationCode)
+        this.emailAdapter.sendEmail(user.email, 'code', confirmationCode)
         return
     
     }
@@ -99,7 +102,7 @@ export class AuthService {
 
         const recoveryCode = uuidv4();
         await this.userRepository.updateRecoveryCode(user._id, recoveryCode)
-        await this.emailAdapter.passwordRecovery(user.accountData.email, 'code', recoveryCode)
+        this.emailAdapter.passwordRecovery(user.email, 'code', recoveryCode)
         return true
     }
 
@@ -112,7 +115,7 @@ export class AuthService {
 
         const passwordSalt = await bcrypt.genSalt(10)
         const passwordHash = await this._generateHash(newPassword, passwordSalt)
-        const resultUpdatePassword = await this.userRepository.updatePassword(result._id, passwordSalt, passwordHash)
+        const resultUpdatePassword = await this.userRepository.updatePassword(result.userId, passwordSalt, passwordHash)
         return true
     }
 }

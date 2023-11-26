@@ -30,7 +30,6 @@ export class UsersRepositoryPSQL {
                         '${newUser._id}')
               `
     const user = await this.userModel.query(query)
-
     const userViewVodel = {
       id: newUser._id.toString(),
       login: newUser.accountData!.login,
@@ -45,11 +44,12 @@ export class UsersRepositoryPSQL {
     try {
       //let user = await this.userModel.deleteOne({ _id: new mongoose.Types.ObjectId(userId) })
       let user = await this.userModel.query(`
-        DELETE FROM public."Users" AS u
-
-        WHERE u."_id" = $1
+        DELETE FROM public."Users" as u WHERE u."_id" = $1  
       `, [userId])
-      if (user === 1) {
+      let userEmail = await this.userModel.query(`
+        DELETE FROM public."EmailConfirmation" as e WHERE e."userId" = $1  
+      `, [userId])
+      if (user[1] > 0 ) {
         return HttpStatus.NO_CONTENT
       } else {return HttpStatus.NOT_FOUND}
     }
@@ -63,18 +63,18 @@ export class UsersRepositoryPSQL {
       let user = await this.userModel.query(`
         DELETE FROM public."Users"
       `)
-      if (user > 0) {
+      if (user[1] > 0) {
         return HttpStatus.NO_CONTENT
       } else {return HttpStatus.NOT_FOUND}
     }
     catch (e) { return HttpStatus.NOT_FOUND }
   }
 
-  async updateConfirmation(_id: mongoose.Types.ObjectId): Promise<boolean> {
+  async updateConfirmation(_id: string): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."EmailConfirmation" as e
-	  SET "isConfirmed"= true, "isConfirmed" = null, "expiritionDate" = null
-	  WHERE e."userId" = $1;
+    UPDATE public."EmailConfirmation"
+	  SET "isConfirmed"= true, "confirmationCode" = null, "expiritionDate" = null
+	  WHERE "userId" = $1;
     `, [_id])
     // let result = await this.userModel.updateOne({ _id }, { $set: { 
     //     "emailConfirmation.isConfirmed": true,
@@ -85,11 +85,11 @@ export class UsersRepositoryPSQL {
     return true
   }
 
-  async updateCode(_id: mongoose.Types.ObjectId, code: string, expiritionDate: Date): Promise<boolean> {
+  async updateCode(_id: string, code: string, expiritionDate: Date): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."EmailConfirmation" as e
-    SET "confirmationCode" = $1, "expiritionDate" = $2
-    WHERE e."userId" = $3;
+    UPDATE public."EmailConfirmation" 
+    SET "confirmationCode" = $1,"expiritionDate" = $2
+    WHERE "userId" = $3;
     `, [code, expiritionDate, _id])
 
    // let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.confirmationCode": code, "emailConfirmation.expiritionDate": expiritionDate } })
@@ -97,20 +97,22 @@ export class UsersRepositoryPSQL {
     return true
   }
 
-  async updatePassword(_id: mongoose.Types.ObjectId, salt: string, hash: string): Promise<boolean> {
+  async updatePassword(_id: string, salt: string, hash: string): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."EmailConfirmation" as e
+    UPDATE public."Users" as u
     SET "salt" = $1, "hash" =$2
+    WHERE "userId" = $3
     `, [salt, hash, _id])
     return true
     //let result = await this.userModel.updateOne({ _id }, { $set: { "accountData.salt": salt, "accountData.hash": hash } })
     //return result.modifiedCount === 1
   }
 
-  async updateRecoveryCode(_id: mongoose.Types.ObjectId, recoveryCode: string): Promise<boolean> {
+  async updateRecoveryCode(_id: string, recoveryCode: string): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."EmailConfirmation" as e
+    UPDATE public."EmailConfirmation"
     SET "recoveryCode" = $1
+    WHERE "userId" = $2
     `, [recoveryCode, _id])
     return true
     //let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.recoveryCode": recoveryCode } })

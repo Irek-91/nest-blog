@@ -1,12 +1,12 @@
 import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request, HttpCode, Response } from '@nestjs/common';
-import { SecurityDeviceService } from './securityDevice.service';
+import {  SecurityDeviceServicePSQL } from './db-psql/securityDevice.service.PSQL';
 import { ChekRefreshToken, ChekRefreshTokenDeleteDevice } from './../auth/guards/auth.guard';
 import { Cookies } from './../auth/guards/cookies.guard';
 
 @Controller('security')
 
 export class SecurityDeviceController {
-    constructor(protected securityDeviceService: SecurityDeviceService) { }
+    constructor(protected securityDeviceService: SecurityDeviceServicePSQL) { }
 
     @HttpCode(HttpStatus.OK)
     @UseGuards(ChekRefreshToken)
@@ -44,9 +44,10 @@ export class SecurityDeviceController {
     @Delete('/devices/:deviceId')
     async deleteDeviceByUserId(
         @Response({ passthrough: true }) res: any,
+        @Param('deviceId') deviceId: string,
         @Request() req: any,
         @Cookies('refreshToken') refreshToken: string) {
-        const deviceId = req.params.deviceId
+            
         const result = await this.securityDeviceService.deleteDeviceByUserId(refreshToken, deviceId)
         res.clearCookie('refreshToken')
     }

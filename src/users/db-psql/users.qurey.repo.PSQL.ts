@@ -4,7 +4,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { FilterQuery, Model } from "mongoose";
 import { User, UserDocument } from "../models/users-schema";
 import mongoose, { ObjectId } from "mongoose";
-import { userMongoModel, userViewModel } from "../models/users-model";
+import { emailConfirmationPSQL, userModelPSQL, userMongoModel, userViewModel } from "../models/users-model";
 import { log } from "console";
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -18,32 +18,47 @@ export class UsersQueryRepoPSQL {
 
   async findUsers(paginatorUser: QueryPaginationTypeUser) {
     const filter:  FilterQuery<userMongoModel> = {};
-
-    if (paginatorUser.searchLoginTerm || paginatorUser.searchEmailTerm) {
-      filter.$or = []
-      if (paginatorUser.searchLoginTerm) {
-        filter.$or.push({ 'accountData.login': { $regex: paginatorUser.searchLoginTerm, $options: 'i' } })
+    let query = `SELECT * FROM public."Users"
+                  ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
+                  `
+      if (paginatorUser.searchLoginTerm !== '' && paginatorUser.searchEmailTerm !== '') {
+        
+        query = `SELECT * FROM public."Users"  
+                WHERE "login" LIKE '%${paginatorUser.searchLoginTerm}%' OR "email" LIKE '%${paginatorUser.searchEmailTerm}%'
+                ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
+                `
       }
-      if (paginatorUser.searchEmailTerm) {
-        filter.$or.push({ 'accountData.email': { $regex: paginatorUser.searchEmailTerm, $options: 'i' } })
+      if (paginatorUser.searchLoginTerm !== '' && paginatorUser.searchEmailTerm === '') {
+        
+        query = `SELECT * FROM public."Users"  
+                WHERE "login" LIKE '%${paginatorUser.searchLoginTerm}%'
+                ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
+                `
       }
-    }
-    const sortByWithCollate = paginatorUser.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
+      if (paginatorUser.searchLoginTerm === '' && paginatorUser.searchEmailTerm !== '') {
+        
 
-    const query = `SELECT * FROM public."Users" as u WHERE u."login" LIKE $1 or u."email" LIKE $2
-                  ORDER BY "${paginatorUser.sortBy}" ${sortByWithCollate} ${paginatorUser.sortDirection}
-                  LIMIT $3 OFFSET $4`
-    const users = await this.userModel.query(query, 
-    [`%${paginatorUser.searchLoginTerm}%`, `%${paginatorUser.searchEmailTerm}%`,
-    paginatorUser.pageSize, paginatorUser.skip
-    ])
+        query = `SELECT * FROM public."Users"  
+                WHERE "email" LIKE '%${paginatorUser.searchEmailTerm}%'
+                ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
+                `
+      }
+      
+    // const query = `SELECT * FROM public."Users"  
+    //               WHERE "login" LIKE $1 OR "email" LIKE $2
+    //               ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
+    //               LIMIT $3 OFFSET $4`
+    const queryResult = `${query}`+` LIMIT $1 OFFSET $2`
+    
+    const users = await this.userModel.query(queryResult, 
+    [paginatorUser.pageSize, paginatorUser.skip])
         // where(filter).
         // sort([[`accountData.${paginatorUser.sortBy}`, paginatorUser.sortDirection]]).
         // skip(paginatorUser.skip).
         // limit(paginatorUser.pageSize).
         // lean()
     //const totalCount = await this.userModel.countDocuments(filter)
-    let totalCount = users.length
+    let totalCount = (await this.userModel.query(query)).length
     const usersOutput: userViewModel[] = users.map((b) => {
       return {
         id: b._id.toString(),
@@ -52,7 +67,6 @@ export class UsersQueryRepoPSQL {
         createdAt: b!.createdAt,
       }
     })
-
     return {
       pagesCount: Math.ceil(totalCount / paginatorUser.pageSize),
       page: paginatorUser.pageNumber,
@@ -63,7 +77,7 @@ export class UsersQueryRepoPSQL {
   }
 
 
-  async findUserById(userId: string): Promise<UserDocument> {
+  async findUserById(userId: string): Promise<userModelPSQL> {
     try {
       let user = await this.userModel.query(`SELECT * FROM public."Users" as u WHERE u."_id" = $1`, [userId]);
 
@@ -71,67 +85,126 @@ export class UsersQueryRepoPSQL {
         throw new HttpException ('Not found',HttpStatus.NOT_FOUND)
       }
       else {
-        return user
+       
+          return {
+            _id: user[0]._id.toString(),
+            login: user[0].login,
+            email: user[0].email,
+            createdAt: user[0].createdAt,
+            salt: user[0].salt,
+            hash: user[0].hash
+          }
+
       }
     } catch (e) { throw new HttpException ('Not found',HttpStatus.NOT_FOUND) }
   }
 
-  async findByLoginOrEmailL(loginOrEmail: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+  async findByLoginOrEmailL(loginOrEmail: string): Promise<userModelPSQL | HttpStatus.NOT_FOUND> {
+    
     const user = await this.userModel.query(
-      `SELECT * FROM public."Users" as u WHERE u."login" = $1 or u."email" = $1`, [loginOrEmail]
+      `SELECT * FROM public."Users" as u 
+      WHERE u."login" = $1 or u."email" = $1`, [loginOrEmail]
       //{ $or: [{ 'accountData.email': loginOrEmail }, { 'accountData.login': loginOrEmail }] }
       )
     if (user.length === 0) {
       return HttpStatus.NOT_FOUND
     }
+    
     else {
-      return user
+      
+      //return user.map((b) => {
+        return {
+          
+          _id: user[0]._id.toString(),
+          login: user[0].login,
+          email: user[0].email,
+          createdAt: user[0].createdAt,
+          salt: user[0].salt,
+          hash: user[0].hash
+        //}
+      }
+      
     }
   }
 
 
-  async findUserByCode(code: string): Promise<UserDocument | null> {
+  async findUserByCode(code: string): Promise<emailConfirmationPSQL | null> {
     try {
-      return this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."confirmationCode" = $1`, [code]
+      const result = await this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."confirmationCode" = $1`, [code]
         //{ "emailConfirmation.confirmationCode": code }
         )
+      if(result.length === 0) {return null}
+      else {
+          return {
+            userId: result[0].userId,
+            confirmationCode:  result[0].confirmationCode,
+            expiritionDate:  result[0].expiritionDate,
+            isConfirmed:  result[0].isConfirmed,
+            recoveryCode: result[0].recoveryCode
+          }
+      }
     }
     catch (e) {
        return null
        }
   }
 
-  async findUserByEmail(email: string): Promise<UserDocument | null> {
+  async findUserByEmail(email: string): Promise<userModelPSQL | null> {
     try {
       const result = await this.userModel.query(`SELECT * FROM public."Users" as u WHERE u."email" = $1`, [email]
         //{ "accountData.email": email }
       )
       if(result.length === 0) {return null}
-      else {return result}
+      else {
+          return {
+            _id: result[0]._id.toString(),
+          login: result[0].login,
+          email: result[0].email,
+          createdAt: result[0].createdAt,
+          salt: result[0].salt,
+          hash: result[0].hash
+          }
+
+      }
     }
     catch (e) { return null }
   }
 
-  async findUserByLogin(login: string): Promise<UserDocument | null> {
+  async findUserByLogin(login: string): Promise<userModelPSQL | null> {
     try {
       let result = await this.userModel.query(`SELECT * FROM public."Users" as u WHERE u."login" = $1`, [login]
 
         //{ "accountData.login": login }
         )
         if(result.length === 0) {return null}
-        else {return result}
+        else {
+            return {
+              _id: result[0]._id.toString(),
+              login: result[0].login,
+              email: result[0].email,
+              createdAt: result[0].createdAt,
+              salt: result[0].salt,
+              hash: result[0].hash
+        }
       }
+    }
       catch (e) { return null }
     }
 
 
-  async findUserByRecoveryCode(recoveryCode: string): Promise<UserDocument | null> {
+  async findUserByRecoveryCode(recoveryCode: string): Promise<emailConfirmationPSQL | null> {
     try {
-      let user = await this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."login" = $1`, [recoveryCode]
+      let user = await this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."recoveryCode" = $1`, [recoveryCode]
         //{ "emailConfirmation.recoveryCode": recoveryCode }
       )
       if (user.length > 0) {
-        return user
+          return {
+            userId: user[0].userId,
+            confirmationCode:  user[0].confirmationCode,
+            expiritionDate:  user[0].expiritionDate,
+            isConfirmed:  user[0].isConfirmed,
+            recoveryCode: user[0].recoveryCode
+          }
       } else {
         return null
       }
@@ -139,5 +212,28 @@ export class UsersQueryRepoPSQL {
     catch (e) {
       return null
     }
+}
+
+
+async findUserByEmailConfirmation(userId: string): Promise<emailConfirmationPSQL | null> {
+  try {
+    let user = await this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."userId" = $1`, [userId]
+      //{ "emailConfirmation.recoveryCode": recoveryCode }
+    )
+    if (user.length > 0) {
+        return {
+          userId: user[0].userId,
+            confirmationCode:  user[0].confirmationCode,
+            expiritionDate:  user[0].expiritionDate,
+            isConfirmed:  user[0].isConfirmed,
+            recoveryCode: user[0].recoveryCode
+        }
+    } else {
+      return null
+    }
+  }
+  catch (e) {
+    return null
+  }
 }
 }

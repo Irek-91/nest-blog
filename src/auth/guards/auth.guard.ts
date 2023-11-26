@@ -7,7 +7,7 @@ import { addSeconds } from 'date-fns';
 import { Model } from 'mongoose';
 import { IPAndURIDocument, IPAndURIModel, IPAndURISchema } from '../../securityDevices/model/IPAndURIModel';
 import { JwtService } from '../../application/jwt-service';
-import { SecurityDeviceService } from '../../securityDevices/securityDevice.service';
+import { SecurityDeviceServicePSQL } from '../../securityDevices/db-psql/securityDevice.service.PSQL';
 
 
 @Injectable()
@@ -102,7 +102,7 @@ export class FilterCountIPAndURL implements CanActivate {
 @Injectable()
 export class ChekRefreshToken {
     constructor(protected jwtService: JwtService,
-        protected securityDeviceService: SecurityDeviceService
+        protected securityDeviceService: SecurityDeviceServicePSQL
     ) { }
     async canActivate(context: ExecutionContext): Promise<any> {
         const req = context.switchToHttp().getRequest();
@@ -124,7 +124,7 @@ export class ChekRefreshToken {
 @Injectable()
 export class ChekRefreshTokenDeleteDevice {
     constructor(protected jwtService: JwtService,
-        protected securityDeviceService: SecurityDeviceService
+        protected securityDeviceService: SecurityDeviceServicePSQL
     ) { }
     async canActivate(context: ExecutionContext): Promise<any> {
         const req = context.switchToHttp().getRequest();

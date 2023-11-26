@@ -1,13 +1,15 @@
-import { JwtService } from './../application/jwt-service';
-import { DeviceViewModel, devicesMongo } from "./model/device-model"
-import { SecurityDeviceRepository } from "./securityDevice.repo"
+import { JwtService } from '../../application/jwt-service';
+import { DeviceViewModel, devicesMongo } from "../model/device-model"
 import mongoose, { ObjectId } from "mongoose"
 import { log } from "console"
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
+import { SecurityDeviceRepository } from '../db-mongo/securityDevice.repo';
+import { SecurityDeviceRepoPSQL } from './securityDevice.repo.PSQL';
+
 
 @Injectable()
-export class SecurityDeviceService {
-    constructor(protected securityDeviceRepository: SecurityDeviceRepository,
+export class SecurityDeviceServicePSQL {
+    constructor(protected securityDeviceRepository: SecurityDeviceRepoPSQL,
         protected jwtService: JwtService) {}
 
     async getDeviceByToken(token: string, IP: string): Promise<DeviceViewModel[] | null> {
@@ -40,7 +42,7 @@ export class SecurityDeviceService {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)    
         }
         const resultUserId = await this.jwtService.getUserIdByToken(refreshToken)
-
+debugger
         if (resultDeviceId.userId !== resultUserId!) { 
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
         }
@@ -128,6 +130,9 @@ export class SecurityDeviceService {
         const resultDelete = await this.securityDeviceRepository.deleteTokenAndDevice(userId, deviceId)
         if (resultDelete === null) { return null }
         return true
+    }
+    async deleteDevices() {
+        return await this.securityDeviceRepository.deleteDevicesAll()
     }
 
 

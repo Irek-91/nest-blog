@@ -27,8 +27,7 @@ import { AuthService } from './auth/auth.service';
 import { EmailAdapter } from './application/email-adapter';
 import { JwtService } from './application/jwt-service';
 import { DevicesModel, DevicesModelSchema } from './securityDevices/model/device-schema';
-import { SecurityDeviceRepository } from './securityDevices/securityDevice.repo';
-import { SecurityDeviceService } from './securityDevices/securityDevice.service';
+import { SecurityDeviceServicePSQL } from './securityDevices/db-psql/securityDevice.service.PSQL';
 import { AuthController } from './auth/auth.controller';
 import { LocalStrategy } from './auth/strategies/local.strategy';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
@@ -47,6 +46,9 @@ import { UsersQueryRepoPSQL } from './users/db-psql/users.qurey.repo.PSQL';
 import { UsersRepositoryPSQL } from './users/db-psql/users.repo.PSQL';
 import { UsersSAController } from './users/users.SA.controller';
 import { log } from 'console';
+import { SecurityDeviceRepository } from './securityDevices/db-mongo/securityDevice.repo';
+import { SecurityDeviceRepoPSQL } from './securityDevices/db-psql/securityDevice.repo.PSQL';
+import { SecurityDeviceService } from './securityDevices/db-mongo/securityDevice.service';
 
 
 @Module({
@@ -137,7 +139,7 @@ import { log } from 'console';
     BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdAlreadyExistConstraint, 
     PostsService, PostRepository, PostQueryRepository,
     CommentsService, CommentsRepository,CommentsQueryRepository,
-    SecurityDeviceRepository, SecurityDeviceService
+    SecurityDeviceRepository, SecurityDeviceService, SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL
   ],
 })
 export class AppModule {}

@@ -1,5 +1,4 @@
 import { UsersService } from './../users/users.service';
-import { SecurityDeviceService } from './../securityDevices/securityDevice.service';
 import { JwtService } from './../application/jwt-service';
 import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response, BadRequestException, HttpCode } from '@nestjs/common';
 import { log } from 'console';
@@ -14,6 +13,7 @@ import { JwtAuthGuard } from './guards/local-jwt.guard';
 import { ChekRefreshToken, EmailOrLoginGuard, FilterCountIPAndURL } from './guards/auth.guard';
 import { Cookies } from './guards/cookies.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { SecurityDeviceServicePSQL } from './../securityDevices/db-psql/securityDevice.service.PSQL';
 
 @Controller('auth')
 
@@ -21,11 +21,11 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 export class AuthController {
     constructor(protected usersService: UsersService,
         protected jwtService: JwtService,
-        protected securityDeviceService: SecurityDeviceService,
+        protected securityDeviceService: SecurityDeviceServicePSQL,
         protected authService: AuthService) { }
 
     @HttpCode(HttpStatus.OK)
-    @UseGuards(/*ThrottlerGuard,*/ LocalAuthGuard)
+    @UseGuards(ThrottlerGuard, LocalAuthGuard)
     @Post('/login')
     async loginUserToTheSystem(@Request() req: any,
         @Body() loginInputData: LoginInputModel,
@@ -78,7 +78,7 @@ export class AuthController {
         const result = await this.securityDeviceService.deleteDeviceIdRefreshToken(refreshToken)
         if (result === true) {
             res.clearCookie('refreshToken')
-            throw new HttpException('No content', HttpStatus.NO_CONTENT)
+            res.status(204)
         }
         else {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
@@ -90,20 +90,20 @@ export class AuthController {
         const user = await this.usersService.findByUserId(req.user)
         return user
     }
-    @UseGuards(/*ThrottlerGuard,*/ EmailOrLoginGuard)
+    @UseGuards(ThrottlerGuard, EmailOrLoginGuard)
     @Post('/registration')
     async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel) {
         const user = await this.authService.creatUser(inputData.login, inputData.password, inputData.email)
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
-    @UseGuards(/*ThrottlerGuard*/)
+    @UseGuards(ThrottlerGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-confirmation')
     async confirmRegistrationCode(@Body() inputData: RegistrationConfirmationCodeModel) {
         return this.authService.confirmationCode(inputData.code)
     }
-    @UseGuards(/*ThrottlerGuard*/)
+    @UseGuards(ThrottlerGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-email-resending')
     async resendConfirmationRegistrationEmail(@Body() inputData: RegistrationEmailResending) {

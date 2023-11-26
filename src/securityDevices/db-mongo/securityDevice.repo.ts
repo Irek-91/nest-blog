@@ -1,9 +1,9 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { devicesMongo } from "./model/device-model";
-import { DevicesModel, DevicesModelDocument } from "./model/device-schema";
+import { devicesMongo } from "./../model/device-model";
 import mongoose, { Model, ObjectId } from "mongoose";
 import { Injectable } from "@nestjs/common"
-import { JwtService } from "./../application/jwt-service";
+import { JwtService } from "../../application/jwt-service";
+import { DevicesModel, DevicesModelDocument } from "../model/device-schema";
 
 @Injectable()
 

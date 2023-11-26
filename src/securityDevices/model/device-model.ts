@@ -33,3 +33,11 @@ export class DeviceViewModel {
     lastActiveDate: string
     deviceId: string
 }
+export type devicesPSQL = {
+    issuedAt: string,
+    expirationDate: string,
+    deviceId: string,
+    IP: string,
+    deviceName: string,
+    userId: string
+}

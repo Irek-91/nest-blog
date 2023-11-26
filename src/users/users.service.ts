@@ -1,4 +1,4 @@
-import { CreatUserInputModel, MeViewModel } from './models/users-model';
+import { CreatUserInputModel, MeViewModel, emailConfirmationPSQL, userModelPSQL } from './models/users-model';
 import { QueryPaginationTypeUser } from './../helpers/query-filter';
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { UsersRepository } from "./db-mongo/users.repo";
@@ -67,13 +67,15 @@ export class UsersService {
     return hash;
   }
 
-  async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<UserDocument | HttpStatus.NOT_FOUND> {
+  async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<userModelPSQL | HttpStatus.NOT_FOUND> {
     const user = await this.usersQueryRepository.findByLoginOrEmailL(loginOrEmail)
     if (user === HttpStatus.NOT_FOUND) {
       return HttpStatus.NOT_FOUND
     }
-    const passwordHash = await this._generateHash(passwordUser, user.accountData.salt)
-    if (user.accountData.hash !== passwordHash) {
+    
+    const passwordHash = await this._generateHash(passwordUser, user!.salt)
+    
+    if (user.hash !== passwordHash) {
       return HttpStatus.NOT_FOUND
     }
     else {
@@ -90,27 +92,27 @@ export class UsersService {
 
     const result = await this.usersQueryRepository.findUserById(userId)
     const resultUserViewModel: MeViewModel = {
-      email: result.accountData.email,
-      login: result.accountData.login,
-      userId: result._id
+      email: result.email,
+      login: result.login,
+      userId: new mongoose.Types.ObjectId(result._id)
     }
     return resultUserViewModel
   }
 
-  async findUserByCode(code: string): Promise<UserDocument | null> {
+  async findUserByCode(code: string): Promise<emailConfirmationPSQL | null> {
     let user = await this.usersQueryRepository.findUserByCode(code)
     if (!user) return null
     return user
   }
 
-  async findUserByEmail(email: string): Promise<UserDocument | null> {
+  async findUserByEmail(email: string): Promise<userModelPSQL | null> {
     let user = await this.usersQueryRepository.findUserByEmail(email)
     if (!user) return null
     return user
   }
 
 
-  async findUserByLogin(login: string): Promise<UserDocument | null> {
+  async findUserByLogin(login: string): Promise<userModelPSQL | null> {
     let user = await this.usersQueryRepository.findUserByLogin(login)
     if (!user) return null
     return user

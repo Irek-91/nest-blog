@@ -23,7 +23,7 @@ export class Pagination {
   getPaginationFromQueryUser = (query: any): QueryPaginationTypeUser => {
    const defaultValuesUsers: QueryPaginationTypeUser = {
      sortBy: 'createdAt',
-     sortDirection: 'ASC',
+     sortDirection: 'DESC',
      pageNumber: 1,
      pageSize: 10,
      searchLoginTerm: '',
