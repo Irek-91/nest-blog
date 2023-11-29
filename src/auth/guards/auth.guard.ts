@@ -107,13 +107,13 @@ export class ChekRefreshToken {
     async canActivate(context: ExecutionContext): Promise<any> {
         const req = context.switchToHttp().getRequest();
         const cookiesRefreshToken = req.cookies.refreshToken
-        if (!cookiesRefreshToken) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        if (!cookiesRefreshToken) throw new HttpException('UNAUTHORIZED now token', HttpStatus.UNAUTHORIZED)
 
         const validationToken = await this.jwtService.checkingTokenKey(cookiesRefreshToken)
-        if (validationToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)    
+        if (validationToken === null) throw new HttpException('UNAUTHORIZED not valid', HttpStatus.UNAUTHORIZED)    
         
         const expiredToken = await this.securityDeviceService.findTokenAndDevice(cookiesRefreshToken)
-        if (expiredToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        if (expiredToken.result === null) throw new HttpException(['UNAUTHORIZED expired', expiredToken], HttpStatus.UNAUTHORIZED)
 
         return true
     }

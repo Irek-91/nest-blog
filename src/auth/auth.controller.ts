@@ -30,12 +30,12 @@ export class AuthController {
     async loginUserToTheSystem(@Request() req: any,
         @Body() loginInputData: LoginInputModel,
         @Response() res: any) {
-        const divicId = uuidv4();
+        const deviceId = uuidv4();
         const IP = req.ip
         const title = req.headers['user-agent'] || 'custom-ua'
       
         const accessToken = await this.jwtService.createdJWTAccessToken(req.user._id)
-        const refreshToken = await this.securityDeviceService.addDeviceIdRefreshToken(req.user._id, divicId, IP, title)
+        const refreshToken = await this.securityDeviceService.addDeviceIdRefreshToken(req.user._id, deviceId, IP, title)
         if (accessToken !== null || refreshToken !== null) {
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
             //res.status(200).send({ accessToken })
@@ -81,7 +81,7 @@ export class AuthController {
             res.status(204)
         }
         else {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+            throw new HttpException('UNAUTHORIZED no device found', HttpStatus.UNAUTHORIZED)
         }
     }
     @UseGuards(JwtAuthGuard)

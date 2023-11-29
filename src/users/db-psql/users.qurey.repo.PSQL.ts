@@ -24,14 +24,14 @@ export class UsersQueryRepoPSQL {
       if (paginatorUser.searchLoginTerm !== '' && paginatorUser.searchEmailTerm !== '') {
         
         query = `SELECT * FROM public."Users"  
-                WHERE "login" LIKE '%${paginatorUser.searchLoginTerm}%' OR "email" LIKE '%${paginatorUser.searchEmailTerm}%'
+                WHERE "login" ILIKE '%${paginatorUser.searchLoginTerm}%' OR "email" LIKE '%${paginatorUser.searchEmailTerm}%'
                 ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
                 `
       }
       if (paginatorUser.searchLoginTerm !== '' && paginatorUser.searchEmailTerm === '') {
         
         query = `SELECT * FROM public."Users"  
-                WHERE "login" LIKE '%${paginatorUser.searchLoginTerm}%'
+                WHERE "login" ILIKE '%${paginatorUser.searchLoginTerm}%'
                 ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
                 `
       }

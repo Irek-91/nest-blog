@@ -39,10 +39,10 @@ export class SecurityDeviceRepoPSQL {
           
             const query =`UPDATE public."Devices"
                             SET "issuedAt" = '${issuedAt}',
-                                "expirationDate" = '${expirationDate}', "IP" = '${device!.IP}'
-                            WHERE "userId" = $1`
+                                "expirationDate" = '${expirationDate}', "IP" = '${IP}'
+                            WHERE "userId" = $1 AND "deviceId" = $2`
             
-            const res = await this.devicesMododel.query(query, [device!.userId])
+            const res = await this.devicesMododel.query(query, [userId, deviceId])
             return refreshToken
         }
         catch (e) { return null }

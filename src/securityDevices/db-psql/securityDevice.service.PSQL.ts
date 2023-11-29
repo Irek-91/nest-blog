@@ -42,7 +42,7 @@ export class SecurityDeviceServicePSQL {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)    
         }
         const resultUserId = await this.jwtService.getUserIdByToken(refreshToken)
-debugger
+
         if (resultDeviceId.userId !== resultUserId!) { 
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
         }
@@ -59,14 +59,14 @@ debugger
         return res
     }
 
-    async findTokenAndDevice(token: string): Promise<boolean | null> {
+    async findTokenAndDevice(token: string): Promise<{result: any, device?: any, issuedAt?: string }> {
         const deviceId = await this.jwtService.getDeviceIdByRefreshToken(token)
         const userId = await this.jwtService.getUserIdByRefreshToken(token) 
         const issuedAt = await  this.jwtService.getIssueAttByRefreshToken(token)
         const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(userId, deviceId)
-        if (device === null) { return null }
-        if (device.issuedAt !== issuedAt) { return null }
-        else { return true }
+        if (device === null) { return  {result: null }}
+        if (device.issuedAt !== issuedAt) { return {result: null, device, issuedAt} }
+        else { return  {result: true } }
     }
 
     async addDeviceIdRefreshToken(userId: string, deviceId: string, IP: string, deviceName: string): Promise<null | string> {
@@ -99,6 +99,7 @@ debugger
         if (userId === null) { return null }
         const deviceId = await  this.jwtService.getDeviceIdByRefreshToken(refreshToken)
         if (deviceId === null) { return null }
+
         
         // const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
         // if (issuedAt === null) { return null }
