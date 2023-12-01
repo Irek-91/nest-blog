@@ -13,6 +13,8 @@ import { IPAndURIModel } from './securityDevices/model/IPAndURIModel';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { SecurityDeviceServicePSQL } from './securityDevices/db-psql/securityDevice.service.PSQL';
+import { BlogsService } from './blogs/blogs.service';
+import { PostsService } from './posts/posts.service';
 
 @Controller()
 export class AppController {
@@ -30,8 +32,9 @@ export class TestingController {
   constructor(
     private userModel: UsersService,
     private deviceModel: SecurityDeviceServicePSQL,
-    @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    private blogModel: BlogsService,
+    private postModel: PostsService,
+
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
     @InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>
@@ -42,12 +45,12 @@ export class TestingController {
   async deleteAll() {
     await this.userModel.deleteUserAll();
     await this.deviceModel.deleteDevices()
-    //await this.blogModel.deleteMany();
-    //await this.postModel.deleteMany();
-    //await this.commentModel.deleteMany();
-    //await this.likeModel.deleteMany();
+    await this.blogModel.deleteBlogAll();
+    await this.postModel.deletePostAll();
+    await this.commentModel.deleteMany();
+    await this.likeModel.deleteMany();
     //await this.deviceModel.deleteMany();
-    //await this.ipAndURIModel.deleteMany()
+    await this.ipAndURIModel.deleteMany()
     console.log('Delete All')
     throw new HttpException('Not Found', HttpStatus.NO_CONTENT)
   }

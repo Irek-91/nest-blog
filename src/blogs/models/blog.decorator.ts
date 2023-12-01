@@ -6,15 +6,16 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
-import { BlogsQueryRepository } from '../blogs.query.repo';
+import { BlogsQueryRepository } from '../db-mongo/blogs.query.repo';
 import { log } from 'console';
 import { BlogDocument } from './blogs-schema';
+import { BlogsQueryRepoPSQL } from '../db-psql/blogs.query.repo.PSQL';
 
 @ValidatorConstraint({ name: 'IsBLogIdExist', async: true })
 @Injectable()
 export class IsBlogIdAlreadyExistConstraint implements ValidatorConstraintInterface {
   
-  constructor(protected blogsQueryRepo: BlogsQueryRepository) { }
+  constructor(protected blogsQueryRepo: BlogsQueryRepoPSQL) { }
   async validate(value: any): Promise<boolean> {
     const foundBlog: BlogDocument | null =
       await this.blogsQueryRepo.getByBlogId(value);

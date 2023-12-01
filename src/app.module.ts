@@ -10,14 +10,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './users/models/users-schema';
 import { BlogsController } from './blogs/blogs.controller';
 import { BlogsService } from './blogs/blogs.service';
-import { BlogsRepository } from './blogs/blogs.repo';
+import { BlogsRepository } from './blogs/db-mongo/blogs.repo';
 import { Blog, BlogSchema } from './blogs/models/blogs-schema';
 import { env } from 'process';
 import { Pagination } from './helpers/query-filter';
 import { Post, PostSchema } from './posts/model/post-schema';
 import { PostsController } from './posts/posts.controller';
 import { PostsService } from './posts/posts.service';
-import { PostRepository } from './posts/post.repo';
 import { Comment, CommentSchema } from './comments/model/comments-schema';
 import { CommentsRepository } from './comments/comments.repo';
 import { CommentsController } from './comments/comments.controller';
@@ -34,9 +33,8 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
-import { PostQueryRepository } from './posts/post.query.repo';
 import { CommentsQueryRepository } from './comments/comments.query.repo';
-import { BlogsQueryRepository } from './blogs/blogs.query.repo';
+import { BlogsQueryRepository } from './blogs/db-mongo/blogs.query.repo';
 import { IsBlogIdAlreadyExistConstraint } from './blogs/models/blog.decorator';
 import { IPAndURIModel, IPAndURISchema } from './securityDevices/model/IPAndURIModel';
 import { SecurityDeviceController } from './securityDevices/securityDevice-controller';
@@ -49,6 +47,12 @@ import { log } from 'console';
 import { SecurityDeviceRepository } from './securityDevices/db-mongo/securityDevice.repo';
 import { SecurityDeviceRepoPSQL } from './securityDevices/db-psql/securityDevice.repo.PSQL';
 import { SecurityDeviceService } from './securityDevices/db-mongo/securityDevice.service';
+import { BlogsQueryRepoPSQL } from './blogs/db-psql/blogs.query.repo.PSQL';
+import { BlogsRepoPSQL } from './blogs/db-psql/blogs.repo.PSQL';
+import { PostQueryRepository } from './posts/db-mongo/post.query.repo';
+import { PostRepository } from './posts/db-mongo/post.repo';
+import { PostQueryRepoPSQL } from './posts/db-psql/post.query.repo';
+import { PostRepoPSQL } from './posts/db-psql/post.repo';
 
 
 @Module({
@@ -136,8 +140,8 @@ import { SecurityDeviceService } from './securityDevices/db-mongo/securityDevice
     JwtService, JwtStrategy, LocalStrategy, 
     BasicStrategy,
     UsersService, UsersRepository, UsersQueryRepository, UsersQueryRepoPSQL,UsersRepositoryPSQL,  
-    BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdAlreadyExistConstraint, 
-    PostsService, PostRepository, PostQueryRepository,
+    BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdAlreadyExistConstraint, BlogsQueryRepoPSQL, BlogsRepoPSQL,
+    PostsService, PostRepository, PostQueryRepository, PostQueryRepoPSQL,PostRepoPSQL,
     CommentsService, CommentsRepository,CommentsQueryRepository,
     SecurityDeviceRepository, SecurityDeviceService, SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL
   ],

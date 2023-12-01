@@ -26,6 +26,8 @@ describe('AppController', () => {
           appSettings(app)
           await app.init()
           httpServer = app.getHttpServer()
+    await request(httpServer).delete('/testing/all-data')
+
     })
     
     afterAll(async () => {
@@ -36,7 +38,7 @@ describe('AppController', () => {
 
 describe('create user in the system ', () => {
         it ('return user ', async () => {
-            const creatResponse = await request(app)
+            const creatResponse = await request(httpServer)
                 .get('/users')
                 .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
                 .expect(200)
@@ -51,7 +53,7 @@ describe('create user in the system ', () => {
         })
 
         it ('error 404 is returned, there is no such user', async () => {
-            await request(app)
+            await request(httpServer)
                     .get('/users/:5')
                     .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
                     .expect(404)
@@ -63,13 +65,13 @@ describe('create user in the system ', () => {
                 password: 'panda2023',
                 email: 'panda@mail.com',
             }
-            const firstRes = await createUser('', '', model)
+            const firstRes = await createUser('', '', model, httpServer)
             expect(firstRes.response.status).toBe(401)
 
-            const secondRes = await createUser('any', 'any', model)
+            const secondRes = await createUser('any', 'any', model, httpServer)
             expect(secondRes.response.status).toBe(401)
 
-            const thirdRes = await createUser('admin', 'qwerty', model)
+            const thirdRes = await createUser('admin', 'qwerty', model, httpServer)
             const getUser = thirdRes.user
 
             expect(thirdRes.response.status).not.toBe(401)
@@ -99,7 +101,7 @@ describe('create user in the system ', () => {
                 password: '',
                 email: '',
             }
-            const firstRes = await createUser('admin', 'qwerty', modelOne)
+            const firstRes = await createUser('admin', 'qwerty', modelOne, httpServer)
             expect(firstRes.response.status).toBe(400)
             expect(firstRes.user).toEqual(errorsUsers)
             
@@ -116,7 +118,7 @@ describe('create user in the system ', () => {
                     }
                 ])
             }
-            const twoRes = await createUser('admin', 'qwerty', modelTwo)
+            const twoRes = await createUser('admin', 'qwerty', modelTwo, httpServer)
             expect(twoRes.response.status).toBe(400)
             expect(twoRes.user).toEqual(errorsUsersTwo)
 
@@ -133,7 +135,7 @@ describe('create user in the system ', () => {
                     }
                 ])
             }
-            const freeRes = await createUser('admin', 'qwerty', modelFree)
+            const freeRes = await createUser('admin', 'qwerty', modelFree, httpServer)
             expect(freeRes.response.status).toBe(400)
             expect(freeRes.user).toEqual(errorsUsersFree)
 
@@ -143,7 +145,7 @@ describe('create user in the system ', () => {
 
         it ('should return 200 status code and created user', async () => {
             const {user} = expect.getState()
-            const res = await request(app).get(`/users`)
+            const res = await request(httpServer).get(`/users`)
                                           .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
 
             expect(res.status).toBe(200)
@@ -158,10 +160,10 @@ describe('create user in the system ', () => {
         it ('delete userId ', async () => {
         const {user} = expect.getState()
 
-        const res = await request(app).delete(`/users/${user.id}`)
+        const res = await request(httpServer).delete(`/users/${user.id}`)
                                       .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
         expect(res.status).toBe(204)
-        const resTwo = await request(app).get(`/users`)
+        const resTwo = await request(httpServer).get(`/users`)
                                           .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
         expect(resTwo.status).toBe(200)
         expect(resTwo.body).toEqual({pagesCount: expect.any(Number),

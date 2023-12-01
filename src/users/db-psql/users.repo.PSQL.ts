@@ -63,6 +63,11 @@ export class UsersRepositoryPSQL {
       let user = await this.userModel.query(`
         DELETE FROM public."Users"
       `)
+
+      let emailUsers = await this.userModel.query(`
+        DELETE FROM public."EmailConfirmation"
+      `)
+
       if (user[1] > 0) {
         return HttpStatus.NO_CONTENT
       } else {return HttpStatus.NOT_FOUND}

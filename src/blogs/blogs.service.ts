@@ -1,14 +1,16 @@
 import { QueryPaginationType } from './../helpers/query-filter';
-import { BlogsRepository } from "./blogs.repo"
+import { BlogsRepository } from "./db-mongo/blogs.repo"
 import { blogInput, blogMongoDB, blogOutput } from "./models/blogs-model"
 import mongoose from "mongoose"
 import { Injectable } from "@nestjs/common"
-import { BlogsQueryRepository } from './blogs.query.repo';
+import { BlogsQueryRepository } from './db-mongo/blogs.query.repo';
+import { BlogsRepoPSQL } from './db-psql/blogs.repo.PSQL';
+import { BlogsQueryRepoPSQL } from './db-psql/blogs.query.repo.PSQL';
 
 @Injectable()
 export class BlogsService {
-    constructor (protected blogsRepository : BlogsRepository,
-        protected blogsQueryRepository : BlogsQueryRepository) {
+    constructor (protected blogsRepository : BlogsRepoPSQL,
+        protected blogsQueryRepository : BlogsQueryRepoPSQL) {
     }
     
     async findBlogs(paginationQuery: QueryPaginationType) {
@@ -19,7 +21,7 @@ export class BlogsService {
         return await this.blogsQueryRepository.getBlogId(id)
     }
 
-    async getBlogNameById(id: string): Promise<string | Number> {
+    async getBlogNameById(id: string): Promise<string | null> {
         return await this.blogsQueryRepository.getBlogNameById(id)
     }
 

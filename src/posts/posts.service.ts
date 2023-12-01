@@ -1,21 +1,25 @@
-import { BlogsQueryRepository } from './../blogs/blogs.query.repo';
-import { BlogsRepository } from './../blogs/blogs.repo';
+import { BlogsQueryRepository } from '../blogs/db-mongo/blogs.query.repo';
+import { BlogsRepository } from '../blogs/db-mongo/blogs.repo';
 import { QueryPaginationType } from './../helpers/query-filter';
 import { Post, PostSchema } from './model/post-schema';
 import {HttpStatus, Injectable , HttpException} from "@nestjs/common"
-import { PostRepository } from "./post.repo"
 import { paginatorPost, postInputModel, postMongoDb, postOutput } from "./model/post-model"
 import { Filter, ObjectId } from "mongodb";
-import { PostQueryRepository } from './post.query.repo';
+import { PostQueryRepository } from './db-mongo/post.query.repo';
+import { PostRepository } from './db-mongo/post.repo';
+import { PostQueryRepoPSQL } from './db-psql/post.query.repo';
+import { BlogsQueryRepoPSQL } from '../blogs/db-psql/blogs.query.repo.PSQL';
+import { PostRepoPSQL } from './db-psql/post.repo';
 
 
 @Injectable()
 
 export class PostsService {
 
-    constructor (protected postRepository: PostRepository,
-        protected postQueryRepo: PostQueryRepository,
-        protected blogQueryRepository: BlogsQueryRepository) { }
+    constructor (protected postRepository: PostRepoPSQL,
+        protected postQueryRepo: PostQueryRepoPSQL,
+        protected blogQueryRepository: BlogsQueryRepoPSQL) { }
+        
     async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost> {
         return this.postQueryRepo.findPost(paginationQuery, userId)
     }
@@ -44,7 +48,7 @@ export class PostsService {
         const newPostId = new ObjectId()
         const createdAt = new Date().toISOString();
         let blodName = await this.blogQueryRepository.getBlogNameById(postData.blogId)
-        if (blodName === typeof Number) {
+        if (!blodName) {
             return null
         }
         const newPost: postMongoDb = {
@@ -90,16 +94,17 @@ export class PostsService {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
 
-        post.title = postInputData.title
-        post.shortDescription = postInputData.shortDescription
-        post.content = postInputData.content
-        //post.addLike()
-
-        await this.postRepository.savePost(post)
-        //0
-
+        // post.title = postInputData.title
+        // post.shortDescription = postInputData.shortDescription
+        // post.content = postInputData.content
+        // post.addLike()
+        // await this.postRepository.savePost(post)
+        const result=  await this.postRepository.updatePostId((post._id).toString(), post.title, post.shortDescription, post.content, post.blogId)
+        if (result) {
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
-        //return await this.postRepository.updatePostId(id, title, shortDescription, content, blogId)
+        } else {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
     }
 
     async updateLikeStatusPostId(postId: string, userId: string, likeStatus: string): Promise<boolean | null> {
