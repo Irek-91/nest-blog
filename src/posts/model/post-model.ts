@@ -60,7 +60,7 @@ export type newestLikes = {
 
 
 export type postMongoDb = {
-  _id: mongoose.Types.ObjectId,
+  _id: mongoose.Types.ObjectId | string,
   title: string,
   shortDescription: string,
   content: string,

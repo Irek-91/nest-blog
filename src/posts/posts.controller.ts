@@ -111,7 +111,7 @@ export class PostsController {
     @Put(':id')
     async updatePostId(@Body() postInputData: postInputModel,
         @Param('id') postId: string) {
-        let postResult = await this.postsService.updatePostId(postInputData, postId)
+        let postResult = await this.postsService.updatePostId(postId, postInputData.title, postInputData.shortDescription, postInputData.content)
     }
 
     @UseGuards(UserAuthGuard)

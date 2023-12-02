@@ -1,34 +1,35 @@
-import { postInputModelSpecific } from './../posts/model/post-model';
-import { PostsService } from './../posts/posts.service';
-import { Pagination } from './../helpers/query-filter';
+import { postInputModelSpecific } from '../posts/model/post-model';
+import { PostsService } from '../posts/posts.service';
+import { Pagination } from '../helpers/query-filter';
 import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards, Request } from "@nestjs/common";
 import { BlogsService } from "./blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
-import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
-import { GetUserIdByAuth } from './../auth/guards/auth.guard';
+import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
+import { GetUserIdByAuth } from '../auth/guards/auth.guard';
 
-
-@Controller('blogs')
-export class BlogsController {
+@UseGuards(BasicAuthGuard)
+@Controller('sa/blogs')
+export class BlogsSAController {
     constructor(protected blogsService: BlogsService,
         protected postsService: PostsService,
         private readonly pagination: Pagination
     ) {
     }
-
+    
     @Get()
     async getBlogs(@Query()
     query: {
-        searchNameTerm?: string;
-        sortBy?: string;
-        sortDirection?: string;
-        pageNumber?: string;
-        pageSize?: string;
+        searchNameTerm: string;
+        sortBy: string;
+        sortDirection: string;
+        pageNumber: string;
+        pageSize: string;
     }) {
         const queryFilter = this.pagination.getPaginationFromQuery(query);
         return await this.blogsService.findBlogs(queryFilter)
     }
+
     @Get(':id')
     async getBlogId(@Param('id') blogId: string) {
         const blog = await this.blogsService.getBlogId(blogId)
@@ -39,11 +40,11 @@ export class BlogsController {
     @Get(':blogId/posts')
     async getPostsByBlogId(@Query()
     query: {
-        searchNameTerm?: string;
-        sortBy?: string;
-        sortDirection?: string;
-        pageNumber?: string;
-        pageSize?: string;
+        searchNameTerm: string;
+        sortBy: string;
+        sortDirection: string;
+        pageNumber: string;
+        pageSize: string;
     },
     @Request() req: any,
         @Param('blogId') blogId: string) {
@@ -63,16 +64,14 @@ export class BlogsController {
         }
     }
 
-    @UseGuards(BasicAuthGuard)
     @Post()
     async createBlog(@Body() blogInputData: blogInput) {
         const blog = await this.blogsService.createBlog(blogInputData)
         return blog
     }
 
-    @UseGuards(BasicAuthGuard)
     @Post(':blogId/posts')
-    async createPostByBlog(@Param('blogId') blogId: string,
+    async createPostByBlogId(@Param('blogId') blogId: string,
         @Body() inputData: postInputModelSpecific) {
         const inputDataModel = {
             title: inputData.title,
@@ -93,7 +92,6 @@ export class BlogsController {
     }
 
 
-    @UseGuards(BasicAuthGuard)
     @Put(':id')
     async updateBlog(@Param('id') blogId: string,
         @Body() blogInputData: blogInput) {
@@ -108,7 +106,17 @@ export class BlogsController {
         }
     }
 
-    @UseGuards(BasicAuthGuard)
+    @Put(':blogId/posts/:postId')
+    async updatePostByBlogId(@Param('blogId') blogId: string, @Param('postId') postId: string,
+        @Body() postUpdateData: postInputModelSpecific) {
+            const blog = await this.blogsService.getBlogId(blogId)
+            const postResult = await this.postsService.updatePostId(postId, postUpdateData.title, 
+                                                                    postUpdateData.shortDescription, 
+                                                                    postUpdateData.content)
+   
+    }
+
+
     @Delete(':id')
     async deletBlog(@Param('id') blogId: string) {
         let result = await this.blogsService.deleteBlogId(blogId)
@@ -119,4 +127,14 @@ export class BlogsController {
         }
     }
 
+    @Delete(':blogId/posts/:postId')
+    async deletPost(@Param('blogId') blogId: string, @Param('postId') postId: string) {
+        const blog = await this.blogsService.getBlogId(blogId)
+        const post = await this.postsService.deletePostId(postId);
+        if (!post) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        } else {
+            throw new HttpException('No content', HttpStatus.NO_CONTENT);
+        }
+    }
 }

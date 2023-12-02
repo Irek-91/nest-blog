@@ -53,16 +53,17 @@ import { PostQueryRepository } from './posts/db-mongo/post.query.repo';
 import { PostRepository } from './posts/db-mongo/post.repo';
 import { PostQueryRepoPSQL } from './posts/db-psql/post.query.repo';
 import { PostRepoPSQL } from './posts/db-psql/post.repo';
+import { BlogsSAController } from './blogs/blogs.SA.controller';
 
 
 @Module({
   imports: [
-    ThrottlerModule.forRoot([
-      {
-        ttl: 10000,
-        limit: 5,
-      },
-    ]),
+    // ThrottlerModule.forRoot([
+    //   {
+    //     ttl: 10000,
+    //     limit: 5,
+    //   },
+    // ]),
     ConfigModule.forRoot(),
     MongooseModule.forRoot('mongodb+srv://admin:admin1@atlascluster.0x495z3.mongodb.net/BlogPlatform?retryWrites=true&w=majority'),
     MongooseModule.forFeature([
@@ -125,9 +126,8 @@ import { PostRepoPSQL } from './posts/db-psql/post.repo';
   ],
   controllers: [AppController, 
     TestingController, 
-    UsersController,
-    UsersSAController,
-    BlogsController, 
+    UsersController, UsersSAController,
+    BlogsController,BlogsSAController,
     PostsController, 
     CommentsController,
     AuthController,

@@ -24,8 +24,8 @@ export class BlogsQueryRepoPSQL {
                 ORDER BY "${pagination.sortBy}" ${pagination.sortDirection}
                 `
     }
-
-    const queryResult = `${query}` + `LIMIT $1 OFFSET $2`
+    
+    const queryResult = `${query} ` + ` LIMIT $1 OFFSET $2`
     const blogs = await this.blogModel.query(queryResult,
         [pagination.pageSize, pagination.skip])
       

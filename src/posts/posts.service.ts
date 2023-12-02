@@ -10,6 +10,7 @@ import { PostRepository } from './db-mongo/post.repo';
 import { PostQueryRepoPSQL } from './db-psql/post.query.repo';
 import { BlogsQueryRepoPSQL } from '../blogs/db-psql/blogs.query.repo.PSQL';
 import { PostRepoPSQL } from './db-psql/post.repo';
+import { log } from 'node:console';
 
 
 @Injectable()
@@ -25,7 +26,7 @@ export class PostsService {
     }
 
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string|null): Promise<paginatorPost | Number> {
+    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string|null): Promise<paginatorPost | null> {
         return this.postQueryRepo.findPostsBlogId(paginationQuery, blogId, userId)
     }
 
@@ -47,8 +48,8 @@ export class PostsService {
         
         const newPostId = new ObjectId()
         const createdAt = new Date().toISOString();
-        let blodName = await this.blogQueryRepository.getBlogNameById(postData.blogId)
-        if (!blodName) {
+        let blogName = await this.blogQueryRepository.getBlogNameById(postData.blogId)
+        if (!blogName) {
             return null
         }
         const newPost: postMongoDb = {
@@ -57,7 +58,7 @@ export class PostsService {
             shortDescription: postData.shortDescription,
             content: postData.content,
             blogId: postData.blogId,
-            blogName: blodName.toString(),
+            blogName: blogName.toString(),
             createdAt: createdAt,
             extendedLikesInfo: {
                 likesCount: 0,
@@ -87,7 +88,7 @@ export class PostsService {
         }
     }
 
-    async updatePostId(postInputData: postInputModel, postId: string): Promise<Number> {
+    async updatePostId( postId: string, title:string,  shortDescription: string, content: string): Promise<Number> {
         //100
         const post = await this.postQueryRepo.getPostById(postId)
         if(!post) {
@@ -99,7 +100,7 @@ export class PostsService {
         // post.content = postInputData.content
         // post.addLike()
         // await this.postRepository.savePost(post)
-        const result=  await this.postRepository.updatePostId((post._id).toString(), post.title, post.shortDescription, post.content, post.blogId)
+        const result=  await this.postRepository.updatePostId(postId, title, shortDescription, content)
         if (result) {
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
         } else {

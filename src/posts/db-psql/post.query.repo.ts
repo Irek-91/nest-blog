@@ -23,7 +23,7 @@ export class PostQueryRepoPSQL {
         let query = `SELECT * FROM public."Posts"
                     ORDER BY "${paginationQuery.sortBy}" ${paginationQuery.sortDirection}
                     `
-        const queryResult = `${query}` + ` LIMIT $1 OFFSET $2`
+        const queryResult = `${query}`+` LIMIT $1 OFFSET $2`
         const posts = await this.postModel.query(queryResult, 
             [paginationQuery.pageSize, paginationQuery.skip])
             //sort([[paginationQuery.sortBy, paginationQuery.sortDirection]]).
@@ -74,14 +74,14 @@ export class PostQueryRepoPSQL {
         }
     }
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string| null): Promise<paginatorPost | Number> {
+    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string| null): Promise<paginatorPost | null> {
         try {
             
             //const filter = { blogId: blogId }
             const queryFilter = `SELECT * FROM public."Posts"
                                 WHERE "blogId" = '${blogId}'
                                 ORDER BY "${paginationQuery.sortBy}" ${paginationQuery.sortDirection}`
-            const queryResult = `${queryFilter}` + `LIMIT $1 OFFSET $2`
+            const queryResult = `${queryFilter}` + ` LIMIT $1 OFFSET $2`
             const posts = await this.postModel.query(queryResult, 
                 [paginationQuery.pageSize, paginationQuery.skip])
                 // .find(filter)
@@ -90,7 +90,7 @@ export class PostQueryRepoPSQL {
                 // .limit(paginationQuery.pageSize)
                 // .lean();
 
-            const totalCount = await this.postModel.query(queryFilter);
+            const totalCount = (await this.postModel.query(queryFilter)).length;
             const pagesCount = Math.ceil(totalCount / (paginationQuery.pageSize))
             const postsOutput: postOutput[] = await Promise.all(posts.map(async(b) => {
             let myStatus = 'None'
@@ -132,7 +132,7 @@ export class PostQueryRepoPSQL {
                 totalCount: totalCount,
                 items: postsOutput
             }
-        } catch (e) { return HttpStatus.NOT_FOUND }
+        } catch (e) { return null }
 
     }
 
@@ -168,7 +168,7 @@ export class PostQueryRepoPSQL {
             SELECT * FROM public."Posts"
             WHERE "_id" = $1`, [id])
             //findOne({ _id: new ObjectId(id) }).lean();
-            
+
             if (post.length === 0) throw new HttpException('Not found',HttpStatus.NOT_FOUND)
 
             let myStatus = 'None'
@@ -187,13 +187,13 @@ export class PostQueryRepoPSQL {
             // })
 
             return {
-                id: post._id.toString(),
-                title: post.title,
-                shortDescription: post.shortDescription,
-                content: post.content,
-                blogId: post.blogId,
-                blogName: post.blogName,
-                createdAt: post.createdAt,
+                id: post[0]._id.toString(),
+                title: post[0].title,
+                shortDescription: post[0].shortDescription,
+                content: post[0].content,
+                blogId: post[0].blogId,
+                blogName: post[0].blogName,
+                createdAt: post[0].createdAt,
                 extendedLikesInfo: {
                     likesCount:  0,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Like' }),
                     dislikesCount: 0,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Dislike' }),

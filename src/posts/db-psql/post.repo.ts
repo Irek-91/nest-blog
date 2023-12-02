@@ -50,14 +50,14 @@ export class PostRepoPSQL {
 
     }
 
-    async updatePostId(id: string, title: string, shortDescription: string, content: string, blogId: string): Promise<boolean> {
+    async updatePostId(id: string | ObjectId, title: string, shortDescription: string, content: string): Promise<boolean> {
         try {
+
         const postUpdate = await this.postModel.query(`
         UPDATE public."Posts"
-	    SET title=${title}, "shortDescription"=${shortDescription}, content=${content}
+	    SET title=$2, "shortDescription"=$3, content=$4
 	    WHERE "_id" = $1
-        `, [id])
-        
+        `, [id, title, shortDescription, content])
         // findOne({ _id: new ObjectId(id) })
         // if (!postInstance) return false
         // postInstance.title = title
