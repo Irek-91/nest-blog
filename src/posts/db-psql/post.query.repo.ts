@@ -34,20 +34,31 @@ export class PostQueryRepoPSQL {
 
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
-            // if (userId) {
-            //     const status = await this.likeModel.findOne({ userId, postIdOrCommentId: b._id.toString() })
+            if (userId) {
+                 const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                            WHERE "userId = $1 AND "postIdOrCommentId" = $2
+                 `, [userId, b._id])
+                 if (status.length > 0) {
+                    myStatus = status[0].status
+                 }
+                 //findOne({ userId, postIdOrCommentId: b._id.toString() })
             //     if (status) {
             //         myStatus = status.status
-            //     }
+                 }
             // }
-            // const newestLikes = await this.likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
-            // const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
-            //     return {
-            //         addedAt: like.createdAt,
-            //         userId: like.userId,
-            //         login: like.login
-            //     }
-            // })
+            const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                            WHERE "postIdOrCommentId" = $1 AND status = 'like'
+                                                            ORDER BY "createdAt" DESC
+                                                            LIMIT 3
+            `, [b._id])
+            //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
+                return {
+                    addedAt: like.createdAt,
+                    userId: like.userId,
+                    login: like.login
+                }
+            })
             return {
                 id: b._id.toString(),
                 title: b.title,
@@ -60,7 +71,7 @@ export class PostQueryRepoPSQL {
                     likesCount:  0,//await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
                     dislikesCount: 0,//await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                     myStatus: myStatus,
-                    newestLikes: []//newestLikesMaped
+                    newestLikes: newestLikesMaped
                 }
 
             }
@@ -94,20 +105,34 @@ export class PostQueryRepoPSQL {
             const pagesCount = Math.ceil(totalCount / (paginationQuery.pageSize))
             const postsOutput: postOutput[] = await Promise.all(posts.map(async(b) => {
             let myStatus = 'None'
+            if (userId) {
+                const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                            WHERE "userId = $1 AND "postIdOrCommentId" = $2
+                `, [userId, b._id])
+
+                if (status.length > 0) {
+                    myStatus = status[0].status
+                }
+            }
                 // if (userId) {
                 //     const status = await this.likeModel.findOne({ userId, postIdOrCommentId: b._id.toString() })
                 //     if (status) {
                 //         myStatus = status.status
                 //     }
                 // }
-                // const newestLikes = await this.likeModel.find({ postIdOrCommentId: b._id.toString(), status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
-                // const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
-                //     return {
-                //         addedAt: like.createdAt,
-                //         userId: like.userId,
-                //         login: like.login
-                //     }
-                // })
+                const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                                WHERE "postIdOrCommentId" = $1 AND status = 'like'
+                                                                ORDER BY "createdAt" DESC
+                                                                LIMIT 3
+                `, [b._id])
+                //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+                const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
+                    return {
+                        addedAt: like.createdAt,
+                        userId: like.userId,
+                        login: like.login
+                    }
+                })
                 return {
                     id: b._id.toString(),
                     title: b.title,
@@ -120,7 +145,7 @@ export class PostQueryRepoPSQL {
                         likesCount:  0, //await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
                         dislikesCount: 0, //await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                         myStatus: myStatus,
-                        newestLikes: []//newestLikesMaped
+                        newestLikes: newestLikesMaped
                     }
                 }
             }))
@@ -172,11 +197,28 @@ export class PostQueryRepoPSQL {
             if (post.length === 0) throw new HttpException('Not found',HttpStatus.NOT_FOUND)
 
             let myStatus = 'None'
-            // if (userId) {
-            //     const user = await this.userModel.findOne({ _id: new ObjectId(userId) })
-            //     const userStatus = await this.likeModel.findOne({ postIdOrCommentId: id, userId: userId })
-            //     if (userStatus) { myStatus = userStatus.status }
-            // }
+            if (userId) {
+                const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                            WHERE "userId = $1 AND "postIdOrCommentId" = $2
+                `, [userId, id])
+                if (status.length > 0) {
+                    myStatus = status[0].status
+                }
+            }
+            const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                                WHERE "postIdOrCommentId" = $1 AND status = 'like'
+                                                                ORDER BY "createdAt" DESC
+                                                                LIMIT 3
+                `, [id])
+                //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+                const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
+                    return {
+                        addedAt: like.createdAt,
+                        userId: like.userId,
+                        login: like.login
+                    }
+                })
+
             // const newestLikes = await this.likeModel.find({ postIdOrCommentId: id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
             // const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
             //     return {
@@ -198,7 +240,7 @@ export class PostQueryRepoPSQL {
                     likesCount:  0,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Like' }),
                     dislikesCount: 0,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Dislike' }),
                     myStatus: myStatus,
-                    newestLikes: []//newestLikesMaped
+                    newestLikes: newestLikesMaped
                 }
             }
         } catch (e) { throw new HttpException('Not found',HttpStatus.NOT_FOUND) }

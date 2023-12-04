@@ -1,8 +1,7 @@
-// import { app } from '../../src/app';
-// import  request  from "supertest";
-// import { loginInputModel, userInputModel } from '../../src/types/user';
+import { LoginInputModel } from "../../src/auth/model/auth.model";
+import  request  from "supertest";
 
-// export const createdAccessToken = async (model: loginInputModel) => {
-//     const result = await request(app).post('/auth/login').send(model)
-//     return result
-// }
+export const createdAccessToken = async (model: LoginInputModel, httpServer: any) => {
+    const result = await request(httpServer).post('/auth/login').send(model)
+    return result
+}

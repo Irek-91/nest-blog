@@ -4,8 +4,8 @@ import { JwtService } from '../../src/application/jwt-service';
 import { userInputModel, userViewModel } from '../../src/users/models/users-model';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from 'src/app.module';
-import { appSettings } from 'src/app.settings';
+import { settings } from '../../src/settings';
+import jwt from 'jsonwebtoken'
 
 type headers = {
     Authorization: string
@@ -18,7 +18,7 @@ export const createUser = async ( saLogin: string, saPwd: string, model: userInp
     user: userViewModel, headers: headers}> => {
     const response = await request(httpServer).post('/users').auth(saLogin, saPwd).send(model)
     const user = response.body
-    const AccessToken = await JwtService.prototype.createdJWTAccessToken(user.id)
+    const AccessToken = jwt.sign({userId : user.id}, settings.JWT_SECRET, {expiresIn: 100})
     const headers = {Authorization: `Bearer ${AccessToken}`}
     return { response, user, headers}
 }

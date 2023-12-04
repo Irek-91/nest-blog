@@ -104,23 +104,23 @@ import { BlogsSAController } from './blogs/blogs.SA.controller';
     TypeOrmModule.forRoot({
       //useFactory: (configService: ConfigService<ConfigType>) => ({
       type: 'postgres',
-      host: process.env.PGHOST,
-      port: 5432,
-      username: process.env.PGUSER,
-      password: process.env.PGPASSWORD,
-      database: process.env.PGDATABASE,
+      host: process.env.PGHOSTLOCAL,
+      port:  Number(process.env.PORTLOCAL),
+      username: process.env.PGUSERLOCAL,
+      password: process.env.PGPASSWORDLOCAL,
+      database: process.env.PGDATABASELOCAL,
       autoLoadEntities: false,
       synchronize: false,
       logging: true,
-      ssl: true,
+      //ssl: true,
       // connection: {
       //   options: `project=${ENDPOINT_ID}`,
       // },
-      extra: {
-                ssl: {
-                    rejectUnauthorized: false,
-                },
-            },
+      // extra: {
+      //           ssl: {
+      //               rejectUnauthorized: false,
+      //           },
+      //       },
     }),
     PassportModule
   ],

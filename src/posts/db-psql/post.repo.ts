@@ -68,14 +68,30 @@ export class PostRepoPSQL {
         } catch (e) {return false}
     }
 
-    async updateLikeStatusPostId(postId: string, userId: string, likeStatus: string): Promise<boolean | null> {
+    async updateLikeStatusPostId(postId: string, userId: string, likeStatus: string): Promise<true | null> {
         try {
-            // const createdAt = (new Date()).toISOString()
-            // const loginResult = await this.userModel.findOne({ _id: new ObjectId(userId) })
-            // const login = loginResult!.accountData.login
+            const createdAt = (new Date()).toISOString()
+            const loginResult = await this.postModel.query(`SELECT * FROM public."Users"
+                                                            WHERE "_id" = $1
+            `, [userId])
+                //{ _id: new ObjectId(userId) }
+            const login = loginResult[0].login
+            const statusResult = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                            WHERE "userId" = $1 AND "postIdOrCommentId" = $2 AND "status" = $3
+            `, [userId, postId, likeStatus])
+
             // const resultLikeStatus = await this.likeModel.findOne({userId: userId, postIdOrCommentId: postId, status: likeStatus})
+            if (statusResult.length > 0) {return true}
             // if (resultLikeStatus) {return true}
             
+            const likeResult = await this.postModel.query(`UPDATE public."Likes"
+            SET "userLogin"=$3, status=$4, "createdAt"=$5
+            WHERE "userId" = $1 AND "postIdOrCommentId" = $2
+            `, [userId, postId, login, likeStatus, new Date().toISOString()])
+            
+            if (likeResult[1] > 0) {return true} 
+            return null
+
             // await this.likeModel.updateOne(
             //     { userId: userId, postIdOrCommentId: postId},
             //     { $set: { login: login, status: likeStatus, createdAt: new Date().toISOString() } },
@@ -101,7 +117,7 @@ export class PostRepoPSQL {
             
             // post!.save()
             
-            return true
+            //return true
         } catch (e) { 
             return null
          }

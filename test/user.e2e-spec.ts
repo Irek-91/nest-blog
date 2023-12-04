@@ -6,6 +6,7 @@ import { appSettings } from '../src/app.settings';
 import request from 'supertest'
 import { createUser } from './helpers/users-tests-helpers';
 import { userInputModel } from '../src/users/models/users-model';
+import { log } from 'console';
 
 
 describe('AppController', () => {
