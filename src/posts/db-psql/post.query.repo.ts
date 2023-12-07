@@ -23,40 +23,55 @@ export class PostQueryRepoPSQL {
         let query = `SELECT * FROM public."Posts"
                     ORDER BY "${paginationQuery.sortBy}" ${paginationQuery.sortDirection}
                     `
-        const queryResult = `${query}`+` LIMIT $1 OFFSET $2`
-        const posts = await this.postModel.query(queryResult, 
+        const queryResult = `${query}` + ` LIMIT $1 OFFSET $2`
+        const posts = await this.postModel.query(queryResult,
             [paginationQuery.pageSize, paginationQuery.skip])
-            //sort([[paginationQuery.sortBy, paginationQuery.sortDirection]]).
-            // skip(paginationQuery.skip).
-            // limit(paginationQuery.pageSize)
+        //sort([[paginationQuery.sortBy, paginationQuery.sortDirection]]).
+        // skip(paginationQuery.skip).
+        // limit(paginationQuery.pageSize)
         const totalCount = (await this.postModel.query(query)).length
         const pagesCount = Math.ceil(totalCount / paginationQuery.pageSize)
 
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
             if (userId) {
-                 const status = await this.postModel.query(`SELECT * FROM public."Likes"
-                                                            WHERE "userId = $1 AND "postIdOrCommentId" = $2
+                const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                            WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                  `, [userId, b._id])
-                 if (status.length > 0) {
+                if (status.length > 0) {
                     myStatus = status[0].status
-                 }
-                 //findOne({ userId, postIdOrCommentId: b._id.toString() })
-            //     if (status) {
-            //         myStatus = status.status
-                 }
+                }
+                //findOne({ userId, postIdOrCommentId: b._id.toString() })
+                //     if (status) {
+                //         myStatus = status.status
+            }
             // }
+        
+            //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            const likes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Like'
+                `, [b._id])
+
+            const likesCount = likes.length
+
+            const dislikes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
+                `, [b._id])
+            const dislikesCount = dislikes.length
+            
             const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
-                                                            WHERE "postIdOrCommentId" = $1 AND status = 'like'
+                                                            WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                                                             ORDER BY "createdAt" DESC
                                                             LIMIT 3
             `, [b._id])
-            //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            
             const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
                 return {
                     addedAt: like.createdAt,
                     userId: like.userId,
-                    login: like.login
+                    login: like.userLogin
                 }
             })
             return {
@@ -68,8 +83,8 @@ export class PostQueryRepoPSQL {
                 blogName: b.blogName,
                 createdAt: b.createdAt,
                 extendedLikesInfo: {
-                    likesCount:  0,//await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
-                    dislikesCount: 0,//await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
+                    likesCount: likesCount,//await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
+                    dislikesCount: dislikesCount,//await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
                 }
@@ -85,35 +100,35 @@ export class PostQueryRepoPSQL {
         }
     }
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string| null): Promise<paginatorPost | null> {
+    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string | null): Promise<paginatorPost | null> {
         try {
-            
+
             //const filter = { blogId: blogId }
             const queryFilter = `SELECT * FROM public."Posts"
                                 WHERE "blogId" = '${blogId}'
                                 ORDER BY "${paginationQuery.sortBy}" ${paginationQuery.sortDirection}`
             const queryResult = `${queryFilter}` + ` LIMIT $1 OFFSET $2`
-            const posts = await this.postModel.query(queryResult, 
+            const posts = await this.postModel.query(queryResult,
                 [paginationQuery.pageSize, paginationQuery.skip])
-                // .find(filter)
-                // //.sort([[paginationQuery.sortBy, paginationQuery.sortDirection]])
-                // .skip(paginationQuery.skip)
-                // .limit(paginationQuery.pageSize)
-                // .lean();
+            // .find(filter)
+            // //.sort([[paginationQuery.sortBy, paginationQuery.sortDirection]])
+            // .skip(paginationQuery.skip)
+            // .limit(paginationQuery.pageSize)
+            // .lean();
 
             const totalCount = (await this.postModel.query(queryFilter)).length;
             const pagesCount = Math.ceil(totalCount / (paginationQuery.pageSize))
-            const postsOutput: postOutput[] = await Promise.all(posts.map(async(b) => {
-            let myStatus = 'None'
-            if (userId) {
-                const status = await this.postModel.query(`SELECT * FROM public."Likes"
-                                                            WHERE "userId = $1 AND "postIdOrCommentId" = $2
+            const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
+                let myStatus = 'None'
+                if (userId) {
+                    const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                                                            WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                 `, [userId, b._id])
 
-                if (status.length > 0) {
-                    myStatus = status[0].status
+                    if (status.length > 0) {
+                        myStatus = status[0].status
+                    }
                 }
-            }
                 // if (userId) {
                 //     const status = await this.likeModel.findOne({ userId, postIdOrCommentId: b._id.toString() })
                 //     if (status) {
@@ -121,16 +136,29 @@ export class PostQueryRepoPSQL {
                 //     }
                 // }
                 const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
-                                                                WHERE "postIdOrCommentId" = $1 AND status = 'like'
+                                                                WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                                                                 ORDER BY "createdAt" DESC
                                                                 LIMIT 3
                 `, [b._id])
                 //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+                const likes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Like'
+                `, [b._id])
+
+                const likesCount = likes.length
+
+                const dislikes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
+                `, [b._id])
+                const dislikesCount = dislikes.length
+                
                 const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
                     return {
                         addedAt: like.createdAt,
                         userId: like.userId,
-                        login: like.login
+                        login: like.userLogin
                     }
                 })
                 return {
@@ -142,8 +170,8 @@ export class PostQueryRepoPSQL {
                     blogName: b.blogName,
                     createdAt: b.createdAt,
                     extendedLikesInfo: {
-                        likesCount:  0, //await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
-                        dislikesCount: 0, //await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
+                        likesCount: likesCount, //await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
+                        dislikesCount: dislikesCount, //await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                         myStatus: myStatus,
                         newestLikes: newestLikesMaped
                     }
@@ -161,29 +189,42 @@ export class PostQueryRepoPSQL {
 
     }
 
-    async getPostById(id: string):Promise<postMongoDb | null> {
-    try {
-        const post: postMongoDb = await this.postModel.query(`
+    async getPostById(id: string): Promise<postMongoDb | null> {
+        try {
+            const post: postMongoDb = await this.postModel.query(`
                     SELECT * FROM public."Posts"
                     WHERE "_id" = $1                        
         `, [id])
-        const resultPost = {
-            _id: post[0]._id,
-            title: post[0].title,
-            shortDescription: post[0].shortDescription,
-            content: post[0].content,
-            blogId: post[0].blogId,
-            blogName: post[0].blogName,
-            createdAt: post[0].createdAt,
-            extendedLikesInfo: {
-                likesCount: 0,
-                dislikesCount: 0,
-                myStatus: 'None',
-                newestLikes: []
+            const likes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Like'
+        `, [id])
+
+            const likesCount = likes.length
+
+            const dislikes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
+        `, [id])
+            const dislikesCount = dislikes.length
+
+            const resultPost = {
+                _id: post[0]._id,
+                title: post[0].title,
+                shortDescription: post[0].shortDescription,
+                content: post[0].content,
+                blogId: post[0].blogId,
+                blogName: post[0].blogName,
+                createdAt: post[0].createdAt,
+                extendedLikesInfo: {
+                    likesCount: likesCount,
+                    dislikesCount: dislikesCount,
+                    myStatus: 'None',
+                    newestLikes: []
+                }
             }
-        }
-        return resultPost
-        } catch (e) {return null}
+            return resultPost
+        } catch (e) { return null }
     }
 
 
@@ -194,37 +235,48 @@ export class PostQueryRepoPSQL {
             WHERE "_id" = $1`, [id])
             //findOne({ _id: new ObjectId(id) }).lean();
 
-            if (post.length === 0) throw new HttpException('Not found',HttpStatus.NOT_FOUND)
+            if (post.length === 0) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 
             let myStatus = 'None'
             if (userId) {
                 const status = await this.postModel.query(`SELECT * FROM public."Likes"
-                                                            WHERE "userId = $1 AND "postIdOrCommentId" = $2
+                                                            WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                 `, [userId, id])
                 if (status.length > 0) {
                     myStatus = status[0].status
                 }
             }
             const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
-                                                                WHERE "postIdOrCommentId" = $1 AND status = 'like'
+                                                                WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                                                                 ORDER BY "createdAt" DESC
                                                                 LIMIT 3
                 `, [id])
-                //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
-                const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
-                    return {
-                        addedAt: like.createdAt,
-                        userId: like.userId,
-                        login: like.login
-                    }
-                })
+            //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
+                return {
+                    addedAt: like.createdAt,
+                    userId: like.userId,
+                    login: like.userLogin
+                }
+            })
+            const likes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Like'
+            `, [id])
 
+            const likesCount = likes.length
+
+            const dislikes = await this.postModel.query(`
+                    SELECT * FROM public."Likes"
+                    WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
+            `, [id])
+            const dislikesCount = dislikes.length
             // const newestLikes = await this.likeModel.find({ postIdOrCommentId: id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
             // const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
             //     return {
             //         addedAt: like.createdAt,
             //         userId: like.userId,
-            //         login: like.login
+            //login: like.userLogin
             //     }
             // })
 
@@ -237,12 +289,12 @@ export class PostQueryRepoPSQL {
                 blogName: post[0].blogName,
                 createdAt: post[0].createdAt,
                 extendedLikesInfo: {
-                    likesCount:  0,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Like' }),
-                    dislikesCount: 0,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Dislike' }),
+                    likesCount: likesCount,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Like' }),
+                    dislikesCount: dislikesCount,//await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Dislike' }),
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
                 }
             }
-        } catch (e) { throw new HttpException('Not found',HttpStatus.NOT_FOUND) }
+        } catch (e) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
     }
 }

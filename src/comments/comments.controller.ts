@@ -3,6 +3,7 @@ import { Controller, Delete, Get, Put, HttpException, HttpStatus, Param, Body, U
 import { CommentsService } from "./comments.service";
 import { commentInput } from "./model/comments-model";
 import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
+import { log } from 'console';
 
 
 @Controller('comments')

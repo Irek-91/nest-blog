@@ -3,7 +3,7 @@ import { UserDocument, User } from '../../users/models/users-schema';
 import { QueryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Post, PostDocument } from "../model/post-schema"
-import { HydratedDocument, Model } from "mongoose"
+import mongoose, { HydratedDocument, Model } from "mongoose"
 import { newestLikes, paginatorPost, postMongoDb, postOutput } from "../model/post-model"
 import { Filter, ObjectId } from "mongodb";
 import { InjectModel } from '@nestjs/mongoose';
@@ -77,20 +77,26 @@ export class PostRepoPSQL {
                 //{ _id: new ObjectId(userId) }
             const login = loginResult[0].login
             const statusResult = await this.postModel.query(`SELECT * FROM public."Likes"
-                                                            WHERE "userId" = $1 AND "postIdOrCommentId" = $2 AND "status" = $3
-            `, [userId, postId, likeStatus])
+                                                            WHERE "userId" = $1 AND "postIdOrCommentId" = $2
+            `, [userId, postId])
 
             // const resultLikeStatus = await this.likeModel.findOne({userId: userId, postIdOrCommentId: postId, status: likeStatus})
-            if (statusResult.length > 0) {return true}
+            if (statusResult.length > 0) {
+                const likeResult = await this.postModel.query(`UPDATE public."Likes"
+                SET "userLogin"=$3, status=$4, "createdAt"=$5
+                WHERE "userId" = $1 AND "postIdOrCommentId" = $2
+                `, [userId, postId, login, likeStatus, createdAt])
+                if (likeResult[1] > 0) {return true} 
+                return null
+            }
             // if (resultLikeStatus) {return true}
-            
-            const likeResult = await this.postModel.query(`UPDATE public."Likes"
-            SET "userLogin"=$3, status=$4, "createdAt"=$5
-            WHERE "userId" = $1 AND "postIdOrCommentId" = $2
-            `, [userId, postId, login, likeStatus, new Date().toISOString()])
-            
-            if (likeResult[1] > 0) {return true} 
-            return null
+            const likeId = new mongoose.Types.ObjectId()
+            const likeResult = await this.postModel.query(`
+            INSERT INTO public."Likes"(
+                _id, "userId", "userLogin", "postIdOrCommentId", status, "createdAt")
+                VALUES ($1 ,$2, $3, $4, $5, $6)
+            `, [likeId,userId, login, postId, likeStatus, createdAt])
+            return true
 
             // await this.likeModel.updateOne(
             //     { userId: userId, postIdOrCommentId: postId},

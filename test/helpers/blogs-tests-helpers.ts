@@ -1,4 +1,4 @@
-import { blogInput } from "../../src/blogs/models/blogs-model";
+import { blogInput } from './../../src/blogs/models/blogs-model';
 import  request  from "supertest";
 
 export const createBlog = async ( saLogin: string, saPwd: string, model: blogInput, httpServer: any) => {

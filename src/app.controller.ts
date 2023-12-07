@@ -1,3 +1,5 @@
+import { LikesRepository } from './likes/likes.repo';
+import { CommentsService } from './comments/comments.service';
 import { Controller, Delete, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './app.service';
 import { UsersService } from './users/users.service';
@@ -34,9 +36,8 @@ export class TestingController {
     private deviceModel: SecurityDeviceServicePSQL,
     private blogModel: BlogsService,
     private postModel: PostsService,
-
-    @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
-    @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
+    private commentModel: CommentsService,
+    private likeModel: LikesRepository,
     @InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>
   ) { }
 
@@ -47,8 +48,8 @@ export class TestingController {
     await this.deviceModel.deleteDevices()
     await this.blogModel.deleteBlogAll();
     await this.postModel.deletePostAll();
-    await this.commentModel.deleteMany();
-    await this.likeModel.deleteMany();
+    await this.commentModel.deleteCommentsAll();
+    await this.likeModel.deletedLikesAll();
     //await this.deviceModel.deleteMany();
     await this.ipAndURIModel.deleteMany()
     console.log('Delete All')

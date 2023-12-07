@@ -1,10 +1,9 @@
+import { userInputModel, userViewModel } from './../../src/users/models/users-model';
+import { settings } from './../../src/settings';
 import { ObjectId } from 'mongodb';
 import  request  from "supertest";
-import { JwtService } from '../../src/application/jwt-service';
-import { userInputModel, userViewModel } from '../../src/users/models/users-model';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { settings } from '../../src/settings';
 import jwt from 'jsonwebtoken'
 
 type headers = {

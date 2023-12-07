@@ -1,11 +1,11 @@
+import { appSettings } from './../src/app.settings';
+import { userInputModel } from './../users/models/users-model';
+import { AppModule } from './../src/app.module';
+import { AppController } from './../src/app.controller';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from '../src/app.controller';
-import { AppModule } from '../src/app.module';
-import { appSettings } from '../src/app.settings';
 import request from 'supertest'
 import { createUser } from './helpers/users-tests-helpers';
-import { userInputModel } from '../src/users/models/users-model';
 import { log } from 'console';
 
 

@@ -64,3 +64,11 @@ export type paginatorComments = {
   items: commentViewModel[]
 }
 
+export type likesPSQLModel = {
+  _id: ObjectId,
+  userId: string,
+  userLogin: string,
+  postIdOrCommentId: string,
+  status: string,
+  createdAt: string
+}

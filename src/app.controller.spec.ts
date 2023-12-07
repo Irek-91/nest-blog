@@ -1,8 +1,8 @@
+// import { appSettings } from './app.settings';
 // import { Test, TestingModule } from '@nestjs/testing';
 // import { AppController } from './app.controller';
 // import { AppService } from './app.service';
 // import { AppModule } from './app.module';
-// import { appSettings } from 'src/app.settings';
 // import { NestFactory } from '@nestjs/core'
 // import { INestApplication} from '@nestjs/common';
 

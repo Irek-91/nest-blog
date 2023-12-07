@@ -98,3 +98,13 @@ export type paginatorPost = {
   totalCount: number,
   items: postOutput[]
 }
+
+
+export type postInputTests = {
+  title: string,
+  shortDescription: string,
+  content: string,
+  blogId: string,
+  blogName: string,
+  createdAt: string
+}

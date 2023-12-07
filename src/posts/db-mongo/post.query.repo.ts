@@ -14,8 +14,8 @@ import { log } from 'console';
 
 export class PostQueryRepository {
     constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(Like.name) private likeModel: Model<LikeDocument>
+        @InjectModel(User.name) private userModel: Model<UserDocument>,
+        @InjectModel(Like.name) private likeModel: Model<LikeDocument>
 
     ) { }
 
@@ -35,7 +35,10 @@ export class PostQueryRepository {
                     myStatus = status.status
                 }
             }
-            const newestLikes = await this.likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+            const newestLikes = await this.likeModel.find({ postIdOrCommentId: b.id, status: 'Like' })
+                .sort({ createdAt: -1 })
+                .limit(3)
+                .lean()
             const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
                 return {
                     addedAt: like.createdAt,
@@ -52,7 +55,7 @@ export class PostQueryRepository {
                 blogName: b.blogName,
                 createdAt: b.createdAt,
                 extendedLikesInfo: {
-                    likesCount:  await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
+                    likesCount: await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
                     dislikesCount: await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
@@ -69,7 +72,7 @@ export class PostQueryRepository {
         }
     }
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string| null): Promise<paginatorPost | Number> {
+    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string | null): Promise<paginatorPost | Number> {
         try {
 
             const filter = { blogId: blogId }
@@ -82,22 +85,22 @@ export class PostQueryRepository {
 
             const totalCount = await this.postModel.countDocuments(filter);
             const pagesCount = Math.ceil(totalCount / (paginationQuery.pageSize))
-            const postsOutput: postOutput[] = await Promise.all(posts.map(async(b) => {
-            let myStatus = 'None'
-            if (userId) {
-                const status = await this.likeModel.findOne({ userId, postIdOrCommentId: b._id.toString() })
-                if (status) {
-                    myStatus = status.status
+            const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
+                let myStatus = 'None'
+                if (userId) {
+                    const status = await this.likeModel.findOne({ userId, postIdOrCommentId: b._id.toString() })
+                    if (status) {
+                        myStatus = status.status
+                    }
                 }
-            }
-            const newestLikes = await this.likeModel.find({ postIdOrCommentId: b._id.toString(), status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
-            const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
-                return {
-                    addedAt: like.createdAt,
-                    userId: like.userId,
-                    login: like.login
-                }
-            })
+                const newestLikes = await this.likeModel.find({ postIdOrCommentId: b._id.toString(), status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
+                const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
+                    return {
+                        addedAt: like.createdAt,
+                        userId: like.userId,
+                        login: like.login
+                    }
+                })
                 return {
                     id: b._id.toString(),
                     title: b.title,
@@ -107,7 +110,7 @@ export class PostQueryRepository {
                     blogName: b.blogName,
                     createdAt: b.createdAt,
                     extendedLikesInfo: {
-                        likesCount:  await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
+                        likesCount: await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Like' }),
                         dislikesCount: await this.likeModel.countDocuments({ postIdOrCommentId: b._id.toString(), status: 'Dislike' }),
                         myStatus: myStatus,
                         newestLikes: newestLikesMaped
@@ -126,16 +129,16 @@ export class PostQueryRepository {
 
     }
 
-    async getPostById(id: string):Promise<HydratedDocument<postMongoDb> | null> {
-        return this.postModel.findOne({_id: id})
+    async getPostById(id: string): Promise<HydratedDocument<postMongoDb> | null> {
+        return this.postModel.findOne({ _id: id })
     }
 
 
     async getPostId(id: string, userId: string | null): Promise<postOutput> {
         try {
             let post = await this.postModel.findOne({ _id: new ObjectId(id) }).lean();
-            
-            if (!post) throw new HttpException('Not found',HttpStatus.NOT_FOUND)
+
+            if (!post) throw new HttpException('Not found', HttpStatus.NOT_FOUND)
 
             let myStatus = 'None'
             if (userId) {
@@ -161,12 +164,12 @@ export class PostQueryRepository {
                 blogName: post.blogName,
                 createdAt: post.createdAt,
                 extendedLikesInfo: {
-                    likesCount:  await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Like' }),
+                    likesCount: await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Like' }),
                     dislikesCount: await this.likeModel.countDocuments({ postIdOrCommentId: id, status: 'Dislike' }),
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
                 }
             }
-        } catch (e) { throw new HttpException('Not found',HttpStatus.NOT_FOUND) }
+        } catch (e) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
     }
 }

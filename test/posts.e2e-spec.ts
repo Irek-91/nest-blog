@@ -1,5 +1,3 @@
-import { createUser } from './helpers/users-tests-helpers';
-import { userInputModel } from '../src/users/models/users-model';
 import { createPost, createPostSpecific } from './helpers/posts-tests-helpers';
 import { postInputModel, postInputModelSpecific } from '../src/posts/model/post-model';
 import { blogInput } from '../src/blogs/models/blogs-model';

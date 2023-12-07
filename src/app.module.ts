@@ -1,3 +1,5 @@
+import { LikesRepository } from './likes/likes.repo';
+import { CommentsRepoPSQL } from './comments/db-psql/comments.repo.PSQL';
 import { CommentsService } from './comments/comments.service';
 import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
@@ -18,7 +20,7 @@ import { Post, PostSchema } from './posts/model/post-schema';
 import { PostsController } from './posts/posts.controller';
 import { PostsService } from './posts/posts.service';
 import { Comment, CommentSchema } from './comments/model/comments-schema';
-import { CommentsRepository } from './comments/comments.repo';
+import { CommentsRepository } from './comments/db-mongo/comments.repo';
 import { CommentsController } from './comments/comments.controller';
 import { Like, LikeSchema } from './likes/model/likes-schema';
 import { UsersQueryRepository } from './users/db-mongo/users.qurey.repo';
@@ -33,7 +35,7 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
-import { CommentsQueryRepository } from './comments/comments.query.repo';
+import { CommentsQueryRepository } from './comments/db-mongo/comments.query.repo';
 import { BlogsQueryRepository } from './blogs/db-mongo/blogs.query.repo';
 import { IsBlogIdAlreadyExistConstraint } from './blogs/models/blog.decorator';
 import { IPAndURIModel, IPAndURISchema } from './securityDevices/model/IPAndURIModel';
@@ -54,6 +56,7 @@ import { PostRepository } from './posts/db-mongo/post.repo';
 import { PostQueryRepoPSQL } from './posts/db-psql/post.query.repo';
 import { PostRepoPSQL } from './posts/db-psql/post.repo';
 import { BlogsSAController } from './blogs/blogs.SA.controller';
+import { CommentsQueryRepoPSQL } from './comments/db-psql/comments.query.repo.PSQL';
 
 
 @Module({
@@ -141,9 +144,10 @@ import { BlogsSAController } from './blogs/blogs.SA.controller';
     BasicStrategy,
     UsersService, UsersRepository, UsersQueryRepository, UsersQueryRepoPSQL,UsersRepositoryPSQL,  
     BlogsService, BlogsRepository, BlogsQueryRepository, IsBlogIdAlreadyExistConstraint, BlogsQueryRepoPSQL, BlogsRepoPSQL,
-    PostsService, PostRepository, PostQueryRepository, PostQueryRepoPSQL,PostRepoPSQL,
-    CommentsService, CommentsRepository,CommentsQueryRepository,
-    SecurityDeviceRepository, SecurityDeviceService, SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL
+    PostsService, PostRepository, PostQueryRepository, PostQueryRepoPSQL, PostRepoPSQL,
+    CommentsService, CommentsRepository,CommentsQueryRepository,CommentsQueryRepoPSQL, CommentsRepoPSQL,
+    SecurityDeviceRepository, SecurityDeviceService, SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
+    LikesRepository
   ],
 })
 export class AppModule {}

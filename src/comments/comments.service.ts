@@ -1,26 +1,30 @@
+import { UsersRepositoryPSQL } from './../users/db-psql/users.repo.PSQL';
+import { UsersQueryRepoPSQL } from './../users/db-psql/users.qurey.repo.PSQL';
+import { CommentsRepoPSQL } from './db-psql/comments.repo.PSQL';
+import { CommentsQueryRepoPSQL } from './db-psql/comments.query.repo.PSQL';
 import { QueryPaginationType } from './../helpers/query-filter';
 import { UsersRepository } from '../users/db-mongo/users.repo';
 import { UsersQueryRepository } from '../users/db-mongo/users.qurey.repo';
 import { Injectable, HttpStatus } from '@nestjs/common';
-import { CommentsRepository } from './comments.repo';
+import { CommentsRepository } from './db-mongo/comments.repo';
 import { commentViewModel, paginatorComments } from './model/comments-model';
 import { Filter, ObjectId } from "mongodb";
-import { CommentsQueryRepository } from './comments.query.repo';
+import { CommentsQueryRepository } from './db-mongo/comments.query.repo';
 
 
 @Injectable()
 
 export class CommentsService {
-    constructor(protected usersRepository: UsersRepository, 
-        protected usersQueryRepository:UsersQueryRepository, 
-        protected commentsRepository: CommentsRepository,
-        protected commentsQueryRepository: CommentsQueryRepository) { }
+    constructor(protected usersRepository: UsersRepositoryPSQL, 
+        protected usersQueryRepository:UsersQueryRepoPSQL, 
+        protected commentsRepository: CommentsRepoPSQL,
+        protected commentsQueryRepository: CommentsQueryRepoPSQL) { }
 
     async createdCommentPostId(postId: string, userId: string, content: string): Promise<commentViewModel> {
 
         const createdAt = new Date().toISOString();
-        const user = await this.usersQueryRepository.findUserById(new ObjectId(userId))
-        const userLogin = user.accountData.login
+        const user = await this.usersQueryRepository.findUserById(userId)
+        const userLogin = user.login
         const creatComment = await this.commentsRepository.createdCommentPostId(postId, content, userId, userLogin, createdAt)
         return creatComment
     }
@@ -81,6 +85,11 @@ export class CommentsService {
     }
 
     async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+        const result = await this.commentsQueryRepository.findCommentById(commentId, userId)
+        if (!result) {return HttpStatus.NOT_FOUND}
         return this.commentsRepository.updateLikeStatus(commentId, userId, likeStatus)
+    }
+    async deleteCommentsAll(): Promise<boolean> {
+        return await this.commentsRepository.deletCommentsAll()
     }
 }

@@ -1,12 +1,12 @@
-import { LikeDocument, Like } from '../likes/model/likes-schema';
-import { QueryPaginationType } from '../helpers/query-filter';
-import { Comment, CommentDocument, CommentSchema } from './model/comments-schema';
+import { LikeDocument, Like } from '../../likes/model/likes-schema';
+import { QueryPaginationType } from '../../helpers/query-filter';
+import { Comment, CommentDocument, CommentSchema } from '../model/comments-schema';
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { Injector } from "@nestjs/core/injector/injector"
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Filter, ObjectId } from "mongodb";
-import { commentMongoModel, commentViewModel, paginatorComments } from './model/comments-model';
+import { commentMongoModel, commentViewModel, paginatorComments } from '../model/comments-model';
 
 
 @Injectable()

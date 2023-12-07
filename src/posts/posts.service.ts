@@ -109,6 +109,8 @@ export class PostsService {
     }
 
     async updateLikeStatusPostId(postId: string, userId: string, likeStatus: string): Promise<boolean | null> {
+        const result = await this.postQueryRepo.getPostById(postId)
+        if (!result) {return null}
         return await this.postRepository.updateLikeStatusPostId(postId, userId, likeStatus)
     }
     async deletePostAll(): Promise<boolean> {
