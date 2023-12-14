@@ -17,13 +17,13 @@ export class UsersRepositoryPSQL {
   async createUser(newUser: User) {
     //const userInstance = newUser
     //await userInstance.save()
-    const query = `INSERT INTO public."Users"(
+    const query = `INSERT INTO public."users"(
               login, email, salt, hash, "createdAt", _id)
               VALUES ('${newUser.accountData.login}' , '${newUser.accountData.email}',
                       '${newUser.accountData.salt}' , '${newUser.accountData.hash}',
                       '${newUser.accountData.createdAt}','${newUser._id}');
 
-              INSERT INTO public."EmailConfirmation"(
+              INSERT INTO public."emailconfirmations"(
               "confirmationCode", "expiritionDate", "isConfirmed", "recoveryCode", "userId")
               VALUES ('${newUser.emailConfirmation.confirmationCode}' , '${newUser.emailConfirmation.expiritionDate}',
                         '${newUser.emailConfirmation.isConfirmed}' , '${newUser.emailConfirmation.recoveryCode}',
@@ -44,10 +44,10 @@ export class UsersRepositoryPSQL {
     try {
       //let user = await this.userModel.deleteOne({ _id: new mongoose.Types.ObjectId(userId) })
       let user = await this.userModel.query(`
-        DELETE FROM public."Users" as u WHERE u."_id" = $1  
+        DELETE FROM public."users" as u WHERE u."_id" = $1  
       `, [userId])
       let userEmail = await this.userModel.query(`
-        DELETE FROM public."EmailConfirmation" as e WHERE e."userId" = $1  
+        DELETE FROM public."emailconfirmations" as e WHERE e."userId" = $1  
       `, [userId])
       if (user[1] > 0 ) {
         return HttpStatus.NO_CONTENT
@@ -61,11 +61,11 @@ export class UsersRepositoryPSQL {
       //let user = await this.userModel.deleteMany()
       
       let user = await this.userModel.query(`
-        DELETE FROM public."Users"
+        DELETE FROM public."users"
       `)
 
       let emailUsers = await this.userModel.query(`
-        DELETE FROM public."EmailConfirmation"
+        DELETE FROM public."emailconfirmations"
       `)
 
       if (user[1] > 0) {
@@ -77,7 +77,7 @@ export class UsersRepositoryPSQL {
 
   async updateConfirmation(_id: string): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."EmailConfirmation"
+    UPDATE public."emailconfirmations"
 	  SET "isConfirmed"= true, "confirmationCode" = null, "expiritionDate" = null
 	  WHERE "userId" = $1;
     `, [_id])
@@ -92,7 +92,7 @@ export class UsersRepositoryPSQL {
 
   async updateCode(_id: string, code: string, expiritionDate: Date): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."EmailConfirmation" 
+    UPDATE public."emailconfirmations" 
     SET "confirmationCode" = $1,"expiritionDate" = $2
     WHERE "userId" = $3;
     `, [code, expiritionDate, _id])
@@ -104,7 +104,7 @@ export class UsersRepositoryPSQL {
 
   async updatePassword(_id: string, salt: string, hash: string): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."Users" as u
+    UPDATE public."users" as u
     SET "salt" = $1, "hash" =$2
     WHERE "userId" = $3
     `, [salt, hash, _id])
@@ -115,7 +115,7 @@ export class UsersRepositoryPSQL {
 
   async updateRecoveryCode(_id: string, recoveryCode: string): Promise<boolean> {
     let result = await this.userModel.query(`
-    UPDATE public."EmailConfirmation"
+    UPDATE public."emailconfirmations"
     SET "recoveryCode" = $1
     WHERE "userId" = $2
     `, [recoveryCode, _id])

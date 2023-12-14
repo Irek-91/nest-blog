@@ -20,7 +20,7 @@ export class PostQueryRepoPSQL {
     ) { }
 
     async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost> {
-        let query = `SELECT * FROM public."Posts"
+        let query = `SELECT * FROM public."posts"
                     ORDER BY "${paginationQuery.sortBy}" ${paginationQuery.sortDirection}
                     `
         const queryResult = `${query}` + ` LIMIT $1 OFFSET $2`
@@ -35,7 +35,7 @@ export class PostQueryRepoPSQL {
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
             if (userId) {
-                const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                const status = await this.postModel.query(`SELECT * FROM public."likes"
                                                             WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                  `, [userId, b._id])
                 if (status.length > 0) {
@@ -49,19 +49,19 @@ export class PostQueryRepoPSQL {
         
             //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
             const likes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                 `, [b._id])
 
             const likesCount = likes.length
 
             const dislikes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
                 `, [b._id])
             const dislikesCount = dislikes.length
             
-            const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
+            const newestLikes = await this.postModel.query(`SELECT * FROM public."likes"
                                                             WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                                                             ORDER BY "createdAt" DESC
                                                             LIMIT 3
@@ -104,7 +104,7 @@ export class PostQueryRepoPSQL {
         try {
 
             //const filter = { blogId: blogId }
-            const queryFilter = `SELECT * FROM public."Posts"
+            const queryFilter = `SELECT * FROM public."posts"
                                 WHERE "blogId" = '${blogId}'
                                 ORDER BY "${paginationQuery.sortBy}" ${paginationQuery.sortDirection}`
             const queryResult = `${queryFilter}` + ` LIMIT $1 OFFSET $2`
@@ -121,7 +121,7 @@ export class PostQueryRepoPSQL {
             const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
                 let myStatus = 'None'
                 if (userId) {
-                    const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                    const status = await this.postModel.query(`SELECT * FROM public."likes"
                                                             WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                 `, [userId, b._id])
 
@@ -135,21 +135,21 @@ export class PostQueryRepoPSQL {
                 //         myStatus = status.status
                 //     }
                 // }
-                const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
+                const newestLikes = await this.postModel.query(`SELECT * FROM public."likes"
                                                                 WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                                                                 ORDER BY "createdAt" DESC
                                                                 LIMIT 3
                 `, [b._id])
                 //likeModel.find({ postIdOrCommentId: b.id, status: 'Like' }).sort({ createdAt: -1 }).limit(3).lean()
                 const likes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                 `, [b._id])
 
                 const likesCount = likes.length
 
                 const dislikes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
                 `, [b._id])
                 const dislikesCount = dislikes.length
@@ -192,18 +192,18 @@ export class PostQueryRepoPSQL {
     async getPostById(id: string): Promise<postMongoDb | null> {
         try {
             const post: postMongoDb = await this.postModel.query(`
-                    SELECT * FROM public."Posts"
+                    SELECT * FROM public."posts"
                     WHERE "_id" = $1                        
         `, [id])
             const likes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Like'
         `, [id])
 
             const likesCount = likes.length
 
             const dislikes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
         `, [id])
             const dislikesCount = dislikes.length
@@ -231,7 +231,7 @@ export class PostQueryRepoPSQL {
     async getPostId(id: string, userId: string | null): Promise<postOutput> {
         try {
             let post = await this.postModel.query(`
-            SELECT * FROM public."Posts"
+            SELECT * FROM public."posts"
             WHERE "_id" = $1`, [id])
             //findOne({ _id: new ObjectId(id) }).lean();
 
@@ -239,14 +239,14 @@ export class PostQueryRepoPSQL {
 
             let myStatus = 'None'
             if (userId) {
-                const status = await this.postModel.query(`SELECT * FROM public."Likes"
+                const status = await this.postModel.query(`SELECT * FROM public."likes"
                                                             WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                 `, [userId, id])
                 if (status.length > 0) {
                     myStatus = status[0].status
                 }
             }
-            const newestLikes = await this.postModel.query(`SELECT * FROM public."Likes"
+            const newestLikes = await this.postModel.query(`SELECT * FROM public."likes"
                                                                 WHERE "postIdOrCommentId" = $1 AND status = 'Like'
                                                                 ORDER BY "createdAt" DESC
                                                                 LIMIT 3
@@ -260,14 +260,14 @@ export class PostQueryRepoPSQL {
                 }
             })
             const likes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Like'
             `, [id])
 
             const likesCount = likes.length
 
             const dislikes = await this.postModel.query(`
-                    SELECT * FROM public."Likes"
+                    SELECT * FROM public."likes"
                     WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
             `, [id])
             const dislikesCount = dislikes.length

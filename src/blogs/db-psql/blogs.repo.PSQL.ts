@@ -15,7 +15,7 @@ export class BlogsRepoPSQL {
 
   async createBlog(newBlog: blogMongoDB) {
     //return await this.blogModel.insertMany({ ...newBlog })
-    const query = `INSERT INTO public."Blogs"(
+    const query = `INSERT INTO public."blogs"(
       _id, name, description, "websiteUrl", "createdAt", "isMembership")
       VALUES  ('${newBlog._id}', '${newBlog.name}', '${newBlog.description}',
                 '${newBlog.websiteUrl}', '${newBlog.createdAt}', '${newBlog.isMembership}')
@@ -27,7 +27,7 @@ export class BlogsRepoPSQL {
   async updateBlog(blogId: string, bloginputData: blogInput): Promise<Number> {
     try {
       const blog = await this.blogModel.query(`
-      UPDATE public."Blogs"
+      UPDATE public."blogs"
       SET name=$2, description=$3, "websiteUrl"=$4
       WHERE "_id" = $1`, [blogId, bloginputData.name,
                         bloginputData.description, bloginputData.websiteUrl])
@@ -42,10 +42,10 @@ export class BlogsRepoPSQL {
     try {
       
       const blogDeleted = await this.blogModel.query(`
-      DELETE FROM public."Blogs" as b
+      DELETE FROM public."blogs" as b
       WHERE b."_id" = $1`, [id])
       const postDeleted = await this.blogModel.query(`
-      DELETE FROM public."Posts"
+      DELETE FROM public."posts"
       WHERE "blogId" = $1`, [id])
       if (blogDeleted[1] > 0) {return HttpStatus.NO_CONTENT}
       else {return HttpStatus.NOT_FOUND}
@@ -57,7 +57,7 @@ export class BlogsRepoPSQL {
   async deleteBlogAll(): Promise<Number> {
     try {
       const blogsDelete = await this.blogModel.query(`
-      DELETE FROM public."Blogs"`)
+      DELETE FROM public."blogs"`)
       if (blogsDelete[1] > 0) return HttpStatus.NOT_FOUND
       return HttpStatus.NO_CONTENT
     }

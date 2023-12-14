@@ -15,7 +15,7 @@ export class LikesRepository {
     }
     async deletedLikesAll(): Promise<boolean> {
         const likesDeleted = await this.commentsModel.query(`
-        DELETE FROM public."Likes"
+        DELETE FROM public."likes"
         `)
         if (likesDeleted[1] > 0) { return true }
         return false

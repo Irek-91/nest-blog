@@ -25,7 +25,7 @@ export class PostRepoPSQL {
 
     async deletePostId(id: string): Promise<Boolean | null> {
         const postDelete = await this.postModel.query(`
-        DELETE FROM public."Posts"
+        DELETE FROM public."posts"
 	    WHERE "_id" = $1
         `, [id])
         //findOne({ _id: new ObjectId(id) })
@@ -37,7 +37,7 @@ export class PostRepoPSQL {
     async createdPost(newPost: postMongoDb): Promise<true | null> {
         try {
         const postCreated = await this.postModel.query(`
-            INSERT INTO public."Posts"(
+            INSERT INTO public."posts"(
             _id, title, "shortDescription", content, "blogId", "blogName", "createdAt")
             VALUES ('${newPost._id}', '${newPost.title}', '${newPost.shortDescription}',
                     '${newPost.content}', '${newPost.blogId}', '${newPost.blogName}', '${newPost.createdAt}')
@@ -54,7 +54,7 @@ export class PostRepoPSQL {
         try {
 
         const postUpdate = await this.postModel.query(`
-        UPDATE public."Posts"
+        UPDATE public."posts"
 	    SET title=$2, "shortDescription"=$3, content=$4
 	    WHERE "_id" = $1
         `, [id, title, shortDescription, content])
@@ -71,18 +71,18 @@ export class PostRepoPSQL {
     async updateLikeStatusPostId(postId: string, userId: string, likeStatus: string): Promise<true | null> {
         try {
             const createdAt = (new Date()).toISOString()
-            const loginResult = await this.postModel.query(`SELECT * FROM public."Users"
+            const loginResult = await this.postModel.query(`SELECT * FROM public."users"
                                                             WHERE "_id" = $1
             `, [userId])
                 //{ _id: new ObjectId(userId) }
             const login = loginResult[0].login
-            const statusResult = await this.postModel.query(`SELECT * FROM public."Likes"
+            const statusResult = await this.postModel.query(`SELECT * FROM public."likes"
                                                             WHERE "userId" = $1 AND "postIdOrCommentId" = $2
             `, [userId, postId])
 
             // const resultLikeStatus = await this.likeModel.findOne({userId: userId, postIdOrCommentId: postId, status: likeStatus})
             if (statusResult.length > 0) {
-                const likeResult = await this.postModel.query(`UPDATE public."Likes"
+                const likeResult = await this.postModel.query(`UPDATE public."likes"
                 SET "userLogin"=$3, status=$4, "createdAt"=$5
                 WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                 `, [userId, postId, login, likeStatus, createdAt])
@@ -92,7 +92,7 @@ export class PostRepoPSQL {
             // if (resultLikeStatus) {return true}
             const likeId = new mongoose.Types.ObjectId()
             const likeResult = await this.postModel.query(`
-            INSERT INTO public."Likes"(
+            INSERT INTO public."likes"(
                 _id, "userId", "userLogin", "postIdOrCommentId", status, "createdAt")
                 VALUES ($1 ,$2, $3, $4, $5, $6)
             `, [likeId,userId, login, postId, likeStatus, createdAt])
@@ -131,7 +131,7 @@ export class PostRepoPSQL {
 
     async deletePostAll(): Promise<boolean> {
         const postsDeleted = await this.postModel.query(`
-        DELETE FROM public."Posts"
+        DELETE FROM public."posts"
         `)
         if (postsDeleted[1] > 0) { return true }
         return false

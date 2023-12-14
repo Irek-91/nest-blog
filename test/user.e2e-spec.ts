@@ -1,5 +1,5 @@
+import { userInputModel } from './../src/users/models/users-model';
 import { appSettings } from './../src/app.settings';
-import { userInputModel } from './../users/models/users-model';
 import { AppModule } from './../src/app.module';
 import { AppController } from './../src/app.controller';
 import { INestApplication } from '@nestjs/common';

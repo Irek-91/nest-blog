@@ -32,7 +32,7 @@ export class CommentsRepoPSQL {
 
 
     const newCommentAdd = await this.commentsModel.query(`
-      INSERT INTO public."Comments"(
+      INSERT INTO public."comments"(
       _id, "postId", content, "createdAt", "userId", "userLogin")
       VALUES ('${newCommentId}', '${postId}', '${content}', '${createdAt}', '${userId}', '${userLogin}');
     `)
@@ -57,7 +57,7 @@ export class CommentsRepoPSQL {
   async updateCommentId(commentsId: string, content: string): Promise<Number> {
     try {
       const post = await this.commentsModel.query(`
-      UPDATE public."Comments"
+      UPDATE public."comments"
       SET content= $2
       WHERE _id= $1
       `, [commentsId, content])
@@ -75,7 +75,7 @@ export class CommentsRepoPSQL {
   async deletCommentById(id: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
       const result = await this.commentsModel.query(`
-          DELETE FROM public."Comments"
+          DELETE FROM public."comments"
 	        WHERE _id = $1
       `, [id])
       //deleteOne({ _id: new ObjectId(id) })
@@ -92,33 +92,33 @@ export class CommentsRepoPSQL {
   async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
       const createdAt = (new Date()).toISOString()
-      const loginResult = await this.commentsModel.query(`SELECT * FROM public."Users"
+      const loginResult = await this.commentsModel.query(`SELECT * FROM public."users"
                                                       WHERE "_id" = $1
       `, [userId])
           //{ _id: new ObjectId(userId) }
       const login = loginResult[0].login
-      const statusResult = await this.commentsModel.query(`SELECT * FROM public."Likes"
+      const statusResult = await this.commentsModel.query(`SELECT * FROM public."likes"
                                                       WHERE "userId" = $1 AND "postIdOrCommentId" = $2
       `, [userId, commentId])
 
       // const resultLikeStatus = await this.likeModel.findOne({userId: userId, postIdOrCommentId: postId, status: likeStatus})
       if (statusResult.length > 0) {
-          const likeResult = await this.commentsModel.query(`UPDATE public."Likes"
+          const likeResult = await this.commentsModel.query(`UPDATE public."likes"
           SET "userLogin"=$3, status=$4, "createdAt"=$5
           WHERE "userId" = $1 AND "postIdOrCommentId" = $2
           `, [userId, commentId, login, likeStatus, createdAt])
           if (likeResult[1] > 0) {return HttpStatus.NO_CONTENT} 
           return HttpStatus.NOT_FOUND
-      }
+      } else {
       // if (resultLikeStatus) {return true}
-      const likeId = new mongoose.Types.ObjectId()
-      const likeResult = await this.commentsModel.query(`
-      INSERT INTO public."Likes"(
+        const likeId = new mongoose.Types.ObjectId()
+        const likeResult = await this.commentsModel.query(`
+        INSERT INTO public."likes"(
           _id, "userId", "userLogin", "postIdOrCommentId", status, "createdAt")
           VALUES ($1 ,$2, $3, $4, $5, $6)
-      `, [likeId,userId, login, commentId, likeStatus, createdAt])
-      return HttpStatus.NO_CONTENT
-
+        `, [likeId,userId, login, commentId, likeStatus, createdAt])
+        return HttpStatus.NO_CONTENT
+      }
     } catch (e) {
       return HttpStatus.NOT_FOUND
     }
@@ -126,7 +126,7 @@ export class CommentsRepoPSQL {
 
   async deletCommentsAll(): Promise<boolean> {
     const commentsDeleted = await this.commentsModel.query(`
-    DELETE FROM public."Comments"
+    DELETE FROM public."comments"
     `)
     if (commentsDeleted[1] > 0) { return true }
     return false

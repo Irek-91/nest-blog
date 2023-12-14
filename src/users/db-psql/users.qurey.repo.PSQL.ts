@@ -18,33 +18,32 @@ export class UsersQueryRepoPSQL {
 
   async findUsers(paginatorUser: QueryPaginationTypeUser) {
     const filter:  FilterQuery<userMongoModel> = {};
-    let query = `SELECT * FROM public."Users"
+    let query = `SELECT * FROM public."users"
                   ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
                   `
       if (paginatorUser.searchLoginTerm !== '' && paginatorUser.searchEmailTerm !== '') {
         
-        query = `SELECT * FROM public."Users"  
-                WHERE "login" ILIKE '%${paginatorUser.searchLoginTerm}%' OR "email" LIKE '%${paginatorUser.searchEmailTerm}%'
+        query = `SELECT * FROM public."users"  
+                WHERE "login" ILIKE '%${paginatorUser.searchLoginTerm}%' OR "email" ILIKE '%${paginatorUser.searchEmailTerm}%'
                 ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
                 `
       }
       if (paginatorUser.searchLoginTerm !== '' && paginatorUser.searchEmailTerm === '') {
         
-        query = `SELECT * FROM public."Users"  
+        query = `SELECT * FROM public."users"  
                 WHERE "login" ILIKE '%${paginatorUser.searchLoginTerm}%'
                 ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
                 `
       }
       if (paginatorUser.searchLoginTerm === '' && paginatorUser.searchEmailTerm !== '') {
         
-
-        query = `SELECT * FROM public."Users"  
-                WHERE "email" LIKE '%${paginatorUser.searchEmailTerm}%'
+        query = `SELECT * FROM public."users"  
+                WHERE "email" ILIKE '%${paginatorUser.searchEmailTerm}%'
                 ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
                 `
       }
       
-    // const query = `SELECT * FROM public."Users"  
+    // const query = `SELECT * FROM public."users"  
     //               WHERE "login" LIKE $1 OR "email" LIKE $2
     //               ORDER BY "${paginatorUser.sortBy}" ${paginatorUser.sortDirection}
     //               LIMIT $3 OFFSET $4`
@@ -79,7 +78,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserById(userId: string): Promise<userModelPSQL> {
     try {
-      let user = await this.userModel.query(`SELECT * FROM public."Users" as u WHERE u."_id" = $1`, [userId]);
+      let user = await this.userModel.query(`SELECT * FROM public."users" as u WHERE u."_id" = $1`, [userId]);
 
       if (user.length === 0) {
         throw new HttpException ('Not found',HttpStatus.NOT_FOUND)
@@ -102,7 +101,7 @@ export class UsersQueryRepoPSQL {
   async findByLoginOrEmailL(loginOrEmail: string): Promise<userModelPSQL | HttpStatus.NOT_FOUND> {
     
     const user = await this.userModel.query(
-      `SELECT * FROM public."Users" as u 
+      `SELECT * FROM public."users" as u 
       WHERE u."login" = $1 or u."email" = $1`, [loginOrEmail]
       //{ $or: [{ 'accountData.email': loginOrEmail }, { 'accountData.login': loginOrEmail }] }
       )
@@ -130,7 +129,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByCode(code: string): Promise<emailConfirmationPSQL | null> {
     try {
-      const result = await this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."confirmationCode" = $1`, [code]
+      const result = await this.userModel.query(`SELECT * FROM public."emailconfirmations" as u WHERE u."confirmationCode" = $1`, [code]
         //{ "emailConfirmation.confirmationCode": code }
         )
       if(result.length === 0) {return null}
@@ -151,7 +150,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByEmail(email: string): Promise<userModelPSQL | null> {
     try {
-      const result = await this.userModel.query(`SELECT * FROM public."Users" as u WHERE u."email" = $1`, [email]
+      const result = await this.userModel.query(`SELECT * FROM public."users" as u WHERE u."email" = $1`, [email]
         //{ "accountData.email": email }
       )
       if(result.length === 0) {return null}
@@ -172,7 +171,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByLogin(login: string): Promise<userModelPSQL | null> {
     try {
-      let result = await this.userModel.query(`SELECT * FROM public."Users" as u WHERE u."login" = $1`, [login]
+      let result = await this.userModel.query(`SELECT * FROM public."users" as u WHERE u."login" = $1`, [login]
 
         //{ "accountData.login": login }
         )
@@ -194,7 +193,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByRecoveryCode(recoveryCode: string): Promise<emailConfirmationPSQL | null> {
     try {
-      let user = await this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."recoveryCode" = $1`, [recoveryCode]
+      let user = await this.userModel.query(`SELECT * FROM public."email_onfirmation" as u WHERE u."recoveryCode" = $1`, [recoveryCode]
         //{ "emailConfirmation.recoveryCode": recoveryCode }
       )
       if (user.length > 0) {
@@ -217,7 +216,7 @@ export class UsersQueryRepoPSQL {
 
 async findUserByEmailConfirmation(userId: string): Promise<emailConfirmationPSQL | null> {
   try {
-    let user = await this.userModel.query(`SELECT * FROM public."EmailConfirmation" as u WHERE u."userId" = $1`, [userId]
+    let user = await this.userModel.query(`SELECT * FROM public."emailconfirmations" as u WHERE u."userId" = $1`, [userId]
       //{ "emailConfirmation.recoveryCode": recoveryCode }
     )
     if (user.length > 0) {

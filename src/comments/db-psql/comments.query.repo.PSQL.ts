@@ -20,7 +20,7 @@ export class CommentsQueryRepoPSQL {
     try {
 
       const comment = await this.commetsModel.query(`
-            SELECT * FROM public."Comments"
+            SELECT * FROM public."comments"
             WHERE "_id" = $1
       `, [commentId])
 
@@ -28,28 +28,28 @@ export class CommentsQueryRepoPSQL {
       if (comment.length === 0) {
         return null
       }
-
+log(comment, commentId)
       let myStatus = 'None'
-
       if (userId) {
         const status = await this.commetsModel.query(`
-              SELECT * FROM public."Likes"
-              WHERE "postIdOrCommentId" = $1
-        `, [commentId])
+              SELECT * FROM public."likes"
+              WHERE "postIdOrCommentId" = $1 AND "userId" = $2
+        `, [commentId, userId])
         //likeModel.findOne({ postIdOrCommentId: commentId, userId })
         if (status.length > 0) {
           myStatus = status[0].status
         }
       }
+
       const likes = await this.commetsModel.query(`
-          SELECT * FROM public."Likes"
+          SELECT * FROM public."likes"
           WHERE "postIdOrCommentId" = $1 AND status = 'Like'
       `, [commentId])
 
       const likesCount = likes.length
 
       const dislikes = await this.commetsModel.query(`
-          SELECT * FROM public."Likes"
+          SELECT * FROM public."likes"
           WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
       `, [commentId])
       const dislikesCount = dislikes.length
@@ -77,7 +77,7 @@ export class CommentsQueryRepoPSQL {
 
   async findCommentsByPostId(postId: string, userId: string | null, pagination: QueryPaginationType): Promise<paginatorComments> {
     try {
-      const filter = `SELECT * FROM public."Comments"
+      const filter = `SELECT * FROM public."comments"
                       WHERE "postId" = $1
                       ORDER BY "${pagination.sortBy}" ${pagination.sortDirection}`
       const comments = await this.commetsModel.query(filter + ` LIMIT $2 OFFSET $3`,
@@ -94,13 +94,26 @@ export class CommentsQueryRepoPSQL {
         const commentsId = c._id.toString()
 
         if (userId) {
-          const status = await this.commetsModel.query(`SELECT * FROM public."Likes"
+          const status = await this.commetsModel.query(`SELECT * FROM public."likes"
                                                      WHERE "userId" = $1 AND "postIdOrCommentId" = $2
           `, [userId, c._id])
           if (status.length > 0) {
             myStatus = status[0].status
           }
         }
+        const likes = await this.commetsModel.query(`
+        SELECT * FROM public."likes"
+        WHERE "postIdOrCommentId" = $1 AND status = 'Like'
+        `, [commentsId])
+
+        const likesCount = likes.length
+
+        const dislikes = await this.commetsModel.query(`
+        SELECT * FROM public."likes"
+        WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
+        `, [commentsId])
+        const dislikesCount = dislikes.length
+
         return {
           id: commentsId,
           content: c.content,
@@ -110,8 +123,8 @@ export class CommentsQueryRepoPSQL {
           },
           createdAt: c.createdAt,
           likesInfo: {
-            likesCount: 0,//await this.likeModel.countDocuments({ postIdOrCommentId: commentsId, status: 'Like' }),
-            dislikesCount: 0,//await this.likeModel.countDocuments({ postIdOrCommentId: commentsId, status: 'Dislike' }),
+            likesCount:likesCount,
+            dislikesCount: dislikesCount,
             myStatus: myStatus
           }
         }

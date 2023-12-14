@@ -15,16 +15,18 @@ export class BlogsQueryRepoPSQL {
   constructor(@InjectDataSource() private blogModel: DataSource) { }
 
   async findBlogs(pagination: QueryPaginationType): Promise<paginatorBlog> {
-    let query = `SELECT * FROM public."Blogs"
+    let query = `SELECT * FROM public."blogs"
                     ORDER BY "${pagination.sortBy}" ${pagination.sortDirection}                 
                     `
+    const sortByWithCollate = pagination.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
     if (pagination.searchNameTerm !== '') {
-        query = `SELECT * FROM public."Blogs"
+        query = `SELECT * FROM public."blogs"
                 WHERE "name" ILIKE '%${pagination.searchNameTerm}%'
-                ORDER BY "${pagination.sortBy}" ${pagination.sortDirection}
+                ORDER BY "${pagination.sortBy}" ${sortByWithCollate} ${pagination.sortDirection}
                 `
     }
     
+
     const queryResult = `${query} ` + ` LIMIT $1 OFFSET $2`
     const blogs = await this.blogModel.query(queryResult,
         [pagination.pageSize, pagination.skip])
@@ -59,7 +61,7 @@ export class BlogsQueryRepoPSQL {
   async getBlogId(id: string): Promise<blogOutput> {
     try {
       const blog = await this.blogModel.query(`
-        SELECT * FROM public."Blogs" as b
+        SELECT * FROM public."blogs" as b
         WHERE b."_id" = $1
         `, [id])
       if (blog.length === 0) throw new HttpException('Not found', HttpStatus.NOT_FOUND)//return HttpStatus.NOT_FOUND
@@ -79,7 +81,7 @@ export class BlogsQueryRepoPSQL {
   async getBlogNameById(id: string): Promise<string | null> {
     try {
       const blog = await this.blogModel.query(`
-        SELECT * FROM public."Blogs" as b
+        SELECT * FROM public."blogs" as b
         WHERE b."_id" = $1
         `, [id])
       if (blog.length === 0) return null
@@ -94,7 +96,7 @@ export class BlogsQueryRepoPSQL {
   async getByBlogId(id: string): Promise< BlogDocument | null> {
     try {
         const blog = await this.blogModel.query(`
-        SELECT * FROM public."Blogs" as b
+        SELECT * FROM public."blogs" as b
         WHERE b."_id" = $1
         `, [id])
       if (blog.length === 0) return null

@@ -18,7 +18,7 @@ export class SecurityDeviceRepoPSQL {
 
     async addRefreshToken(newDevice: devicesMongo): Promise<boolean | null> {
         try {
-            const query = `INSERT INTO public."Devices"(
+            const query = `INSERT INTO public."devices"(
                 "deviceId", "issuedAt", "expirationDate", "IP", "deviceName", "userId")
                 VALUES ('${newDevice.deviceId}', '${newDevice.issuedAt}',
                         '${newDevice.expirationDate}', '${newDevice.IP}',
@@ -37,7 +37,7 @@ export class SecurityDeviceRepoPSQL {
             const issuedAt = await this.jwtService.getIssueAttByRefreshToken(refreshToken)
             const expirationDate = await this.jwtService.getExpiresAttByRefreshToken(refreshToken)
           
-            const query =`UPDATE public."Devices"
+            const query =`UPDATE public."devices"
                             SET "issuedAt" = '${issuedAt}',
                                 "expirationDate" = '${expirationDate}', "IP" = '${IP}'
                             WHERE "userId" = $1 AND "deviceId" = $2`
@@ -62,7 +62,7 @@ export class SecurityDeviceRepoPSQL {
 
         try {
             const res = await this.devicesMododel.query(`
-            SELECT * FROM public."Devices" as d
+            SELECT * FROM public."devices" as d
             WHERE d."userId" = $1 AND d."deviceId" = $2
             `, [userId, deviceId])
             if (res.length === 0) { return null }
@@ -84,7 +84,7 @@ export class SecurityDeviceRepoPSQL {
     async deleteTokenAndDevice(userId: string, deviceId: string): Promise<true | null> {
         try {
             const res = await this.devicesMododel.query(`
-            DELETE FROM public."Devices" as d
+            DELETE FROM public."devices" as d
             WHERE d."userId" = $1 AND d."deviceId" = $2
             `, [userId, deviceId])
             if (res.length === 0) { return null }
@@ -95,7 +95,7 @@ export class SecurityDeviceRepoPSQL {
 
     async deleteDevicesAll() {
         const deletResult = await this.devicesMododel.query(`
-        DELETE FROM public."Devices"
+        DELETE FROM public."devices"
         `)
         return true
     }
@@ -104,7 +104,7 @@ export class SecurityDeviceRepoPSQL {
 
         try {
             const res = await this.devicesMododel.query(`
-            SELECT *FROM public."Devices" as u
+            SELECT *FROM public."devices" as u
             WHERE u."userId" = $1
             `, [userId])
             //find({ userId: userId }).lean();
@@ -128,7 +128,7 @@ export class SecurityDeviceRepoPSQL {
     async deleteDeviceId(deviceId: string): Promise<null | true> {
         try {
             const res = await this.devicesMododel.query(`
-            DELETE FROM public."Devices" as u
+            DELETE FROM public."devices" as u
             WHERE u."deviceId" = $1
             `, [deviceId])
             if (res.length === 0) { return null }
@@ -142,13 +142,13 @@ export class SecurityDeviceRepoPSQL {
 
         try {
             const checkUserIdByDeviceId = await this.devicesMododel.query(`
-            SELECT * FROM public."Devices" as u 
+            SELECT * FROM public."devices" as u 
             WHERE u."deviceId" = $1 AND u."userId" = $2
             `, [deviceId, userId]
             )
             if (checkUserIdByDeviceId.length === 0) { return null }
             const res = await this.devicesMododel.query(`
-            DELETE FROM public."Devices" as d
+            DELETE FROM public."devices" as d
             WHERE d."userId" = $1 AND d."deviceId" != $2
             `, [userId, deviceId])
 
@@ -162,7 +162,7 @@ export class SecurityDeviceRepoPSQL {
     async findOneDeviceId(deviceId: string): Promise<devicesPSQL | null> {
         try {
             const device = await this.devicesMododel.query(
-                `SELECT * FROM public."Devices" as u WHERE u."deviceId" = $1`, [deviceId]
+                `SELECT * FROM public."devices" as u WHERE u."deviceId" = $1`, [deviceId]
             );
             if (device.length === 0) { return null }
             //const deviceIdOutput : devicesPSQL = device.map((b) => {

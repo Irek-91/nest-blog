@@ -38,7 +38,7 @@ export class TestingController {
     private postModel: PostsService,
     private commentModel: CommentsService,
     private likeModel: LikesRepository,
-    @InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>
+    //@InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>
   ) { }
 
   
@@ -51,7 +51,7 @@ export class TestingController {
     await this.commentModel.deleteCommentsAll();
     await this.likeModel.deletedLikesAll();
     //await this.deviceModel.deleteMany();
-    await this.ipAndURIModel.deleteMany()
+    //await this.ipAndURIModel.deleteMany()
     console.log('Delete All')
     throw new HttpException('Not Found', HttpStatus.NO_CONTENT)
   }

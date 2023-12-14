@@ -81,7 +81,7 @@ export class AuthService {
         const errMsg = [{message: 'wrong email', field: `email`}]
         if (!user) throw new BadRequestException(errMsg)
         let result = await this.usersQueryRepository.findUserByEmailConfirmation(user._id)
-        if (result !== null && result!.isConfirmed) throw new BadRequestException(errMsg)
+        if (result !== null && result.isConfirmed === true) throw new BadRequestException(errMsg)
 
         const confirmationCode = uuidv4();
         const expiritionDate = add(new Date(), {
