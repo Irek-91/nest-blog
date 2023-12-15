@@ -24,6 +24,6 @@ export class Blog {
     @Column()
     isMembership: boolean
 
-    @OneToMany(() => Post, p => p._id)
+    @OneToMany('Post', 'posts', {nullable: true})
     posts: Post[]
 }

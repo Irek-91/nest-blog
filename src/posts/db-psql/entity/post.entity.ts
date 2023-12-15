@@ -16,12 +16,13 @@ export class Post {
     content: string
 
     @Column()
-    blogId: string
-
-    @Column()
     blogName: string
 
     @Column()
     createdAt: string
+
+    @ManyToOne('Blog', 'blogs', {nullable: true})
+    @JoinColumn({name: 'blogId'})
+    public blogId: Blog
 
 }

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { User } from './../../users/db-psql/entity/user.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 
@@ -6,8 +7,11 @@ export class Like {
     @PrimaryColumn()
     _id: string
 
-    @Column()
-    userId:string
+    @ManyToOne('User', 'users')
+    @JoinColumn({
+        name: 'userId'
+    })
+    public userId: User
 
     @Column()
     userLogin: string

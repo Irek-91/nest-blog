@@ -68,12 +68,12 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
 
 @Module({
   imports: [
-    // ThrottlerModule.forRoot([
-    //   {
-    //     ttl: 10000,
-    //     limit: 5,
-    //   },
-    // ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 10000,
+        limit: 5,
+      },
+    ]),
     ConfigModule.forRoot(),
     //MongooseModule.forRoot('mongodb+srv://admin:admin1@atlascluster.0x495z3.mongodb.net/BlogPlatform?retryWrites=true&w=majority'),
     //MongooseModule.forFeature([
@@ -133,7 +133,7 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
     ,
     JwtModule.register({
       secret: env.JWT_SECRET,
-      signOptions: {expiresIn: 100}
+      signOptions: {expiresIn: 10}
     }),
     PassportModule
   ],

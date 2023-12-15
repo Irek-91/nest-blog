@@ -25,7 +25,7 @@ export class AuthController {
         protected authService: AuthService) { }
 
     @HttpCode(HttpStatus.OK)
-    @UseGuards(//ThrottlerGuard,
+    @UseGuards(ThrottlerGuard,
          LocalAuthGuard)
     @Post('/login')
     async loginUserToTheSystem(@Request() req: any,
@@ -91,7 +91,7 @@ export class AuthController {
         const user = await this.usersService.findByUserId(req.user)
         return user
     }
-    @UseGuards(//ThrottlerGuard,
+    @UseGuards(ThrottlerGuard,
          EmailOrLoginGuard)
     @Post('/registration')
     async codeWillBeSendToPassedEmailAddress(@Body() inputData: RegistrationUserInputModel) {
@@ -99,14 +99,14 @@ export class AuthController {
         throw new HttpException('No content', HttpStatus.NO_CONTENT)
     }
 
-    @UseGuards(//ThrottlerGuard
+    @UseGuards(ThrottlerGuard
     )
     @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-confirmation')
     async confirmRegistrationCode(@Body() inputData: RegistrationConfirmationCodeModel) {
         return this.authService.confirmationCode(inputData.code)
     }
-    @UseGuards(//ThrottlerGuard
+    @UseGuards(ThrottlerGuard
         )
     @HttpCode(HttpStatus.NO_CONTENT)
     @Post('/registration-email-resending')

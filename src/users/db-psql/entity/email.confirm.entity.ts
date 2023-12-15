@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 
 @Entity()
@@ -15,5 +15,9 @@ export class EmailConfirmation {
  
     
     @PrimaryColumn()
-    userId : string
+    @ManyToOne('User', 'users')
+    @JoinColumn({
+        name: 'userId'
+    })
+    public userId : User
  }

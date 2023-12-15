@@ -1,12 +1,17 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { User } from './../../../users/db-psql/entity/user.entity';
+import { Post } from './../../../posts/db-psql/entity/post.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Comment {
     @PrimaryColumn()
     _id: string
 
-    @Column()
-    postId:string
+    @ManyToOne('Post', 'posts')
+    @JoinColumn({
+        name: 'postId'
+    })
+    public postId : Post
 
     @Column()
     content: string
@@ -14,8 +19,11 @@ export class Comment {
     @Column()
     createdAt: string
 
-    @Column()
-    userId: string
+    @ManyToOne('User', 'users')
+    @JoinColumn({
+        name: 'userId'
+    })
+    public userId: User
 
     @Column()
     userLogin:string

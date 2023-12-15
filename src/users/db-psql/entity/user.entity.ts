@@ -1,5 +1,5 @@
 import { Device } from './../../../securityDevices/db-psql/entity/devices.entity';
-import { Column, Entity, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { EmailConfirmation } from "./email.confirm.entity";
 
 
@@ -23,8 +23,10 @@ salt: string
 @Column()
 hash: string
 
-@OneToMany(() => Device, p => p.userId)
-devices: Device[]
-@OneToMany(() => EmailConfirmation, p => p.userId)
-emailConfirmation: EmailConfirmation[]
+@OneToMany('Device', 'devices')
+@JoinColumn({
+    name: 'deviceId'
+})
+public deviceId: Device
+
 }

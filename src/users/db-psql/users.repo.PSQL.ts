@@ -43,12 +43,15 @@ export class UsersRepositoryPSQL {
   async deleteUserId(userId: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
       //let user = await this.userModel.deleteOne({ _id: new mongoose.Types.ObjectId(userId) })
-      let user = await this.userModel.query(`
-        DELETE FROM public."users" as u WHERE u."_id" = $1  
-      `, [userId])
       let userEmail = await this.userModel.query(`
         DELETE FROM public."emailconfirmations" as e WHERE e."userId" = $1  
       `, [userId])
+      
+      let user = await this.userModel.query(`
+        DELETE FROM public."users" as u WHERE u."_id" = $1  
+      `, [userId])
+      
+      
       if (user[1] > 0 ) {
         return HttpStatus.NO_CONTENT
       } else {return HttpStatus.NOT_FOUND}
@@ -60,12 +63,12 @@ export class UsersRepositoryPSQL {
     try {
       //let user = await this.userModel.deleteMany()
       
+      let emailUsers = await this.userModel.query(`
+      DELETE FROM public."emailconfirmations"
+    `)
+
       let user = await this.userModel.query(`
         DELETE FROM public."users"
-      `)
-
-      let emailUsers = await this.userModel.query(`
-        DELETE FROM public."emailconfirmations"
       `)
 
       if (user[1] > 0) {

@@ -1,9 +1,9 @@
 import { User } from './../../../users/db-psql/entity/user.entity';
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Device {
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryColumn()
     deviceId: string
 
     @Column()
@@ -17,8 +17,10 @@ export class Device {
 
     @Column()
     deviceName: string
-
-    @PrimaryColumn()
-    userId : string
-
+    
+    @ManyToOne('User', 'users')
+    @JoinColumn({
+        name: 'userId'
+    })
+    public userId: User
 }
