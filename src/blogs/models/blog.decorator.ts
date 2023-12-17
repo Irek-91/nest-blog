@@ -10,6 +10,7 @@ import { BlogsQueryRepository } from '../db-mongo/blogs.query.repo';
 import { log } from 'console';
 import { BlogDocument } from './blogs-schema';
 import { BlogsQueryRepoPSQL } from '../db-psql/blogs.query.repo.PSQL';
+import { Blog } from '../db-psql/entity/blog.entity';
 
 @ValidatorConstraint({ name: 'IsBLogIdExist', async: true })
 @Injectable()
@@ -17,7 +18,7 @@ export class IsBlogIdAlreadyExistConstraint implements ValidatorConstraintInterf
   
   constructor(protected blogsQueryRepo: BlogsQueryRepoPSQL) { }
   async validate(value: any): Promise<boolean> {
-    const foundBlog: BlogDocument | null =
+    const foundBlog: Blog | null =
       await this.blogsQueryRepo.getByBlogId(value);
     if (!foundBlog) {
       return false;

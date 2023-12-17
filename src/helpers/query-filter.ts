@@ -11,7 +11,7 @@ export type QueryPaginationTypeUser = {
 }
 export type QueryPaginationType = {
   searchNameTerm: string
-  sortBy: string
+  sortBy: 'createdAt' | 'name'
   sortDirection: 'ASC' | 'DESC'
   pageNumber: number
   pageSize: number
@@ -55,7 +55,7 @@ export class Pagination {
     }
   
     if (query.searchNameTerm) { defaultValues.searchNameTerm = query.searchNameTerm };
-    if (query.sortBy) { defaultValues.sortBy = query.sortBy };
+    if (query.sortBy || query.sortBy === 'createdAt' || query.sortBy === 'name') { defaultValues.sortBy = query.sortBy };
     if (query.sortDirection) { defaultValues.sortDirection = query.sortDirection }
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }

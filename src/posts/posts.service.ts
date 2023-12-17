@@ -44,6 +44,16 @@ export class PostsService {
 
     }
 
+    async deletePostsByBlogId(blogId: string): Promise<Boolean | null> {
+        const result = await this.postRepository.deletePostsByBlogId(blogId)
+        if (!result) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return true
+        }
+
+    }
+
     async createdPostBlogId(postData : postInputModel): Promise<postOutput | null> {
         
         const newPostId = new ObjectId()

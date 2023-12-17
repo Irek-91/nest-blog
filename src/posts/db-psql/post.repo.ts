@@ -33,6 +33,15 @@ export class PostRepoPSQL {
         else {return null}
     }
 
+    async deletePostsByBlogId(blogId: string): Promise<Boolean | null> {
+        const postsDeleted = await this.postModel.query(`
+            DELETE FROM public."posts"
+            WHERE "blogId" = $1`, [blogId])
+        //findOne({ _id: new ObjectId(id) })
+        if (postsDeleted[1] > 0) { return true}
+        else {return null}
+    }
+
 
     async createdPost(newPost: postMongoDb): Promise<true | null> {
         try {

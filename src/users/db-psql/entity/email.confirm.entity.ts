@@ -15,9 +15,9 @@ export class EmailConfirmation {
  
     
     @PrimaryColumn()
-    @ManyToOne('User', 'users')
+    @ManyToOne(() => User, (user) => user._id)
     @JoinColumn({
         name: 'userId'
     })
-    public userId : User
+    public userId : string
  }
