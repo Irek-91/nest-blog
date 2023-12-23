@@ -19,5 +19,5 @@ export class EmailConfirmation {
     @JoinColumn({
         name: 'userId'
     })
-    public userId : string
+    public userId : User
  }

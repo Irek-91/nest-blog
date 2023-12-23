@@ -17,8 +17,8 @@ export class Device {
 
     @Column()
     deviceName: string
-    
-    @ManyToOne('User', 'users')
+
+    @ManyToOne((type)=> User, (user) => user.deviceId)
     @JoinColumn({
         name: 'userId'
     })

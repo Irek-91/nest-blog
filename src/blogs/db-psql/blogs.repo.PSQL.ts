@@ -4,12 +4,14 @@ import { QueryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { BlogDocument } from "../models/blogs-schema"
 import { Filter, ObjectId } from "mongodb";
+import { v4 as uuidv4 } from 'uuid';
 
 import { Model } from "mongoose"
 import { blogInput, blogMongoDB, blogOutput, paginatorBlog } from "../models/blogs-model"
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { log } from 'console';
 
 @Injectable()
 export class BlogsRepoPSQL {
@@ -25,7 +27,18 @@ export class BlogsRepoPSQL {
       VALUES  ('${newBlog._id}', '${newBlog.name}', '${newBlog.description}',
                 '${newBlog.websiteUrl}', '${newBlog.createdAt}', '${newBlog.isMembership}')
       `
-    const user = await this.blogModel.query(query)
+      log(1)
+    const user =  this.blogRepoTypeORM.create({
+      _id: newBlog._id.toString(),
+      name: newBlog.name,
+      description: newBlog.description,
+      websiteUrl: newBlog.websiteUrl,
+      createdAt: newBlog.createdAt,
+      isMembership: newBlog.isMembership
+    })
+    await this.blogRepoTypeORM.save(user)
+
+
     return newBlog
   }
 
@@ -63,8 +76,12 @@ export class BlogsRepoPSQL {
       // WHERE "blogId" = $1`, [id])
 
 
-      if (!blogDeleted.affected) {return HttpStatus.NO_CONTENT}
-      else {return HttpStatus.NOT_FOUND}
+      if (!blogDeleted.affected) {
+        return HttpStatus.NOT_FOUND
+      }
+      else {
+        return HttpStatus.NO_CONTENT
+      }
     }
     catch (e) { return HttpStatus.NOT_FOUND }
 

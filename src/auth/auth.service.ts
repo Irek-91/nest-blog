@@ -1,6 +1,6 @@
 import { EmailAdapter } from './../application/email-adapter';
 import { User } from './../users/models/users-schema';
-import { userViewModel } from './../users/models/users-model';
+import { userMongoModel, userViewModel } from './../users/models/users-model';
 import { UsersQueryRepository } from '../users/db-mongo/users.qurey.repo';
 import { UsersRepository } from '../users/db-mongo/users.repo';
 import mongoose, { ObjectId } from "mongoose";
@@ -26,8 +26,8 @@ export class AuthService {
         const passwordSalt = await bcrypt.genSalt(10)
         const passwordHash = await this._generateHash(password, passwordSalt)
 
-        const newUser: User = {
-            _id: new mongoose.Types.ObjectId(),
+        const newUser: userMongoModel = {
+            _id: uuidv4(),
             accountData: {
                 login: login,
                 email: email,

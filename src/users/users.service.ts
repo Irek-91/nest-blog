@@ -35,7 +35,7 @@ export class UsersService {
     })).toISOString()
 
     const newUser = {
-      _id: new mongoose.Types.ObjectId(),
+      _id: uuidv4(),
       accountData: {
         login: inputModel.login,
         email: inputModel.email,
@@ -94,7 +94,7 @@ export class UsersService {
     const resultUserViewModel: MeViewModel = {
       email: result.email,
       login: result.login,
-      userId: new mongoose.Types.ObjectId(result._id)
+      userId: result._id
     }
     return resultUserViewModel
   }

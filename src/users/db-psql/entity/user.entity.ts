@@ -23,10 +23,10 @@ salt: string
 @Column()
 hash: string
 
-@OneToMany('Device', 'devices')
+@OneToMany((type) => Device, (device) => device.userId)
 @JoinColumn({
     name: 'deviceId'
 })
-public deviceId: Device
+public deviceId: Device[]
 
 }

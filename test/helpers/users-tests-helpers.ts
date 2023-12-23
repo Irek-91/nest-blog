@@ -15,7 +15,7 @@ type headers = {
 
 export const createUser = async ( saLogin: string, saPwd: string, model: userInputModel, httpServer: any): Promise<{ response: request.Response;
     user: userViewModel, headers: headers}> => {
-    const response = await request(httpServer).post('/users').auth(saLogin, saPwd).send(model)
+    const response = await request(httpServer).post('/sa/users').auth(saLogin, saPwd).send(model)
     const user = response.body
     const AccessToken = jwt.sign({userId : user.id}, settings.JWT_SECRET, {expiresIn: 100})
     const headers = {Authorization: `Bearer ${AccessToken}`}

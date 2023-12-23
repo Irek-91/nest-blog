@@ -1,3 +1,4 @@
+import { Device } from './../../securityDevices/db-psql/entity/devices.entity';
 import { User } from './entity/user.entity';
 import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
@@ -54,7 +55,7 @@ export class UsersRepositoryPSQL {
                                               expiritionDate: newUser.emailConfirmation.expiritionDate,
                                               isConfirmed: newUser.emailConfirmation.isConfirmed,
                                               recoveryCode: newUser.emailConfirmation.recoveryCode,
-                                              userId: newUser._id.toString()
+                                              userId: {_id: newUser._id}
                                             })
                                             .execute()
 
@@ -80,12 +81,17 @@ export class UsersRepositoryPSQL {
                                                   .from(EmailConfirmation)
                                                   .where({userId: userId})
                                                   .execute()
+      const deletedUserDevice = await this.userModel.createQueryBuilder()
+                                                  .delete()
+                                                  .from(Device)
+                                                  .where({userId: userId})
+                                                  .execute()
       const deletedUser = await this.userModel.createQueryBuilder()
                                                   .delete()
                                                   .from(User)
                                                   .where({_id: userId})
                                                   .execute()
-      if (!deletedUserEmail || !deletedUser) {
+      if (deletedUserEmail.affected === 0 || deletedUser.affected === 0) {
         return HttpStatus.NOT_FOUND
       }
       else {
@@ -114,11 +120,19 @@ export class UsersRepositoryPSQL {
                                                   .delete()
                                                   .from(EmailConfirmation)
                                                   .execute()
+      
+      const deletedDevices = await this.userModel.createQueryBuilder()
+                                                .delete()
+                                                .from(Device)
+                                                .execute()
+
       const deletedUsers = await this.userModel.createQueryBuilder()
                                                 .delete()
                                                 .from(User)
                                                 .execute()
-      if (!deletedUsersEmail || !deletedUsers) {
+      
+
+      if (deletedUsersEmail.affected === 0 || deletedUsers.affected === 0) {
         return HttpStatus.NOT_FOUND
       }
       else {

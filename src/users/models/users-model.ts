@@ -48,7 +48,7 @@ export type emailConfirmationPSQL = {
 
 
 export type userMongoModel = {
-    _id: mongoose.Types.ObjectId,
+    _id: string,
     accountData: {
         login: string,
         email: string,
@@ -68,7 +68,7 @@ export type userMongoModel = {
 export type MeViewModel = {
     login: string,
     email: string,
-    userId: mongoose.Types.ObjectId
+    userId: mongoose.Types.ObjectId | string
 }
 export type userInputModel = {
     email: string,

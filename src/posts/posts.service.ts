@@ -11,6 +11,7 @@ import { PostQueryRepoPSQL } from './db-psql/post.query.repo';
 import { BlogsQueryRepoPSQL } from '../blogs/db-psql/blogs.query.repo.PSQL';
 import { PostRepoPSQL } from './db-psql/post.repo';
 import { log } from 'node:console';
+import { v4 as uuidv4 } from 'uuid';
 
 
 @Injectable()
@@ -46,17 +47,17 @@ export class PostsService {
 
     async deletePostsByBlogId(blogId: string): Promise<Boolean | null> {
         const result = await this.postRepository.deletePostsByBlogId(blogId)
-        if (!result) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
-        } else {
-            return true
-        }
-
+        // if (!result) {
+        //     throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        // } else {
+        //     return true
+        // }
+        return true
     }
 
     async createdPostBlogId(postData : postInputModel): Promise<postOutput | null> {
         
-        const newPostId = new ObjectId()
+        const newPostId = uuidv4()
         const createdAt = new Date().toISOString();
         let blogName = await this.blogQueryRepository.getBlogNameById(postData.blogId)
         if (!blogName) {

@@ -9,7 +9,7 @@ import { createUser } from './helpers/users-tests-helpers';
 import { log } from 'console';
 
 
-describe('AppController', () => {
+describe('tests for users', () => {
     let appController: AppController;
     let app: INestApplication;
     let httpServer: any;
@@ -40,11 +40,11 @@ describe('AppController', () => {
 describe('create user in the system ', () => {
         it ('return user ', async () => {
             const creatResponse = await request(httpServer)
-                .get('/users')
+                .get('/sa/users')
                 .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
                 .expect(200)
-            const getPosts = creatResponse.body
-            expect(getPosts).toEqual({pagesCount: 0,
+            const getUsers = creatResponse.body
+            expect(getUsers).toEqual({pagesCount: 0,
                                   page: 1,
                                   pageSize: 10,
                                   totalCount: 0,
@@ -55,7 +55,7 @@ describe('create user in the system ', () => {
 
         it ('error 404 is returned, there is no such user', async () => {
             await request(httpServer)
-                    .get('/users/:5')
+                    .get('/sa/users/:5')
                     .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
                     .expect(404)
         })
@@ -74,9 +74,10 @@ describe('create user in the system ', () => {
 
             const thirdRes = await createUser('admin', 'qwerty', model, httpServer)
             const getUser = thirdRes.user
-
             expect(thirdRes.response.status).not.toBe(401)
+            expect(thirdRes.response.status).not.toBe(500)
             
+
             expect.setState({user: getUser})
         })
 
@@ -146,9 +147,8 @@ describe('create user in the system ', () => {
 
         it ('should return 200 status code and created user', async () => {
             const {user} = expect.getState()
-            const res = await request(httpServer).get(`/users`)
+            const res = await request(httpServer).get(`/sa/users`)
                                           .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
-
             expect(res.status).toBe(200)
             expect(res.body).toEqual({pagesCount: expect.any(Number),
                                       page: expect.any(Number),
@@ -161,10 +161,10 @@ describe('create user in the system ', () => {
         it ('delete userId ', async () => {
         const {user} = expect.getState()
 
-        const res = await request(httpServer).delete(`/users/${user.id}`)
+        const res = await request(httpServer).delete(`/sa/users/${user.id}`)
                                       .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
         expect(res.status).toBe(204)
-        const resTwo = await request(httpServer).get(`/users`)
+        const resTwo = await request(httpServer).get(`/sa/users`)
                                           .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
         expect(resTwo.status).toBe(200)
         expect(resTwo.body).toEqual({pagesCount: expect.any(Number),

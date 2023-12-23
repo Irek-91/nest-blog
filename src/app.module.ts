@@ -71,7 +71,7 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 5,
+        limit: 500,
       },
     ]),
     ConfigModule.forRoot(),
@@ -107,6 +107,7 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
       // }
     //])
     //
+    
     TypeOrmModule.forRoot({
       //useFactory: (configService: ConfigService<ConfigType>) => ({
       type: 'postgres',

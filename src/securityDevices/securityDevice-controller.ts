@@ -2,6 +2,7 @@ import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, P
 import {  SecurityDeviceServicePSQL } from './db-psql/securityDevice.service.PSQL';
 import { ChekRefreshToken, ChekRefreshTokenDeleteDevice } from './../auth/guards/auth.guard';
 import { Cookies } from './../auth/guards/cookies.guard';
+import { log } from 'console';
 
 @Controller('security')
 

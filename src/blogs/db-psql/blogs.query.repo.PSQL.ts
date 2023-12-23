@@ -27,7 +27,7 @@ export class BlogsQueryRepoPSQL {
     let sortBy = {
     }
 
-    if (pagination.sortBy || pagination.sortBy === 'name') {
+    if (pagination.sortBy === 'name') {
       sortBy = {
         name: sortDirection
       }
@@ -37,13 +37,6 @@ export class BlogsQueryRepoPSQL {
       }
     }
 
-    let query = {
-      where:{name: ILike(`%${pagination.searchNameTerm}%`)},
-      order: sortBy,
-      skip: pagination.skip,
-      take: pagination.pageSize
-
-    }
     const sortByWithCollate = pagination.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
     // if (pagination.searchNameTerm !== '') {
     //     // query = `SELECT * FROM public."blogs"
@@ -68,7 +61,7 @@ export class BlogsQueryRepoPSQL {
       skip: pagination.skip,
       take: pagination.pageSize
     })
-    
+   
     
     // find({ name: { $regex: pagination.searchNameTerm, $options: 'i' } }).
     //   //sort([[pagination.sortBy, pagination.sortDirection]]).
@@ -107,6 +100,7 @@ export class BlogsQueryRepoPSQL {
     try {
 
       const blog = await this.blogRepoTypeORM.findOneBy({_id: id})
+      
       if (!blog) {throw new HttpException('Not found', HttpStatus.NOT_FOUND)}
       else {
       return {

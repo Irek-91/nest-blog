@@ -1,20 +1,20 @@
-import { LikeDocument, Like } from '../../likes/model/likes-schema';
-import { UserDocument, User } from '../../users/models/users-schema';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { Like } from './../../likes/entity/likes.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Post, PostDocument } from "../model/post-schema"
+import { PostDocument } from "../model/post-schema"
 import mongoose, { HydratedDocument, Model } from "mongoose"
 import { newestLikes, paginatorPost, postMongoDb, postOutput } from "../model/post-model"
 import { Filter, ObjectId } from "mongodb";
 import { InjectModel } from '@nestjs/mongoose';
 import { log } from 'console';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { Post } from './entity/post.entity';
 
 @Injectable()
 
 export class PostRepoPSQL {
-    constructor(@InjectDataSource() private postModel: DataSource
+    constructor(@InjectDataSource() private postModel: DataSource,
+
 
     ) { }
 
@@ -24,34 +24,72 @@ export class PostRepoPSQL {
      }
 
     async deletePostId(id: string): Promise<Boolean | null> {
-        const postDelete = await this.postModel.query(`
-        DELETE FROM public."posts"
-	    WHERE "_id" = $1
-        `, [id])
+        const likesByPostId = await this.postModel.createQueryBuilder()
+                                                    .delete()
+                                                    .from(Like)
+                                                    .where({
+                                                        postIdOrCommentId: id
+                                                    })
+
+        const postDelete = await this.postModel.createQueryBuilder()
+                                                    .delete()
+                                                    .from(Post)
+                                                    .where({
+                                                        _id: id
+                                                    })
+                                                    .execute()
+        // (`
+        // DELETE FROM public."posts"
+	    // WHERE "_id" = $1
+        // `, [id])
         //findOne({ _id: new ObjectId(id) })
-        if (postDelete[1] > 0) { return true}
-        else {return null}
+        if (!postDelete.affected) { return null}
+        else {return true}
     }
 
     async deletePostsByBlogId(blogId: string): Promise<Boolean | null> {
-        const postsDeleted = await this.postModel.query(`
-            DELETE FROM public."posts"
-            WHERE "blogId" = $1`, [blogId])
+        const postsDeleted = await this.postModel.createQueryBuilder()
+                                                .delete()
+                                                .from(Post)
+                                                .where({
+                                                    blogId: blogId
+                                                })
+                                                .execute()
+        // query(`
+        //     DELETE FROM public."posts"
+        //     WHERE "blogId" = $1`, [blogId])
         //findOne({ _id: new ObjectId(id) })
-        if (postsDeleted[1] > 0) { return true}
-        else {return null}
+        if (!postsDeleted.affected) { return null}
+        else {return true}
     }
 
 
     async createdPost(newPost: postMongoDb): Promise<true | null> {
         try {
-        const postCreated = await this.postModel.query(`
-            INSERT INTO public."posts"(
-            _id, title, "shortDescription", content, "blogId", "blogName", "createdAt")
-            VALUES ('${newPost._id}', '${newPost.title}', '${newPost.shortDescription}',
-                    '${newPost.content}', '${newPost.blogId}', '${newPost.blogName}', '${newPost.createdAt}')
-        `)
-        return true
+        const postCreated = await this.postModel.createQueryBuilder()
+                                                .insert()
+                                                .into(Post)
+                                                .values({
+                                                    _id: newPost._id.toString(),
+                                                    title: newPost.title,
+                                                    shortDescription: newPost.shortDescription,
+                                                    content: newPost.content,
+                                                    blogId: {_id: newPost.blogId},
+                                                    blogName: newPost.blogName,
+                                                    createdAt: newPost.createdAt
+                                                })
+                                                .execute()
+        // query(`
+        //     INSERT INTO public."posts"(
+        //     _id, title, "shortDescription", content, "blogId", "blogName", "createdAt")
+        //     VALUES ('${newPost._id}', '${newPost.title}', '${newPost.shortDescription}',
+        //             '${newPost.content}', '${newPost.blogId}', '${newPost.blogName}', '${newPost.createdAt}')
+        // `)
+        if (postCreated.identifiers.length > 0) {
+            return true
+        } else {
+            return null
+        }
         }
         catch (e) {
             return null

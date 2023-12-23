@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 export type blogsCollectionsType = blogOutput[];
 
 export type blogMongoDB = {
-  _id: ObjectId,
+  _id: ObjectId | string,
   name: string,
   description: string,
   websiteUrl: string,

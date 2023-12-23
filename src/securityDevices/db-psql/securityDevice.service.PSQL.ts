@@ -38,12 +38,13 @@ export class SecurityDeviceServicePSQL {
     async deleteDeviceByUserId(refreshToken: string, deviceId: string): Promise<null | true> {
 
         const resultDeviceId = await this.securityDeviceRepository.findOneDeviceId(deviceId)
+
         if (!resultDeviceId) { 
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)    
         }
-        const resultUserId = await this.jwtService.getUserIdByToken(refreshToken)
 
-        if (resultDeviceId.userId !== resultUserId!) { 
+        const resultUserId = await this.jwtService.getUserIdByToken(refreshToken)
+        if (resultDeviceId.userId !== resultUserId) { 
             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
         }
 

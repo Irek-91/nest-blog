@@ -31,7 +31,7 @@ export class Pagination {
      skip: 0
    }
    if (query.sortBy) {defaultValuesUsers.sortBy = query.sortBy};
-   if (query.sortDirection) {defaultValuesUsers.sortDirection = query.sortDirection}
+   if (query.sortDirection) {defaultValuesUsers.sortDirection = query.sortDirection.toUpperCase()}
    if (query.pageNumber) {defaultValuesUsers.pageNumber = +query.pageNumber}
    if (query.pageSize) {defaultValuesUsers.pageSize = +query.pageSize}
    if (query.searchLoginTerm) {defaultValuesUsers.searchLoginTerm = query.searchLoginTerm}
@@ -56,7 +56,7 @@ export class Pagination {
   
     if (query.searchNameTerm) { defaultValues.searchNameTerm = query.searchNameTerm };
     if (query.sortBy || query.sortBy === 'createdAt' || query.sortBy === 'name') { defaultValues.sortBy = query.sortBy };
-    if (query.sortDirection) { defaultValues.sortDirection = query.sortDirection }
+    if (query.sortDirection) { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize

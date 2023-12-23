@@ -28,7 +28,6 @@ export class CommentsQueryRepoPSQL {
       if (comment.length === 0) {
         return null
       }
-log(comment, commentId)
       let myStatus = 'None'
       if (userId) {
         const status = await this.commetsModel.query(`

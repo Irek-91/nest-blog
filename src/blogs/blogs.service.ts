@@ -6,6 +6,7 @@ import { Injectable } from "@nestjs/common"
 import { BlogsQueryRepository } from './db-mongo/blogs.query.repo';
 import { BlogsRepoPSQL } from './db-psql/blogs.repo.PSQL';
 import { BlogsQueryRepoPSQL } from './db-psql/blogs.query.repo.PSQL';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class BlogsService {
@@ -27,7 +28,7 @@ export class BlogsService {
 
     async createBlog(blogInputData: blogInput): Promise<blogOutput> {
         const createdAt = new Date().toISOString()
-        const newBlog : blogMongoDB = {_id: new mongoose.Types.ObjectId(),
+        const newBlog : blogMongoDB = {_id: uuidv4(),
             name: blogInputData.name,
             description: blogInputData.description,
             websiteUrl: blogInputData.websiteUrl,
