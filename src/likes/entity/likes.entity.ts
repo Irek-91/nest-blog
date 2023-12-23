@@ -12,10 +12,7 @@ export class Like {
         name: 'userId'
     })
     public userId: User
-
-    @Column()
-    userLogin: string
-
+    
     @Column()
     postIdOrCommentId: string
 

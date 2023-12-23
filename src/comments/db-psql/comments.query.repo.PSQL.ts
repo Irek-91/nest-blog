@@ -1,15 +1,11 @@
-import { LikeDocument, Like } from '../../likes/model/likes-schema';
+import { Like } from './../../likes/entity/likes.entity';
 import { QueryPaginationType } from '../../helpers/query-filter';
-import { Comment, CommentDocument, CommentSchema } from '../model/comments-schema';
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
-import { Injector } from "@nestjs/core/injector/injector"
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Filter, ObjectId } from "mongodb";
 import { commentMongoModel, commentViewModel, paginatorComments } from '../model/comments-model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { log } from 'console';
+import { Comment } from './entity/comments.entity';
 
 
 @Injectable()
@@ -19,39 +15,71 @@ export class CommentsQueryRepoPSQL {
   async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | null> {
     try {
 
-      const comment = await this.commetsModel.query(`
-            SELECT * FROM public."comments"
-            WHERE "_id" = $1
-      `, [commentId])
-
-      //commentModel.findOne({ _id: new ObjectId(commentId) })
-      if (comment.length === 0) {
+      const comment = await this.commetsModel.getRepository(Comment)
+                                            .createQueryBuilder()
+                                            .where({
+                                            _id: commentId
+                                            }).getOne()
+      if (!comment) {
         return null
       }
       let myStatus = 'None'
       if (userId) {
-        const status = await this.commetsModel.query(`
-              SELECT * FROM public."likes"
-              WHERE "postIdOrCommentId" = $1 AND "userId" = $2
-        `, [commentId, userId])
-        //likeModel.findOne({ postIdOrCommentId: commentId, userId })
-        if (status.length > 0) {
-          myStatus = status[0].status
+        const like = await this.commetsModel.getRepository(Like)
+                                              .createQueryBuilder()
+                                              .where({
+                                                userId: userId
+                                              })
+                                              .andWhere({
+                                                postIdOrCommentId: commentId
+                                              })
+                                              .getOne()
+        if (like) {
+          myStatus = like.status
         }
+        // query(`
+        //       SELECT * FROM public."likes"
+        //       WHERE "postIdOrCommentId" = $1 AND "userId" = $2
+        // `, [commentId, userId])
+        //likeModel.findOne({ postIdOrCommentId: commentId, userId })
+        // if (status.length > 0) {
+        //   myStatus = status[0].status
+        // }
       }
 
-      const likes = await this.commetsModel.query(`
-          SELECT * FROM public."likes"
-          WHERE "postIdOrCommentId" = $1 AND status = 'Like'
-      `, [commentId])
+      const likesCount = await this.commetsModel.getRepository(Like)
+                                          .createQueryBuilder()
+                                          .select()
+                                          .where({
+                                            postIdOrCommentId: commentId
+                                          })
+                                          .andWhere({
+                                            status: 'Like'
+                                          })
+                                          .getCount()
+      // query(`
+      // SELECT  status, COUNT(*)
+      // FROM "likes" as l
+      // WHERE l."postIdOrCommentId" = $1
+      // GROUP BY status
+      // // `, [commentId])
+      // const likesCount = likes.length
 
-      const likesCount = likes.length
-
-      const dislikes = await this.commetsModel.query(`
-          SELECT * FROM public."likes"
-          WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
-      `, [commentId])
-      const dislikesCount = dislikes.length
+      const dislikesCount = await this.commetsModel.getRepository(Like)
+                                              .createQueryBuilder()
+                                              .select()
+                                              .where({
+                                                postIdOrCommentId: commentId
+                                              })
+                                              .andWhere({
+                                                status: 'Dislike'
+                                              })
+                                              .getCount()
+      // query(`
+      //     SELECT * FROM public."likes"
+      //     WHERE "postIdOrCommentId" = $1 AND status = 'Dislike'
+      // `, [commentId])
+      // const dislikesCount = dislikes.length
 
       const commentViewModel: commentViewModel = {
         id: comment[0]._id.toString(),

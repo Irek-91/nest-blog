@@ -24,7 +24,4 @@ export class Comment {
         name: 'userId'
     })
     public userId: User
-
-    @Column()
-    userLogin:string
 }

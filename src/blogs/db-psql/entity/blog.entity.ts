@@ -25,5 +25,5 @@ export class Blog {
     isMembership: boolean
 
     @OneToMany('Post', 'posts', {nullable: true})
-    post: Post[]
+    posts: Post[]
 }

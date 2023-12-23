@@ -5,7 +5,7 @@ import mongoose, { HydratedDocument } from "mongoose";
 
 @Schema()
 export class Comment {
-    _id: mongoose.Types.ObjectId;
+    _id: mongoose.Types.ObjectId | string;
     @Prop({
         required: true,
         type: String,

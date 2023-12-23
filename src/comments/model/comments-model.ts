@@ -29,7 +29,7 @@ export type commentViewModel = {
 }
 
 export type commentMongoModel = {
-  _id: ObjectId,
+  _id: ObjectId | string,
   postId: string,
   content: string,
   commentatorInfo: {

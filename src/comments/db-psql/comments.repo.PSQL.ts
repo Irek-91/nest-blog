@@ -1,6 +1,4 @@
-import { LikeDocument, Like } from '../../likes/model/likes-schema';
 import { QueryPaginationType } from '../../helpers/query-filter';
-import { Comment, CommentDocument, CommentSchema } from '../model/comments-schema';
 import { Injectable, HttpStatus, Query } from '@nestjs/common';
 import { Injector } from "@nestjs/core/injector/injector"
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,6 +7,10 @@ import { Filter, ObjectId } from "mongodb";
 import { commentMongoModel, commentViewModel, paginatorComments } from '../model/comments-model';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
+import { Comment } from './entity/comments.entity';
+import { User } from '../../users/db-psql/entity/user.entity';
+import { Like } from '../../likes/entity/likes.entity';
 
 
 @Injectable()
@@ -16,7 +18,7 @@ export class CommentsRepoPSQL {
   constructor(@InjectDataSource() private commentsModel: DataSource) { }
 
   async createdCommentPostId(postId: string, content: string, userId: string, userLogin: string, createdAt: string): Promise<commentViewModel> {
-    const newCommentId = new ObjectId()
+    const newCommentId = uuidv4()
 
     const newComment: commentMongoModel = {
       _id: newCommentId,
@@ -30,14 +32,21 @@ export class CommentsRepoPSQL {
       //likesInfo: { likesCount: 0, dislikesCount: 0, myStatus: 'None' }
     }
 
-
-    const newCommentAdd = await this.commentsModel.query(`
-      INSERT INTO public."comments"(
-      _id, "postId", content, "createdAt", "userId", "userLogin")
-      VALUES ('${newCommentId}', '${postId}', '${content}', '${createdAt}', '${userId}', '${userLogin}');
-    `)
-
-
+    const newCommentAdd = await this.commentsModel.createQueryBuilder()
+                                                  .insert()
+                                                  .into(Comment)
+                                                  .values({
+                                                    _id:newCommentId,
+                                                    postId: {_id: postId},
+                                                    content: content,
+                                                    createdAt: createdAt,
+                                                    userId: {_id: userId},
+                                                  })    
+    // query(`
+    //   INSERT INTO public."comments"(
+    //   _id, "postId", content, "createdAt", "userId", "userLogin")
+    //   VALUES ('${newCommentId}', '${postId}', '${content}', '${createdAt}', '${userId}', '${userLogin}');
+    // `)
     return {
       id: newComment._id.toString(),
       content: newComment.content,
@@ -56,17 +65,26 @@ export class CommentsRepoPSQL {
 
   async updateCommentId(commentsId: string, content: string): Promise<Number> {
     try {
-      const post = await this.commentsModel.query(`
-      UPDATE public."comments"
-      SET content= $2
-      WHERE _id= $1
-      `, [commentsId, content])
-      //updateOne({ _id: new ObjectId(commentsId) }, { $set: { content } })
-      if (post[1] > 0) {
-        return HttpStatus.NO_CONTENT
+      const post = await this.commentsModel.createQueryBuilder()
+                                            .update(Comment)
+                                            .set({
+                                              content: content
+                                            })
+                                            .where({
+                                              _id: commentsId
+                                            })
+                                            .execute()
+      // query(`
+      // UPDATE public."comments"
+      // SET content= $2
+      // WHERE _id= $1
+      // `, [commentsId, content])
+
+      if (!post) {
+        return HttpStatus.NOT_FOUND
       }
       else {
-        return HttpStatus.NOT_FOUND
+        return HttpStatus.NO_CONTENT
       }
     }
     catch (e) { return HttpStatus.NOT_FOUND }
@@ -74,16 +92,22 @@ export class CommentsRepoPSQL {
 
   async deletCommentById(id: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
-      const result = await this.commentsModel.query(`
-          DELETE FROM public."comments"
-	        WHERE _id = $1
-      `, [id])
+      const result = await this.commentsModel.createQueryBuilder()
+                                              .delete()
+                                              .from(Comment)
+                                              .where({
+                                                _id: id
+                                              }).execute()
+      // query(`
+      //     DELETE FROM public."comments"
+	    //     WHERE _id = $1
+      // `, [id])
       //deleteOne({ _id: new ObjectId(id) })
-      if (result[1] > 0) {
-        return HttpStatus.NO_CONTENT
+      if (!result) {
+        return HttpStatus.NOT_FOUND
       }
       else {
-        return HttpStatus.NOT_FOUND
+        return HttpStatus.NO_CONTENT
       }
     } catch (e) { return HttpStatus.NOT_FOUND }
   }
@@ -92,31 +116,55 @@ export class CommentsRepoPSQL {
   async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
       const createdAt = (new Date()).toISOString()
-      const loginResult = await this.commentsModel.query(`SELECT * FROM public."users"
-                                                      WHERE "_id" = $1
-      `, [userId])
-          //{ _id: new ObjectId(userId) }
-      const login = loginResult[0].login
-      const statusResult = await this.commentsModel.query(`SELECT * FROM public."likes"
-                                                      WHERE "userId" = $1 AND "postIdOrCommentId" = $2
-      `, [userId, commentId])
+      
+      const statusResult = await this.commentsModel.getRepository(Like)
+                                                    .createQueryBuilder()
+                                                    .select()
+                                                    .where({userId: userId})
+                                                    .andWhere({postIdOrCommentId: commentId})
+                                                    .getOne()
+      // query(`SELECT * FROM public."likes"
+      //                                                 WHERE "userId" = $1 AND "postIdOrCommentId" = $2
+      // `, [userId, commentId])
 
-      // const resultLikeStatus = await this.likeModel.findOne({userId: userId, postIdOrCommentId: postId, status: likeStatus})
-      if (statusResult.length > 0) {
-          const likeResult = await this.commentsModel.query(`UPDATE public."likes"
-          SET "userLogin"=$3, status=$4, "createdAt"=$5
-          WHERE "userId" = $1 AND "postIdOrCommentId" = $2
-          `, [userId, commentId, login, likeStatus, createdAt])
-          if (likeResult[1] > 0) {return HttpStatus.NO_CONTENT} 
-          return HttpStatus.NOT_FOUND
+      if (statusResult) {
+          const likeResult = await this.commentsModel.createQueryBuilder()
+                                                      .update(Like)
+                                                      .set({
+                                                        status: likeStatus, createdAt: createdAt
+                                                      })
+                                                      .where({userId: userId, postIdOrCommentId: commentId})
+                                                      .execute()
+          // query(`UPDATE public."likes"
+          // SET "userLogin"=$3, status=$4, "createdAt"=$5
+          // WHERE "userId" = $1 AND "postIdOrCommentId" = $2
+          // `, [userId, commentId, login, likeStatus, createdAt])
+
+
+          if (!likeResult) {return HttpStatus.NOT_FOUND} 
+          return HttpStatus.NO_CONTENT
       } else {
-      // if (resultLikeStatus) {return true}
-        const likeId = new mongoose.Types.ObjectId()
-        const likeResult = await this.commentsModel.query(`
-        INSERT INTO public."likes"(
-          _id, "userId", "userLogin", "postIdOrCommentId", status, "createdAt")
-          VALUES ($1 ,$2, $3, $4, $5, $6)
-        `, [likeId,userId, login, commentId, likeStatus, createdAt])
+        const likeId = uuidv4()
+        
+        const likeResult = await this.commentsModel.createQueryBuilder()
+                                                    .insert()
+                                                    .into(Like)
+                                                    .values({
+                                                      _id: likeId,
+                                                      userId: {_id: userId},
+                                                      postIdOrCommentId: commentId,
+                                                      status: likeStatus,
+                                                      createdAt: createdAt
+                                                    })
+                                                    .execute()
+        
+        // query(`
+        // INSERT INTO public."likes"(
+        //   _id, "userId", "userLogin", "postIdOrCommentId", status, "createdAt")
+        //   VALUES ($1 ,$2, $3, $4, $5, $6)
+        // `, [likeId,userId, login, commentId, likeStatus, createdAt])
+
+
         return HttpStatus.NO_CONTENT
       }
     } catch (e) {
@@ -125,11 +173,15 @@ export class CommentsRepoPSQL {
   }
 
   async deletCommentsAll(): Promise<boolean> {
-    const commentsDeleted = await this.commentsModel.query(`
-    DELETE FROM public."comments"
-    `)
-    if (commentsDeleted[1] > 0) { return true }
-    return false
+    const commentsDeleted = await this.commentsModel.createQueryBuilder()
+                                                    .delete()
+                                                    .from(Like)
+                                                    .execute()
+      // query(`
+    // DELETE FROM public."comments"
+    // `)
+    if (!commentsDeleted) { return false }
+    return true
 }
 }
 
