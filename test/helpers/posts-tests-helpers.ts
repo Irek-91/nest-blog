@@ -8,6 +8,6 @@ export const createPost = async ( saLogin: string, saPwd: string, model: postInp
     return result
 }
 export const createPostSpecific = async ( saLogin: string, saPwd: string, blogId: string, model: postInputModelSpecific, httpServer: any) => {
-    const result = await request(httpServer).post(`/blogs/${blogId}/posts`).auth(saLogin, saPwd).send(model)
+    const result = await request(httpServer).post(`/sa/blogs/${blogId}/posts`).auth(saLogin, saPwd).send(model)
     return result
 }

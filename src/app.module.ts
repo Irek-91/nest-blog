@@ -118,7 +118,7 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
       database: process.env.PGDATABASELOCAL,
       autoLoadEntities: true,
       synchronize: true,
-      logging: true,
+      logging: false,
       namingStrategy: new CustomNaimingStrategy()
       //ssl: true,
       // connection: {

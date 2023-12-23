@@ -1,3 +1,4 @@
+import { Like } from './../../likes/entity/likes.entity';
 import { Device } from './../../securityDevices/db-psql/entity/devices.entity';
 import { User } from './entity/user.entity';
 import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
@@ -86,6 +87,11 @@ export class UsersRepositoryPSQL {
                                                   .from(Device)
                                                   .where({userId: userId})
                                                   .execute()
+      const deletedUserLikes = await this.userModel.createQueryBuilder()
+                                                  .delete()
+                                                  .from(Like)
+                                                  .where({userId: userId})
+                                                  .execute()
       const deletedUser = await this.userModel.createQueryBuilder()
                                                   .delete()
                                                   .from(User)
@@ -124,6 +130,10 @@ export class UsersRepositoryPSQL {
       const deletedDevices = await this.userModel.createQueryBuilder()
                                                 .delete()
                                                 .from(Device)
+                                                .execute()
+      const deletedLikes = await this.userModel.createQueryBuilder()
+                                                .delete()
+                                                .from(Like)
                                                 .execute()
 
       const deletedUsers = await this.userModel.createQueryBuilder()

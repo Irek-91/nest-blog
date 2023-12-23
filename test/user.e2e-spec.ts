@@ -24,9 +24,8 @@ describe('tests for users', () => {
   
       //appController = app.get<AppController>(AppController);
       app = moduleFixture.createNestApplication()
-          appSettings(app)
           await app.init()
-          httpServer = app.getHttpServer()
+        httpServer = app.getHttpServer()
     await request(httpServer).delete('/testing/all-data')
 
     })

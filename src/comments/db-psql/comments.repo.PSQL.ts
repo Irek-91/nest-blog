@@ -173,9 +173,10 @@ export class CommentsRepoPSQL {
   }
 
   async deletCommentsAll(): Promise<boolean> {
+    
     const commentsDeleted = await this.commentsModel.createQueryBuilder()
                                                     .delete()
-                                                    .from(Like)
+                                                    .from(Comment)
                                                     .execute()
       // query(`
     // DELETE FROM public."comments"

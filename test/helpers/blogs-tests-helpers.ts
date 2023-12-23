@@ -6,3 +6,10 @@ export const createBlog = async ( saLogin: string, saPwd: string, model: blogInp
     const result = await request(httpServer).post('/blogs').auth(saLogin, saPwd).send(model)
     return result
 }
+
+
+export const createBlogSa = async ( saLogin: string, saPwd: string, model: blogInput, httpServer: any) => {
+     
+    const result = await request(httpServer).post('/sa/blogs').auth(saLogin, saPwd).send(model)
+    return result
+}
