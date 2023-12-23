@@ -7,6 +7,7 @@ export class Comment {
     @PrimaryColumn()
     _id: string
 
+    
     @ManyToOne('Post', 'posts')
     @JoinColumn({
         name: 'postId'
