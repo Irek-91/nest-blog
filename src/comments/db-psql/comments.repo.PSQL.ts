@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Comment } from './entity/comments.entity';
 import { User } from '../../users/db-psql/entity/user.entity';
 import { Like } from '../../likes/entity/likes.entity';
+import { log } from 'console';
 
 
 @Injectable()
@@ -41,7 +42,7 @@ export class CommentsRepoPSQL {
                                                     content: content,
                                                     createdAt: createdAt,
                                                     userId: {_id: userId},
-                                                  })    
+                                                  }).execute()
     // query(`
     //   INSERT INTO public."comments"(
     //   _id, "postId", content, "createdAt", "userId", "userLogin")
@@ -133,7 +134,8 @@ export class CommentsRepoPSQL {
                                                       .set({
                                                         status: likeStatus, createdAt: createdAt
                                                       })
-                                                      .where({userId: userId, postIdOrCommentId: commentId})
+                                                      .where({userId: userId})
+                                                      .andWhere({postIdOrCommentId: commentId})
                                                       .execute()
           // query(`UPDATE public."likes"
           // SET "userLogin"=$3, status=$4, "createdAt"=$5

@@ -16,12 +16,9 @@ export class Post {
     content: string
 
     @Column()
-    blogName: string
-
-    @Column()
     createdAt: string
 
-    @ManyToOne('Blog', 'blogs', {nullable: true})
+    @ManyToOne((type) => Blog, (blogs) => blogs._id, {nullable: true})
     @JoinColumn({name: 'blogId'})
     public blogId: Blog
 

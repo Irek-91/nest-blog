@@ -24,47 +24,6 @@ export class PostRepoPSQL {
         await post.save()
     }
 
-    async deletePostId(id: string): Promise<Boolean | null> {
-        const likesByPostId = await this.postModel.createQueryBuilder()
-            .delete()
-            .from(Like)
-            .where({
-                postIdOrCommentId: id
-            })
-
-        const postDelete = await this.postModel.createQueryBuilder()
-            .delete()
-            .from(Post)
-            .where({
-                _id: id
-            })
-            .execute()
-        // (`
-        // DELETE FROM public."posts"
-        // WHERE "_id" = $1
-        // `, [id])
-        //findOne({ _id: new ObjectId(id) })
-        if (!postDelete.affected) { return null }
-        else { return true }
-    }
-
-    async deletePostsByBlogId(blogId: string): Promise<Boolean | null> {
-        const postsDeleted = await this.postModel.createQueryBuilder()
-            .delete()
-            .from(Post)
-            .where({
-                blogId: blogId
-            })
-            .execute()
-        // query(`
-        //     DELETE FROM public."posts"
-        //     WHERE "blogId" = $1`, [blogId])
-        //findOne({ _id: new ObjectId(id) })
-        if (!postsDeleted.affected) { return null }
-        else { return true }
-    }
-
-
     async createdPost(newPost: postMongoDb): Promise<true | null> {
         try {
             const postCreated = await this.postModel.createQueryBuilder()
@@ -76,7 +35,6 @@ export class PostRepoPSQL {
                     shortDescription: newPost.shortDescription,
                     content: newPost.content,
                     blogId: { _id: newPost.blogId },
-                    blogName: newPost.blogName,
                     createdAt: newPost.createdAt
                 })
                 .execute()
@@ -101,17 +59,24 @@ export class PostRepoPSQL {
     async updatePostId(id: string | ObjectId, title: string, shortDescription: string, content: string): Promise<boolean> {
         try {
 
-            const postUpdate = await this.postModel.query(`
-        UPDATE public."posts"
-	    SET title=$2, "shortDescription"=$3, content=$4
-	    WHERE "_id" = $1
-        `, [id, title, shortDescription, content])
-            // findOne({ _id: new ObjectId(id) })
-            // if (!postInstance) return false
-            // postInstance.title = title
-            // postInstance.shortDescription = shortDescription
-            // postInstance.content = content
-            // postInstance.save()
+            const postUpdate = await this.postModel.createQueryBuilder()
+                .update(Post)
+                .set({
+                    title: title,
+                    shortDescription: shortDescription,
+                    content: content
+                })
+                .where({
+                    _id: id
+                })
+                .execute()
+
+            //     query(`
+            // UPDATE public."posts"
+            // SET title=$2, "shortDescription"=$3, content=$4
+            // WHERE "_id" = $1
+            // `, [id, title, shortDescription, content])
+
             return true
         } catch (e) { return false }
     }
@@ -119,28 +84,29 @@ export class PostRepoPSQL {
     async updateLikeStatusPostId(postId: string, userId: string, likeStatus: string): Promise<true | null> {
         try {
             const createdAt = (new Date()).toISOString()
-            const statusResult = await this.postModel.getRepository(Like)
-                .createQueryBuilder()
-                .select()
-                .where({ userId: userId })
-                .andWhere({ postIdOrCommentId: postId })
-                .getOne()
-       
 
-            if (statusResult) {
-                const likeResult = await this.postModel.createQueryBuilder()
+            const status = await this.postModel.getRepository(Like)
+                .createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
+                .where('u._id = :userId', { userId: userId })
+                .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
+                .getOne()
+
+            if (status) {
+                const likeResult = await this.postModel
+                    .createQueryBuilder()
                     .update(Like)
                     .set({
                         status: likeStatus, createdAt: createdAt
                     })
-                    .where({ userId: userId, postIdOrCommentId: postId })
+                    .where({ userId: userId })
+                    .andWhere({ postIdOrCommentId: postId })
                     .execute()
                 // query(`UPDATE public."likes"
                 // SET "userLogin"=$3, status=$4, "createdAt"=$5
                 // WHERE "userId" = $1 AND "postIdOrCommentId" = $2
                 // `, [userId, commentId, login, likeStatus, createdAt])
-
-
+                
                 if (!likeResult) { return null }
                 return true
             } else {
@@ -172,4 +138,39 @@ export class PostRepoPSQL {
         if (postsDeleted[1] > 0) { return true }
         return false
     }
+
+    async deletePostId(id: string): Promise<Boolean | null> {
+        const likesByPostId = await this.postModel.createQueryBuilder()
+            .delete()
+            .from(Like)
+            .where({
+                postIdOrCommentId: id
+            }).execute()
+
+        const postDelete = await this.postModel.createQueryBuilder()
+            .delete()
+            .from(Post)
+            .where({
+                _id: id
+            })
+            .execute()
+
+        if (!postDelete.affected) { return null }
+        else { return true }
+    }
+
+    async deletePostsByBlogId(blogId: string): Promise<Boolean | null> {
+        const postsDeleted = await this.postModel.createQueryBuilder()
+            .delete()
+            .from(Post)
+            .where({
+                blogId: blogId
+            })
+            .execute()
+
+        if (!postsDeleted.affected) { return null }
+        else { return true }
+    }
+
+
 }

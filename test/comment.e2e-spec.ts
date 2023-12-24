@@ -17,26 +17,27 @@ import { log } from 'console'
 
 describe ('tests for comments', () => {
 
-    let app: INestApplication;
-    let httpServer: any;
-    beforeAll(async () => {
-        const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [AppModule],
-            //controllers: [AppModule, AppController],
-            //providers: [BlogsService],
-          }).compile();
-      
-        app = moduleFixture.createNestApplication()
-        appSettings(app)
-        await app.init()
-        httpServer = app.getHttpServer()
-        await request(httpServer).delete('/testing/all-data')
+  let app: INestApplication;
+  let httpServer: any;
+  beforeAll(async () => {
+      const moduleFixture: TestingModule = await Test.createTestingModule({
+          imports: [AppModule],
+          //controllers: [AppModule, AppController],
+          //providers: [BlogsService],
+        }).compile();
+    
+      app = moduleFixture.createNestApplication()
+      appSettings(app)
+      await app.init()
+      httpServer = app.getHttpServer()
+      await request(httpServer).delete('/testing/all-data')
 
-    })
+  })
 
-    afterAll (async () => {
-        await app.close()
-    })
+  afterAll (async () => {
+      await app.close()
+  })
+
     describe('действия с коментариями', () => {
         it ('обновление коментария ', async () => {
             const userModel: userInputModel = {
@@ -74,8 +75,13 @@ describe ('tests for comments', () => {
                 content: "coments of post!!!!!!!!!!!!!!!"    
             }
     
-            const createCommment = await createComment(post.id, newCommentData, 201, new ObjectId(userOne.id), httpServer)
+            const createCommment = await createComment(post.id, newCommentData, 201, userOne.id, httpServer)
             const comment = createCommment.createdComment
+            const commentId = createCommment.createdComment!.id
+
+            const resultCreated = await request(httpServer).get(`/comments/${commentId}`)
+            expect(resultCreated.status).toBe(200)
+
             expect.setState({comment: comment})      
 
             const AccessToken = jwt.sign({userId : userOne.id}, settings.JWT_SECRET, {expiresIn: 100})
@@ -84,7 +90,6 @@ describe ('tests for comments', () => {
             const updateCommentData = {
                 content: "update coments of post!!!!!!!!!!!!!!!"    
             }
-            const commentId = createCommment.createdComment!.id
             const result = await request(httpServer).put(`/comments/${commentId}`)
                                       .set(headersJWT)
                                       .send(updateCommentData)

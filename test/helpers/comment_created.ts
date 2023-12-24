@@ -8,14 +8,14 @@ export type comenntInput = {
     content: string  
 }
 
-export const createHeadersJWT = async (userId: ObjectId) => {
+export const createHeadersJWT = async (userId: string) => {
     const AccessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 100})
     const headersJWT = {Authorization: `Bearer ${AccessToken}`}
     return headersJWT
 }
 
 export const createComment = async (postId: string, data: comenntInput, 
-                                    expectedStatusCode: number, userOneId : ObjectId, httpServer: any)
+                                    expectedStatusCode: number, userOneId : string, httpServer: any)
                                     : Promise<{ response: request.Response; createdComment: null | commentViewModel;}
                                     > => {
         const AccessToken = jwt.sign({userId : userOneId}, settings.JWT_SECRET, {expiresIn: 100})

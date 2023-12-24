@@ -24,6 +24,9 @@ export class Blog {
     @Column()
     isMembership: boolean
 
-    @OneToMany('Post', 'posts', {nullable: true})
-    posts: Post[]
+    @OneToMany((type) => Post, (post) => post._id, {nullable: true})
+    @JoinColumn({
+        name: 'postId'
+    })
+    public postId: Post[]
 }

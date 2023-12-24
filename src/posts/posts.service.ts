@@ -22,7 +22,7 @@ export class PostsService {
         protected postQueryRepo: PostQueryRepoPSQL,
         protected blogQueryRepository: BlogsQueryRepoPSQL) { }
         
-    async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost> {
+    async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost | null> {
         return this.postQueryRepo.findPost(paginationQuery, userId)
     }
 

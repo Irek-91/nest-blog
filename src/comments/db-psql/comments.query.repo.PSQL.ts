@@ -16,28 +16,29 @@ export class CommentsQueryRepoPSQL {
     try {
 
       const comment = await this.commetsModel.getRepository(Comment)
-        .createQueryBuilder()
+        .createQueryBuilder('c')
+        .leftJoinAndSelect('c.userId', 'u')
         .where({
           _id: commentId
         }).getOne()
+
+
       if (!comment) {
         return null
       }
       let myStatus = 'None'
+      
       if (userId) {
-        const like = await this.commetsModel.getRepository(Like).createQueryBuilder()
-          .where({
-            userId: userId
-          })
-          .andWhere({
-            postIdOrCommentId: commentId
-          })
+        const status = await this.commetsModel.getRepository(Like)
+          .createQueryBuilder('l')
+          .leftJoinAndSelect('l.userId', 'u')
+          .where('u._id = :userId', { userId: userId })
+          .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: commentId })
           .getOne()
-        if (like) {
-          myStatus = like.status
+        if (status) {
+          myStatus = status.status
         }
       }
-
       const likesCount = await this.commetsModel.getRepository(Like).createQueryBuilder()
         .select()
         .where({
@@ -47,7 +48,6 @@ export class CommentsQueryRepoPSQL {
           status: 'Like'
         })
         .getCount()
-
       const dislikesCount = await this.commetsModel.getRepository(Like).createQueryBuilder()
         .select()
         .where({
@@ -102,17 +102,18 @@ export class CommentsQueryRepoPSQL {
 
       const comments = await this.commetsModel.getRepository(Comment)
         .createQueryBuilder('c')
-        .leftJoinAndSelect('c.postId', 'p')
+        //.leftJoinAndSelect('c.postId', 'p')
         .leftJoinAndSelect('c.userId', 'u')
         .where('c.postId = :postId', { postId: postId })
         .orderBy(`c.${pagination.sortBy}`, pagination.sortDirection)
         .skip(pagination.skip)
         .take(pagination.pageSize)
         .getMany()
-      log(comments)
-      if (!comments) { }
+
+      // if (!comments) { }
 
       const pagesCount = Math.ceil(totalCount / pagination.pageSize)
+      
 
 
       const mappedComments: any = await Promise.all(comments.map(async c => {
@@ -121,63 +122,62 @@ export class CommentsQueryRepoPSQL {
         const commentId = c._id.toString()
 
         if (userId) {
-          const like = await this.commetsModel.getRepository(Like).createQueryBuilder()
-            .where({
-              userId: userId
-            })
-            .andWhere({
-              postIdOrCommentId: commentId
-            })
+          const status = await this.commetsModel.getRepository(Like)
+            .createQueryBuilder('l')
+            .leftJoinAndSelect('l.userId', 'u')
+            .where('u._id = :userId', { userId: userId })
+            .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: commentId })
             .getOne()
-          if (like) {
-            myStatus = like.status
-          }
-          const likesCount = await this.commetsModel.getRepository(Like).createQueryBuilder()
-            .select()
-            .where({
-              postIdOrCommentId: commentId
-            })
-            .andWhere({
-              status: 'Like'
-            })
-            .getCount()
-
-          const dislikesCount = await this.commetsModel.getRepository(Like).createQueryBuilder()
-            .select()
-            .where({
-              postIdOrCommentId: commentId
-            })
-            .andWhere({
-              status: 'Dislike'
-            })
-            .getCount()
-
-
-          return {
-            id: commentId,
-            content: c.content,
-            commentatorInfo: {
-              userId: c.userId._id,
-              userLogin: c.userId.login
-            },
-            createdAt: c.createdAt,
-            likesInfo: {
-              likesCount: likesCount,
-              dislikesCount: dislikesCount,
-              myStatus: myStatus
-            }
+          if (status) {
+            myStatus = status.status
           }
         }
-      }))
+        const likesCount = await this.commetsModel.getRepository(Like).createQueryBuilder()
+          .select()
+          .where({
+            postIdOrCommentId: commentId
+          })
+          .andWhere({
+            status: 'Like'
+          })
+          .getCount()
 
-      return {
-        pagesCount: pagesCount,
-        page: pagination.pageNumber,
-        pageSize: pagination.pageSize,
-        totalCount: totalCount,
-        items: mappedComments
+        const dislikesCount = await this.commetsModel.getRepository(Like).createQueryBuilder()
+          .select()
+          .where({
+            postIdOrCommentId: commentId
+          })
+          .andWhere({
+            status: 'Dislike'
+          })
+          .getCount()
+
+
+        return {
+          id: commentId,
+          content: c.content,
+          commentatorInfo: {
+            userId: c.userId._id,
+            userLogin: c.userId.login
+          },
+          createdAt: c.createdAt,
+          likesInfo: {
+            likesCount: likesCount,
+            dislikesCount: dislikesCount,
+            myStatus: myStatus
+          }
+        }
       }
-    } catch (e) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
-  }
+      ))
+    
+    return {
+      pagesCount: pagesCount,
+      page: pagination.pageNumber,
+      pageSize: pagination.pageSize,
+      totalCount: totalCount,
+      items: mappedComments
+    }
+  } catch(e) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
+}
 }
 

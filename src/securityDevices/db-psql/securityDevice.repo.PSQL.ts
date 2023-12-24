@@ -14,8 +14,8 @@ import { log } from "console";
 
 export class SecurityDeviceRepoPSQL {
     constructor(@InjectDataSource() private devicesMododel: DataSource,
-    @InjectEntityManager() private entityManager: EntityManager,
-    protected jwtService: JwtService
+        @InjectEntityManager() private entityManager: EntityManager,
+        protected jwtService: JwtService
 
     ) { }
 
@@ -29,23 +29,23 @@ export class SecurityDeviceRepoPSQL {
             `
             // const res = await this.devicesMododel.query(query)
             const res = await this.entityManager
-                                                //.getRepository(Device)
-                                                .createQueryBuilder()
-                                                //.relation(User, 'devices')
-                                                //.of({deviceId: newDevice.deviceId})
-                                                .insert()
-                                                .into(Device)
-                                                .values({
-                                                   deviceId: newDevice.deviceId,
-                                                   issuedAt: newDevice.issuedAt,
-                                                   expirationDate: newDevice.expirationDate,
-                                                   IP: newDevice.IP,
-                                                   deviceName: newDevice.deviceName,
-                                                   userId: {_id: newDevice.userId}
-                                                })
-                                                .execute()
-                                                
-                                                //.execute()
+                //.getRepository(Device)
+                .createQueryBuilder()
+                //.relation(User, 'devices')
+                //.of({deviceId: newDevice.deviceId})
+                .insert()
+                .into(Device)
+                .values({
+                    deviceId: newDevice.deviceId,
+                    issuedAt: newDevice.issuedAt,
+                    expirationDate: newDevice.expirationDate,
+                    IP: newDevice.IP,
+                    deviceName: newDevice.deviceName,
+                    userId: { _id: newDevice.userId }
+                })
+                .execute()
+
+            //.execute()
             return true
         }
         catch (e) { return null }
@@ -57,22 +57,22 @@ export class SecurityDeviceRepoPSQL {
             const refreshToken = await this.jwtService.createdJWTRefreshToken(userId, deviceId)
             const issuedAt = await this.jwtService.getIssueAttByRefreshToken(refreshToken)
             const expirationDate = await this.jwtService.getExpiresAttByRefreshToken(refreshToken)
-          
+
             // const query =`UPDATE public."devices"
             //                 SET "issuedAt" = '${issuedAt}',
             //                     "expirationDate" = '${expirationDate}', "IP" = '${IP}'
             //                 WHERE "userId" = $1 AND "deviceId" = $2`
-            
+
             const res = await this.devicesMododel.createQueryBuilder()
-                                                .update(Device)
-                                                .set({
-                                                    issuedAt : issuedAt,
-                                                    expirationDate: expirationDate,
-                                                    IP: IP
-                                                })
-                                                .where({deviceId: deviceId})
-                                                .andWhere({userId: userId})
-                                                .execute()
+                .update(Device)
+                .set({
+                    issuedAt: issuedAt,
+                    expirationDate: expirationDate,
+                    IP: IP
+                })
+                .where({ deviceId: deviceId })
+                .andWhere({ userId: userId })
+                .execute()
 
             return refreshToken
         }
@@ -93,41 +93,41 @@ export class SecurityDeviceRepoPSQL {
 
         try {
             const res = await this.devicesMododel.getRepository(Device)
-                                                .createQueryBuilder('d')
-                                                .leftJoinAndSelect('d.userId', 'users')
-                                                //.select(['users._id'])
-                                                .where('d.deviceId = :id', {id: deviceId})
-                                                .andWhere('users._id = :userId', {userId: userId})
-                                                .getOne()
+                .createQueryBuilder('d')
+                .leftJoinAndSelect('d.userId', 'users')
+                //.select(['users._id'])
+                .where('d.deviceId = :id', { id: deviceId })
+                .andWhere('users._id = :userId', { userId: userId })
+                .getOne()
             // query(`
             // SELECT * FROM public."devices" as d
             // WHERE d."userId" = $1 AND d."deviceId" = $2
             // `, [userId, deviceId])
             if (!res) { return null }
             //const devicesOutput: devicesPSQL = res.map((b) => {
-                return {
-                    issuedAt: res.issuedAt,
-                    expirationDate: res.expirationDate,
-                    deviceId: res.deviceName,
-                    IP: res.IP,
-                    deviceName: res.deviceName,
-                    userId: res.userId._id.toString() 
-                }
-              //})
-              //return devicesOutput        
+            return {
+                issuedAt: res.issuedAt,
+                expirationDate: res.expirationDate,
+                deviceId: res.deviceName,
+                IP: res.IP,
+                deviceName: res.deviceName,
+                userId: res.userId._id.toString()
             }
+            //})
+            //return devicesOutput        
+        }
         catch (e) { return null }
     }
 
     async deleteTokenAndDevice(userId: string, deviceId: string): Promise<true | null> {
         try {
             const res = await this.devicesMododel
-                                                .createQueryBuilder()
-                                                .delete()
-                                                .from(Device)
-                                                .where({deviceId: deviceId})
-                                                .andWhere({userId: userId}) 
-                                                .execute()          
+                .createQueryBuilder()
+                .delete()
+                .from(Device)
+                .where({ deviceId: deviceId })
+                .andWhere({ userId: userId })
+                .execute()
             // query(`
             // DELETE FROM public."devices" as d
             // WHERE d."userId" = $1 AND d."deviceId" = $2
@@ -140,10 +140,10 @@ export class SecurityDeviceRepoPSQL {
 
     async deleteDevicesAll() {
         const deletResult = await this.devicesMododel
-                                                    .createQueryBuilder()
-                                                    .delete()
-                                                    .from(Device)
-                                                    .execute()                                          
+            .createQueryBuilder()
+            .delete()
+            .from(Device)
+            .execute()
         // query(`
         // DELETE FROM public."devices"
         // `)
@@ -154,11 +154,11 @@ export class SecurityDeviceRepoPSQL {
 
         try {
             const res = await this.devicesMododel.getRepository(Device)
-                                                    .createQueryBuilder('d')
-                                                    .leftJoinAndSelect('d.userId', 'users')
-                                                    .select(['users._id', 'd.issuedAt', 'd.expirationDate', 'd.deviceId', 'd.IP', 'd.deviceName'])
-                                                    .where('d.userId = :userId', {userId: userId})
-                                                    .getMany()           
+                .createQueryBuilder('d')
+                .leftJoinAndSelect('d.userId', 'users')
+                .select(['users._id', 'd.issuedAt', 'd.expirationDate', 'd.deviceId', 'd.IP', 'd.deviceName'])
+                .where('d.userId = :userId', { userId: userId })
+                .getMany()
             // query(`
             // SELECT *FROM public."devices" as u
             // WHERE u."userId" = $1
@@ -174,11 +174,11 @@ export class SecurityDeviceRepoPSQL {
                     deviceId: b.deviceId,
                     IP: b.IP,
                     deviceName: b.deviceName,
-                    userId: b.userId._id 
+                    userId: b.userId._id
                 }
-              })
-              return devicesOutput
-            
+            })
+            return devicesOutput
+
         }
         catch (e) { return null }
     }
@@ -186,11 +186,11 @@ export class SecurityDeviceRepoPSQL {
     async deleteDeviceId(deviceId: string): Promise<null | true> {
         try {
             const res = await this.devicesMododel
-                                                .createQueryBuilder()
-                                                .delete()
-                                                .from(Device)
-                                                .where({deviceId: deviceId})
-                                                .execute()
+                .createQueryBuilder()
+                .delete()
+                .from(Device)
+                .where({ deviceId: deviceId })
+                .execute()
 
             // query(`
             // DELETE FROM public."devices" as u
@@ -207,11 +207,11 @@ export class SecurityDeviceRepoPSQL {
 
         try {
             const checkUserIdByDeviceId = await this.devicesMododel.getRepository(Device)
-                                                                    .createQueryBuilder()
-                                                                    .select()
-                                                                    .where({deviceId: deviceId})
-                                                                    .andWhere({userId: userId})
-                                                                    .getOne()
+                .createQueryBuilder()
+                .select()
+                .where({ deviceId: deviceId })
+                .andWhere({ userId: userId })
+                .getOne()
             // query(`
             // SELECT * FROM public."devices" as u 
             // WHERE u."deviceId" = $1 AND u."userId" = $2
@@ -219,11 +219,11 @@ export class SecurityDeviceRepoPSQL {
             // )
             if (!checkUserIdByDeviceId) { return null }
             const res = await this.devicesMododel.getRepository(Device)
-                                                .createQueryBuilder()
-                                                .delete()
-                                                .where({userId: userId})
-                                                .andWhere({deviceId: Not(deviceId)})
-                                                .execute()
+                .createQueryBuilder()
+                .delete()
+                .where({ userId: userId })
+                .andWhere({ deviceId: Not(deviceId) })
+                .execute()
             // query(`
             // DELETE FROM public."devices" as d
             // WHERE d."userId" = $1 AND d."deviceId" != $2
@@ -239,27 +239,27 @@ export class SecurityDeviceRepoPSQL {
     async findOneDeviceId(deviceId: string): Promise<devicesPSQL | null> {
         try {
             const device = await this.devicesMododel.getRepository(Device)
-                                                    .createQueryBuilder('d')
-                                                    .leftJoinAndSelect('d.userId', 'users')
-                                                    //.select('users._id')
-                                                    .where('d.deviceId = :deviceId',{deviceId: deviceId})
-                                                    .getOne()
+                .createQueryBuilder('d')
+                .leftJoinAndSelect('d.userId', 'users')
+                //.select('users._id')
+                .where('d.deviceId = :deviceId', { deviceId: deviceId })
+                .getOne()
 
             // query(
             //     `SELECT * FROM public."devices" as u WHERE u."deviceId" = $1`, [deviceId]
             // );
             if (!device) { return null }
             //const deviceIdOutput : devicesPSQL = device.map((b) => {
-                return {
-                    issuedAt: device.issuedAt,
-                    expirationDate: device.expirationDate,
-                    deviceId: device.deviceName,
-                    IP: device.IP,
-                    deviceName: device.deviceName,
-                    userId: device.userId._id
-                }
+            return {
+                issuedAt: device.issuedAt,
+                expirationDate: device.expirationDate,
+                deviceId: device.deviceName,
+                IP: device.IP,
+                deviceName: device.deviceName,
+                userId: device.userId._id
+            }
             //})
-           // return deviceIdOutput 
+            // return deviceIdOutput 
         }
         catch (e) { return null }
     }

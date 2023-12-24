@@ -8,7 +8,7 @@ export class Comment {
     _id: string
 
     
-    @ManyToOne('Post', 'posts')
+    @ManyToOne((type) => Post, (post) => post._id)
     @JoinColumn({
         name: 'postId'
     })
@@ -20,7 +20,7 @@ export class Comment {
     @Column()
     createdAt: string
 
-    @ManyToOne('User', 'users')
+    @ManyToOne((type) => User, (user) => user._id)
     @JoinColumn({
         name: 'userId'
     })

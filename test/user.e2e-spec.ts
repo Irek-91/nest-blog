@@ -15,7 +15,7 @@ describe('tests for users', () => {
     let httpServer: any;
   
   
-    beforeEach(async () => {
+    beforeAll(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
         //controllers: [],
@@ -24,6 +24,7 @@ describe('tests for users', () => {
   
       //appController = app.get<AppController>(AppController);
       app = moduleFixture.createNestApplication()
+      appSettings(app)
           await app.init()
         httpServer = app.getHttpServer()
     await request(httpServer).delete('/testing/all-data')

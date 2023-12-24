@@ -45,8 +45,6 @@ export class TestingController {
   @Delete()
   async deleteAll() {
     await this.userModel.deleteUserAll();
-    await this.deviceModel.deleteDevices()
-    await this.likeModel.deletedLikesAll();
     await this.commentModel.deleteCommentsAll();
     await this.postModel.deletePostAll();
     await this.blogModel.deleteBlogAll();

@@ -38,7 +38,7 @@ export class PostsController {
             userId = null
         }
         const paginationPost = this.pagination.getPaginationFromQuery(query)
-        const posts: paginatorPost = await this.postsService.findPost(paginationPost, userId);
+        const posts: paginatorPost | null = await this.postsService.findPost(paginationPost, userId);
         if (!posts) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {

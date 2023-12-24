@@ -1,7 +1,7 @@
 import { userInputModel } from './../dist/users/models/users-model.d';
 import { postInputModel, postInputModelSpecific } from 'src/posts/model/post-model';
 import { blogInput } from 'src/blogs/models/blogs-model';
-import { appSettings } from 'src/app.settings';
+import { appSettings } from '../src/app.settings';
 import { AppModule } from '../src/app.module';
 import request from 'supertest'
 import { MongoClient, ObjectId } from 'mongodb';
@@ -32,17 +32,19 @@ describe ('tests for posts', () => {
       appSettings(app)
       await app.init()
       httpServer = app.getHttpServer()
-      await request(app).delete('/testing/all-data')
+      await request(httpServer).delete('/testing/all-data')
 
     })
 
     afterAll (async () => {
       await app.close()
     })
+
+    
     describe('return post tests', () => {
 
     it ('return posts ', async () => {
-        const creatResponse = await request(app)
+        const creatResponse = await request(httpServer)
             .get('/posts')
             .expect(200)
         const getPosts = creatResponse.body
@@ -56,7 +58,7 @@ describe ('tests for posts', () => {
     })
 
     it ('error 404 is returned, there is no such user', async () => {
-        await request(app)
+        await request(httpServer)
                 .get('/posts/:5')
                 .expect(404)
     })
@@ -139,7 +141,7 @@ describe ('tests for posts', () => {
         const {post} = expect.getState()
         const {blog} = expect.getState()
 
-        const res = await request(app).get(`/posts/${post.id}`)
+        const res = await request(httpServer).get(`/posts/${post.id}`)
         expect(res.status).toBe(200)
         expect(res.body).toEqual({
             id: expect.any(String),
@@ -168,11 +170,11 @@ describe ('tests for posts', () => {
             content: "string",
             blogId: blog.id
           }
-        const result = await request(app).put(`/posts/${post.id}`)
+        const result = await request(httpServer).put(`/posts/${post.id}`)
                                       .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
                                       .send(updatePostData)
                                       .expect(204)
-        const updateResult = await request(app).get(`/posts/${post.id}`)
+        const updateResult = await request(httpServer).get(`/posts/${post.id}`)
 
         expect(result.status).toBe(204)
         expect(updateResult.body).toEqual({
@@ -208,8 +210,8 @@ describe ('tests for posts', () => {
                 content: "coments of post!!!!!!!!!!!!!!!"    
         }
     
-        const createCommment = await createComment(post.id, newCommentData, 201, new ObjectId(userOne.user.id), httpServer)
-        const result = await request(app).get(`/posts/${post.id}/comments`)
+        const createCommment = await createComment(post.id, newCommentData, 201, userOne.user.id, httpServer)
+        const result = await request(httpServer).get(`/posts/${post.id}/comments`)
         expect(result.status).toBe(200)
         expect(result.body).toEqual({
                 pagesCount: expect.any(Number),
@@ -237,7 +239,7 @@ describe ('tests for posts', () => {
             content: "comentlength min 20"    
         }
 
-        const commentIncorect = await createComment(post.id, dataIncorect, 400, new ObjectId(userOne.user.id), httpServer)
+        const commentIncorect = await createComment(post.id, dataIncorect, 400, userOne.user.id, httpServer)
         expect(commentIncorect.response.status).toBe(400)
         expect(commentIncorect.response.body).toEqual(
                 {
@@ -259,7 +261,7 @@ describe ('tests for posts', () => {
         "likeStatus": ""
       }
       
-      const getResultUpdateLikeIncorect = await request(app).put(`/posts/${post.id}/like-status`)
+      const getResultUpdateLikeIncorect = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userOne.headers)
                     .send(likeStatusDataIncorect)
                     .expect(400)
@@ -284,12 +286,12 @@ describe ('tests for posts', () => {
       const like = {
         "likeStatus": "Like"
       }
-      const updateLike = await request(app).put(`/posts/${post.id}/like-status`)
+      const updateLike = await request(httpServer).put(`/posts/${post.id}/like-status`)
                       .set(userOne.headers)
                       .send(like)
                       .expect(204)
 
-      const resUpdateLikeForUserOne = await request(app).get(`/posts/${post.id}`)
+      const resUpdateLikeForUserOne = await request(httpServer).get(`/posts/${post.id}`)
                     .set(userOne.headers)
 
       expect(resUpdateLikeForUserOne.body).toEqual({
@@ -325,12 +327,12 @@ describe ('tests for posts', () => {
         const like = {
           "likeStatus": "Like"
         }
-      const againUpdateLike = await request(app).put(`/posts/${post.id}/like-status`)
+      const againUpdateLike = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userOne.headers)
                     .send(like)
                     .expect(204)
 
-      const resUpdateLikeOfLike = await request(app).get(`/posts/${post.id}`)
+      const resUpdateLikeOfLike = await request(httpServer).get(`/posts/${post.id}`)
                                 .set(userOne.headers)
       expect(resUpdateLikeOfLike.body).toEqual({
           id: post.id,
@@ -353,11 +355,11 @@ describe ('tests for posts', () => {
           }
       })
 
-      const updateLikeOfDislike = await request(app).put(`/posts/${post.id}/like-status`)
+      const updateLikeOfDislike = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userOne.headers)
                     .send(dislike)
                     .expect(204)
-      const resUpdateLikeOfDislike = await request(app).get(`/posts/${post.id}`)
+      const resUpdateLikeOfDislike = await request(httpServer).get(`/posts/${post.id}`)
                                 .set(userOne.headers)              
 
       expect(resUpdateLikeOfDislike.body).toEqual({
@@ -434,29 +436,29 @@ describe ('tests for posts', () => {
       }
 
 
-      const getResultUpdateLike = await request(app).put(`/posts/${post.id}/like-status`)
+      const getResultUpdateLike = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userOne.headers)
                     .send(like)
                     .expect(204)
-      const getResultUpdateLikeTwo = await request(app).put(`/posts/${post.id}/like-status`)
+      const getResultUpdateLikeTwo = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userTwo.headers)
                     .send(dislike)
                     .expect(204)
-      const getResultUpdateFree = await request(app).put(`/posts/${post.id}/like-status`)
+      const getResultUpdateFree = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userThree.headers)
                     .send(like)
                     .expect(204)
-      const getResultUpdateFour = await request(app).put(`/posts/${post.id}/like-status`)
+      const getResultUpdateFour = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userFour.headers)
                     .send(like)
                     .expect(204)
-      const getResultUpdateFive = await request(app).put(`/posts/${post.id}/like-status`)
+      const getResultUpdateFive = await request(httpServer).put(`/posts/${post.id}/like-status`)
                     .set(userFive.headers)
                     .send(like)
                     .expect(204)
 
 
-      const res = await request(app).get(`/posts/${post.id}`)
+      const res = await request(httpServer).get(`/posts/${post.id}`)
                     .set(userOne.headers)
 
       expect(res.body).toEqual({
