@@ -11,7 +11,7 @@ export type QueryPaginationTypeUser = {
 }
 export type QueryPaginationType = {
   searchNameTerm: string
-  sortBy: 'createdAt' | 'name'
+  sortBy: string
   sortDirection: 'ASC' | 'DESC'
   pageNumber: number
   pageSize: number

@@ -23,74 +23,78 @@ export class PostQueryRepoPSQL {
             .skip(paginationQuery.skip)
             .take(paginationQuery.pageSize)
             .getMany()
-
+        
         if (!posts) {
             return null
         }
-        const totalCount = (posts).length
+
+        const totalCount = await this.postModel.getRepository(Post)
+            .createQueryBuilder()
+            .getCount()
+
         const pagesCount = Math.ceil(totalCount / paginationQuery.pageSize)
 
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
             const postId = b._id.toString()
-                if (userId) {
-                    const status = await this.postModel.getRepository(Like)
-                        .createQueryBuilder('l')
-                        .leftJoinAndSelect('l.userId', 'u')
-                        .where('u._id = :userId', { userId: userId })
-                        .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
-                        .getOne()
-                    if (status) {
-                        myStatus = status.status
-                    }
-                }
-                const likesCount = await this.postModel.getRepository(Like).createQueryBuilder()
-                    .select()
-                    .where({ postIdOrCommentId: postId })
-                    .andWhere({ status: 'Like' })
-                    .getCount()
-
-                const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder()
-                    .select()
-                    .where({ postIdOrCommentId: postId })
-                    .andWhere({ status: 'Dislike' })
-                    .getCount()
-
-               
-                const newestLikes = await this.postModel.getRepository(Like)
+            if (userId) {
+                const status = await this.postModel.getRepository(Like)
                     .createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
-                    .where('l.status = :status', { status: 'Like' })
+                    .where('u._id = :userId', { userId: userId })
                     .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
-                    .orderBy('l.createdAt', 'DESC')
-                    .take(3)
-                    .getMany()
-
-                const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
-                    return {
-                        addedAt: like.createdAt,
-                        userId: like.userId._id,
-                        login: like.userId.login
-                    }
-                })
-               
-                return {
-                    id: b._id.toString(),
-                    title: b.title,
-                    shortDescription: b.shortDescription,
-                    content: b.content,
-                    blogId: b.blogId._id,
-                    blogName: b.blogId.name,
-                    createdAt: b.createdAt,
-                    extendedLikesInfo: {
-                        likesCount: likesCount,
-                        dislikesCount: dislikesCount,
-                        myStatus: myStatus,
-                        newestLikes: newestLikesMaped
-                    }
-
+                    .getOne()
+                if (status) {
+                    myStatus = status.status
                 }
             }
+            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+                .select()
+                .where({ postIdOrCommentId: postId })
+                .andWhere({ status: 'Like' })
+                .getCount()
+
+            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+                .select()
+                .where({ postIdOrCommentId: postId })
+                .andWhere({ status: 'Dislike' })
+                .getCount()
+
+
+            const newestLikes = await this.postModel.getRepository(Like)
+                .createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
+                .where('l.status = :status', { status: 'Like' })
+                .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
+                .orderBy('l.createdAt', 'DESC')
+                .take(3)
+                .getMany()
+
+            const newestLikesMaped: newestLikes[] = newestLikes.map((like) => {
+                return {
+                    addedAt: like.createdAt,
+                    userId: like.userId._id,
+                    login: like.userId.login
+                }
+            })
+
+            return {
+                id: b._id.toString(),
+                title: b.title,
+                shortDescription: b.shortDescription,
+                content: b.content,
+                blogId: b.blogId._id,
+                blogName: b.blogId.name,
+                createdAt: b.createdAt,
+                extendedLikesInfo: {
+                    likesCount: likesCount,
+                    dislikesCount: dislikesCount,
+                    myStatus: myStatus,
+                    newestLikes: newestLikesMaped
+                }
+
+            }
+        }
         ))
         return {
             pagesCount: pagesCount,
@@ -116,7 +120,13 @@ export class PostQueryRepoPSQL {
                 return null
             }
 
-            const totalCount = posts.length;
+            const totalCount = await this.postModel.getRepository(Post)
+                .createQueryBuilder('p')
+                .leftJoinAndSelect('p.blogId', 'b')
+                .where('b._id = :id', { id: blogId })
+                .getCount()
+
+
             const pagesCount = Math.ceil(totalCount / (paginationQuery.pageSize))
 
 
