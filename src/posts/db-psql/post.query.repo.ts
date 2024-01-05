@@ -16,10 +16,18 @@ export class PostQueryRepoPSQL {
     ) { }
 
     async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost | null> {
+        let sortBy = `p.${paginationQuery.sortBy}`
+        if (paginationQuery.sortBy === 'blogName') {
+            sortBy = `b.name`
+        }
+        if (paginationQuery.sortBy === 'blogId') {
+            sortBy = `b._id`
+        }
+
         const posts: Post[] | null = await this.postModel.getRepository(Post)
             .createQueryBuilder('p')
             .leftJoinAndSelect('p.blogId', 'b')
-            .orderBy(`p.${paginationQuery.sortBy}`, paginationQuery.sortDirection)
+            .orderBy(sortBy, paginationQuery.sortDirection)
             .skip(paginationQuery.skip)
             .take(paginationQuery.pageSize)
             .getMany()

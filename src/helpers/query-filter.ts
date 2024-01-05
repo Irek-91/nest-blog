@@ -55,11 +55,36 @@ export class Pagination {
     }
   
     if (query.searchNameTerm) { defaultValues.searchNameTerm = query.searchNameTerm };
-    if (query.sortBy || query.sortBy === 'createdAt' || query.sortBy === 'name') { defaultValues.sortBy = query.sortBy };
+    if (query.sortBy === 'createdAt' || query.sortBy === 'name') { defaultValues.sortBy = query.sortBy }
+    else {query.sortBy = 'createdAt'};
     if (query.sortDirection) { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
     return defaultValues
   }
+  getPaginationFromQueryPosts = (query: any): QueryPaginationType => {
+    const defaultValues: QueryPaginationType = {
+      searchNameTerm: '',
+      sortBy: 'createdAt',
+      sortDirection: 'DESC',
+      pageNumber: 1,
+      pageSize: 10,
+      skip: 0
+    }
+  
+    if (query.searchNameTerm) { defaultValues.searchNameTerm = query.searchNameTerm };
+    if (query.sortBy === 'createdAt' || query.sortBy === 'blogName' || query.sortBy === 'title' 
+        || query.sortBy === 'shortDescription' || query.sortBy === 'content' || query.sortBy === 'blogId'
+        || query.sortBy === 'blogName' 
+    ) { defaultValues.sortBy = query.sortBy }
+    else {query.sortBy = 'createdAt'};
+    if (query.sortDirection) { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
+    if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
+    if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
+    defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
+    return defaultValues
+  }
+
+
 }
