@@ -1,3 +1,4 @@
+import { QuestionsRepository } from './quizQuestions/db-psql/questions.repo.PSQL';
 import { LikesRepository } from './likes/likes.repo';
 import { CommentsService } from './comments/comments.service';
 import { Controller, Delete, Get, HttpException, HttpStatus } from '@nestjs/common';
@@ -38,16 +39,20 @@ export class TestingController {
     private postModel: PostsService,
     private commentModel: CommentsService,
     private likeModel: LikesRepository,
+    private questionModel: QuestionsRepository,
+
+
     //@InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>
   ) { }
 
   
   @Delete()
   async deleteAll() {
-    await this.userModel.deleteUserAll();
     await this.commentModel.deleteCommentsAll();
+    await this.userModel.deleteUserAll();
     await this.postModel.deletePostAll();
     await this.blogModel.deleteBlogAll();
+    await this.questionModel.deleteAllQuestions()
     //await this.deviceModel.deleteMany();
     //await this.ipAndURIModel.deleteMany()
     console.log('Delete All')

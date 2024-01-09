@@ -18,6 +18,16 @@ export type QueryPaginationType = {
   skip: number
 }
 
+export type QueryPaginationQuestionsType = {
+  bodySearchTerm: string
+  publishedStatus: 'all' | 'published' | 'notPublished'
+  sortBy: string
+  sortDirection: 'ASC' | 'DESC'
+  pageNumber: number
+  pageSize: number
+  skip: number
+}
+
 @Injectable()
 export class Pagination {
   getPaginationFromQueryUser = (query: any): QueryPaginationTypeUser => {
@@ -83,6 +93,41 @@ export class Pagination {
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
+    return defaultValues
+  }
+
+
+  getPaginationFromQueryQuestions = (query: any): QueryPaginationQuestionsType => {
+    const defaultValues: QueryPaginationQuestionsType = {
+      bodySearchTerm: '',
+      publishedStatus: 'all',
+      sortBy: 'createdAt',
+      sortDirection: 'DESC',
+      pageNumber: 1,
+      pageSize: 10,
+      skip: 0
+    }
+  
+    if (query.bodySearchTerm) { defaultValues.bodySearchTerm = query.bodySearchTerm };
+
+    if (query.publishedStatus === 'all' || query.publishedStatus === 'published' || 
+    query.publishedStatus === 'notPublished') { defaultValues.publishedStatus = query.publishedStatus } 
+    else {defaultValues.publishedStatus === 'all'}
+
+
+    if (query.sortBy === 'createdAt' || query.sortBy === 'published' || query.sortBy === 'updatedAt' ||
+        query.sortBy === 'body' || query.sortBy === 'id') { defaultValues.sortBy = query.sortBy }
+    else {defaultValues.sortBy = 'createdAt'};
+
+    if (query.sortDirection === 'asc' || query.sortDirection === 'desc' || 
+    query.sortDirection === 'ASC' || query.sortDirection === 'DESC') { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
+    else  {defaultValues.sortDirection = 'DESC'};
+
+    if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
+
+    if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
+    defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
+    
     return defaultValues
   }
 

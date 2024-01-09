@@ -1,3 +1,6 @@
+import { QuestionsRepository } from './quizQuestions/db-psql/questions.repo.PSQL';
+import { QusetionsService } from './quizQuestions/questions.service';
+import { QusetionsSAController } from './quizQuestions/questions.SA.controller';
 import { Like } from './likes/entity/likes.entity';
 import { Comment } from './comments/db-psql/entity/comments.entity';
 import { Blog } from './blogs/db-psql/entity/blog.entity';
@@ -64,6 +67,7 @@ import { Post } from './posts/db-psql/entity/post.entity';
 import { UserSchema } from './users/models/users-schema';
 import { EmailConfirmation } from './users/db-psql/entity/email.confirm.entity';
 import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
+import { Question } from './quizQuestions/db-psql/entity/question';
 
 
 @Module({
@@ -130,7 +134,7 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
       //           },
       //       },
     }),
-    TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like])    
+    TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question])    
     ,
     JwtModule.register({
       secret: env.JWT_SECRET,
@@ -146,7 +150,8 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
     PostsController, 
     CommentsController,
     AuthController,
-    SecurityDeviceController
+    SecurityDeviceController,
+    QusetionsSAController
   ],
   providers: [AppService,
     AuthService, 
@@ -168,7 +173,8 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
     CommentsQueryRepoPSQL, CommentsRepoPSQL,
     //SecurityDeviceService, SecurityDeviceRepository,
     SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
-    LikesRepository
+    LikesRepository,
+    QusetionsService, QuestionsRepository
   ],
 })
 export class AppModule {}
