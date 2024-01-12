@@ -1,5 +1,5 @@
 import { QueryPaginationQuestionsType } from './../../helpers/query-filter';
-import { questionViewModel, questionDBModel, paginatorQuestions, QuestionInputModel, PublishInputModel } from './model/questionModel';
+import { questionViewModel, questionDBModel, paginatorQuestions, QuestionInputModel, PublishInputModel } from '../model/questionModel';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Question } from './entity/question';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -167,6 +167,22 @@ export class QuestionsRepository {
       .from(Question)
       .execute()
     return true
+  }
+
+  async getFiveRandomQuestions(): Promise<string[]> {
+    const questions = await this.questionsModel.getRepository(Question)
+      .createQueryBuilder('q')
+      .select()
+      .orderBy('RANDOM()')
+      .take(5)
+      .getMany()
+    
+    const result = questions.map(q => {
+      return q.id
+    })
+
+    return result
+
   }
 
 }

@@ -1,5 +1,5 @@
 import { QusetionsService } from './questions.service';
-import { QuestionInputModel, paginatorQuestions, questionViewModel, PublishInputModel } from './db-psql/model/questionModel';
+import { QuestionInputModel, paginatorQuestions, questionViewModel, PublishInputModel } from './model/questionModel';
 import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
 import { Pagination } from '../helpers/query-filter';
 import { Body, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, Query, UseGuards } from "@nestjs/common";

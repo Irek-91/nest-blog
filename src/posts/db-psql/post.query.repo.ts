@@ -44,6 +44,7 @@ export class PostQueryRepoPSQL {
 
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
+            
             const postId = b._id.toString()
             if (userId) {
                 const status = await this.postModel.getRepository(Like)

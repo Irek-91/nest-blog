@@ -1,6 +1,11 @@
-import { QuestionsRepository } from './quizQuestions/db-psql/questions.repo.PSQL';
-import { QusetionsService } from './quizQuestions/questions.service';
-import { QusetionsSAController } from './quizQuestions/questions.SA.controller';
+import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
+import { Pair } from './quiz.pair/dv-psql/entity/pairs';
+import { PairGameRepo } from './quiz.pair/dv-psql/pairGameRepo';
+import { PairGameService } from './quiz.pair/pair.game.service';
+import { PairGameController } from './quiz.pair/pair.game.controller';
+import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo.PSQL';
+import { QusetionsService } from './quiz.questions/questions.service';
+import { QusetionsSAController } from './quiz.questions/questions.SA.controller';
 import { Like } from './likes/entity/likes.entity';
 import { Comment } from './comments/db-psql/entity/comments.entity';
 import { Blog } from './blogs/db-psql/entity/blog.entity';
@@ -67,7 +72,7 @@ import { Post } from './posts/db-psql/entity/post.entity';
 import { UserSchema } from './users/models/users-schema';
 import { EmailConfirmation } from './users/db-psql/entity/email.confirm.entity';
 import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
-import { Question } from './quizQuestions/db-psql/entity/question';
+import { Question } from './quiz.questions/db-psql/entity/question';
 
 
 @Module({
@@ -134,7 +139,7 @@ import { Question } from './quizQuestions/db-psql/entity/question';
       //           },
       //       },
     }),
-    TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question])    
+    TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult])    
     ,
     JwtModule.register({
       secret: env.JWT_SECRET,
@@ -151,7 +156,8 @@ import { Question } from './quizQuestions/db-psql/entity/question';
     CommentsController,
     AuthController,
     SecurityDeviceController,
-    QusetionsSAController
+    QusetionsSAController,
+    PairGameController
   ],
   providers: [AppService,
     AuthService, 
@@ -174,7 +180,8 @@ import { Question } from './quizQuestions/db-psql/entity/question';
     //SecurityDeviceService, SecurityDeviceRepository,
     SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
     LikesRepository,
-    QusetionsService, QuestionsRepository
+    QusetionsService, QuestionsRepository,
+    PairGameService, PairGameRepo
   ],
 })
 export class AppModule {}

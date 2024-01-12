@@ -1,6 +1,6 @@
 import { QueryPaginationQuestionsType } from './../helpers/query-filter';
 import { QuestionsRepository } from './db-psql/questions.repo.PSQL';
-import { QuestionInputModel, questionViewModel, questionDBModel, PublishInputModel } from './db-psql/model/questionModel';
+import { QuestionInputModel, questionViewModel, questionDBModel, PublishInputModel } from './model/questionModel';
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -1,5 +1,5 @@
 import { createQuestions } from './helpers/qustions-tests-helpers';
-import { QuestionInputModel } from './../src/quizQuestions/db-psql/model/questionModel';
+import { QuestionInputModel } from '../src/quizQuestions/model/questionModel';
 import { appSettings } from '../src/app.settings';
 import { AppModule } from '../src/app.module';
 import { AppController } from '../src/app.controller';
