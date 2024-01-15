@@ -1,6 +1,6 @@
 import { userInputModel } from './../dist/users/models/users-model.d';
-import { postInputModel, postInputModelSpecific } from 'src/posts/model/post-model';
-import { blogInput } from 'src/blogs/models/blogs-model';
+import { postInputModel, postInputModelSpecific } from '../src/posts/model/post-model';
+import { blogInput } from '../src/blogs/models/blogs-model';
 import { appSettings } from '../src/app.settings';
 import { AppModule } from '../src/app.module';
 import request from 'supertest'

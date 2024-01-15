@@ -5,13 +5,12 @@ import { Pair } from "./pairs";
 
 @Entity()
 export class Pairresult {
-
+   
     @PrimaryColumn()
-    @ManyToOne(() => Pair, (pair) => pair.id)
-    @JoinColumn({
-        name: 'pairId'
-    })
-    public pairId: Pair
+    id: string
+
+    @Column()
+    pairId: string
 
     @Column()
     playerId: string
@@ -24,5 +23,11 @@ export class Pairresult {
 
     @Column()
     score: number
+    
 
+    // @ManyToOne(() => Pair, (pair) => pair.id)
+    // @JoinColumn({
+    //     name: 'pairId'
+    // })
+    // public pairId: Pair
 }

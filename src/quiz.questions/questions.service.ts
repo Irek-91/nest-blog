@@ -50,7 +50,15 @@ export class QusetionsService {
     return updateResult
   }
 
+  async checkingCorrectAnswer(questionsId : string, answer: string): Promise<boolean> {
+    const result = await this.questionsRepository.checkingCorrectAnswer(questionsId,answer)
+    if (!result) {
+      return false
+    } else {
+      return true
+    }
 
+  }
 
   async deleteQuestionId(questionId: string): Promise<boolean> {
     return await this.questionsRepository.deleteQuestionId(questionId)

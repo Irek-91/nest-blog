@@ -1,4 +1,4 @@
-import { PairGameRepo } from './quiz.pair/dv-psql/pairGameRepo';
+import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.Repo';
 import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo.PSQL';
 import { LikesRepository } from './likes/likes.repo';
 import { CommentsService } from './comments/comments.service';

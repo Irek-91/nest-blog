@@ -163,7 +163,6 @@ export class SecurityDeviceRepoPSQL {
             // SELECT *FROM public."devices" as u
             // WHERE u."userId" = $1
             // `, [userId])
-            log(res)
 
             //find({ userId: userId }).lean();
             if (res.length === 0) { return null }

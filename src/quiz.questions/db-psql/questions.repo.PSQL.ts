@@ -4,6 +4,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Question } from './entity/question';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { log } from 'console';
 
 
 
@@ -68,7 +69,6 @@ export class QuestionsRepository {
       .where({ id: id })
       .getOne()
     return question
-
   }
 
   async createQuestion(newQuestion: questionDBModel): Promise<questionViewModel> {
@@ -182,7 +182,20 @@ export class QuestionsRepository {
     })
 
     return result
+  }
 
+  async getAnswerByQuestiontId(id: string): Promise<string[]> {
+    const question = await this.questionsModel.getRepository(Question)
+      .createQueryBuilder()
+      .where({ id: id })
+      .getOne()
+    return question!.answers
+  }
+
+  async checkingCorrectAnswer(questionsId: string ,answer: string): Promise<boolean> {
+    const result = await this.getAnswerByQuestiontId(questionsId)
+    return result.includes(answer.toString())
+     
   }
 
 }

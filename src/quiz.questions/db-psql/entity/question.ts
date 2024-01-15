@@ -8,7 +8,6 @@ export class Question {
 @PrimaryColumn()
 id: string
 
-
 @Column()
 body: string
 

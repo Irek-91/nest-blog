@@ -1,3 +1,4 @@
+import { PairGameService } from './../../quiz.pair/pair.game.service';
 import { UsersService } from './../../users/users.service';
 import { HttpStatus, BadRequestException } from '@nestjs/common';
 import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
@@ -62,7 +63,6 @@ export class UserAuthGuard implements CanActivate {
         }
         const token = req.headers.authorization.split(' ')[1]
         const userId: any = await this.jwtService.getPayloadByRefreshToken(token)
-        
         if (!userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
@@ -135,6 +135,29 @@ export class ChekRefreshTokenDeleteDevice {
         const validationToken = await this.jwtService.checkingTokenKey(cookiesRefreshToken)
         if (validationToken === null) throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)    
        
+        return true
+    }
+}
+@Injectable()
+export class CheckingActivePair implements CanActivate {
+    constructor(protected jwtService: JwtService,
+        protected pairGameService: PairGameService) { }
+
+    async canActivate(context: ExecutionContext): Promise<any> {
+        const req = context.switchToHttp().getRequest();
+        if (!req.headers.authorization || req.headers.authorization === undefined) {
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        }
+        const token = req.headers.authorization.split(' ')[1]
+        const userId: any = await this.jwtService.getPayloadByRefreshToken(token)
+        if (!userId) {
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        }
+        const getActivPair = await this.pairGameService.getPairMuCurrent(userId)
+        if (!getActivPair) {
+            throw new HttpException('NOT_FOUND', HttpStatus.NOT_FOUND)
+        }
+        req.userId = userId ? userId : null
         return true
     }
 }

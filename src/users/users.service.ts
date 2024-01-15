@@ -6,7 +6,6 @@ import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import mongoose, { ObjectId } from "mongoose";
 import bcrypt from 'bcrypt'
-import { UsersQueryRepository } from "./db-mongo/users.qurey.repo";
 import { UserDocument } from "./models/users-schema";
 import { log } from 'console';
 import { UsersRepositoryPSQL } from './db-psql/users.repo.PSQL';

@@ -27,7 +27,6 @@ export class BlogsRepoPSQL {
       VALUES  ('${newBlog._id}', '${newBlog.name}', '${newBlog.description}',
                 '${newBlog.websiteUrl}', '${newBlog.createdAt}', '${newBlog.isMembership}')
       `
-      log(1)
     const user =  this.blogRepoTypeORM.create({
       _id: newBlog._id.toString(),
       name: newBlog.name,

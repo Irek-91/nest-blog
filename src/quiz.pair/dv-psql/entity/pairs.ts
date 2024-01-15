@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Pairresult } from "./result.pair";
 
 
 
@@ -27,6 +28,12 @@ startGameDate: string
 
 @Column({nullable: true})
 finishGameDate: string
+
+// @OneToMany((type) => Pairresult, (result) => result.pairId)
+// @JoinColumn({
+//     name: 'resultsId'
+// })
+// public resultsId: Pairresult[]
 
 }
 

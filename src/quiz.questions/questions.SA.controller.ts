@@ -16,7 +16,7 @@ export class QusetionsSAController {
 
     @HttpCode(HttpStatus.OK)
     @Get()
-    async getUsers(@Query()
+    async getQuestions(@Query()
     query: {
         bodySearchTerm: string;
         publishedStatus: string
@@ -31,7 +31,7 @@ export class QusetionsSAController {
 
 
     @Post()
-    async createUser(@Body() inputModel: QuestionInputModel): Promise<questionViewModel> {
+    async createQuestion(@Body() inputModel: QuestionInputModel): Promise<questionViewModel> {
         const result: questionViewModel = await this.qusetionsService.createQuestion(inputModel)
         return result
     }

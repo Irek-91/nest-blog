@@ -1,5 +1,5 @@
 import { createQuestions } from './helpers/qustions-tests-helpers';
-import { QuestionInputModel } from '../src/quizQuestions/model/questionModel';
+import { QuestionInputModel } from '../src/quiz.questions/model/questionModel';
 import { appSettings } from '../src/app.settings';
 import { AppModule } from '../src/app.module';
 import { AppController } from '../src/app.controller';
@@ -51,6 +51,7 @@ describe('tests for questions', () => {
                 totalCount: 0,
                 items: []
             })
+        })
         })
         it('error 401 is returned, there is Unauthorized', async () => {
             await request(httpServer)
@@ -224,8 +225,8 @@ describe('tests for questions', () => {
                 .get('/sa/quiz/questions')
                 .set({ Authorization: 'Basic YWRtaW46cXdlcnR5' })
                 .expect(200)
-            const getUsers = creatResponse.body
-            expect(getUsers).toEqual({
+            const getQuestions = creatResponse.body
+            expect(getQuestions).toEqual({
                 pagesCount: 0,
                 page: 1,
                 pageSize: 10,
@@ -237,4 +238,3 @@ describe('tests for questions', () => {
 
 
     })
-})

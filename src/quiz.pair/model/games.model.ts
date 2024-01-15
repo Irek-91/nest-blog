@@ -1,6 +1,11 @@
+import { IsString } from 'class-validator';
 import { Types } from 'mongoose';
 import { Strategy } from 'passport-local';
 
+export class AnswerInputModel {
+    @IsString()
+    answer: string
+}
 
 export type playerViewModel = {
     id: string | Types.ObjectId,

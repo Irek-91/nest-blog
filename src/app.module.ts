@@ -1,6 +1,8 @@
+import { CheckingActivePair } from './auth/guards/auth.guard';
+import { CustomPipe } from './application/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
 import { Pair } from './quiz.pair/dv-psql/entity/pairs';
-import { PairGameRepo } from './quiz.pair/dv-psql/pairGameRepo';
+import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.Repo';
 import { PairGameService } from './quiz.pair/pair.game.service';
 import { PairGameController } from './quiz.pair/pair.game.controller';
 import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo.PSQL';
@@ -181,7 +183,9 @@ import { Question } from './quiz.questions/db-psql/entity/question';
     SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
     LikesRepository,
     QusetionsService, QuestionsRepository,
-    PairGameService, PairGameRepo
+    PairGameService, PairGameRepo,
+    CustomPipe,
+    CheckingActivePair
   ],
 })
 export class AppModule {}
