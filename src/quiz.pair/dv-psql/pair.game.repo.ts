@@ -271,7 +271,7 @@ export class PairGameRepo {
 
     }
 
-    async updateStatusGame(pairId: string): Promise<boolean | null> {
+    async updateStatusGame(pairId: string, bonusPlayerId: string, score: number): Promise<boolean | null> {
         try {
             const updateStatus = await this.model.createQueryBuilder()
                 .update(Pair)
@@ -282,6 +282,16 @@ export class PairGameRepo {
                     id: pairId
                 })
                 .execute()
+            const updateBonusScore = await this.model.createQueryBuilder()
+                .update(Pairresult)
+                .set({
+                    score: score
+                })
+                .where({
+                    playerId: bonusPlayerId
+                })
+                .execute()
+
             return true
         } catch (e) {
             return null

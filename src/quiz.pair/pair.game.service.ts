@@ -176,7 +176,24 @@ export class PairGameService {
         const resultUpdateSecondPlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
 
         if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
-            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id)
+            let bonusPlayerId = pair.firstPlayerId
+            let score = resultUpdateFirstPlayer!.score
+            const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4]
+            const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4]
+            if (resultUpdateFirstPlayer!.answersStatus.includes('Correct')) {
+                score++  
+            }
+            
+            if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
+                bonusPlayerId = pair.secondPlayerId
+                score = resultUpdateSecondPlayer!.score
+                if (resultUpdateSecondPlayer!.answersStatus.includes('Correct')) {
+                    score++ 
+                }
+            }
+
+            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, bonusPlayerId, score)
+
             
         }
         // if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length) {

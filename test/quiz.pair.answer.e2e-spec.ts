@@ -264,7 +264,7 @@ describe('tests for questions', () => {
                         id: userOne.id,
                         login: userOne.login
                     },
-                    score: 5
+                    score: 6
                 },
                 secondPlayerProgress: {
                     answers: [

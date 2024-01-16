@@ -64,10 +64,6 @@ export class QusetionsSAController {
 
 
 
-
-
-
-
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
     async deleteUser(@Param('id') questionId: string): Promise<boolean> {
