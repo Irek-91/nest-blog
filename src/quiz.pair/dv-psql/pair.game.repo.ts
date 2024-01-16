@@ -1,4 +1,5 @@
-import { QueryPaginationPairsType } from './../../helpers/query-filter';
+import { Statistic } from './entity/statistis';
+import { queryPaginationPairsType } from './../../helpers/query-filter';
 import { Question } from '../../quiz.questions/db-psql/entity/question';
 import { QuestionsRepository } from '../../quiz.questions/db-psql/questions.repo.PSQL';
 import { answerViewModel, questionPairViewModel } from '../model/games.model';
@@ -38,7 +39,7 @@ export class PairGameRepo {
         }
     }
 
-    async getAllPairsByUser(userId: string, queryFilter: QueryPaginationPairsType): Promise<Pair[] | null> {
+    async getAllPairsByUser(userId: string, queryFilter: queryPaginationPairsType): Promise<Pair[] | null> {
         try {
             const result = await this.model.getRepository(Pair)
                 .createQueryBuilder('p')
@@ -216,7 +217,28 @@ export class PairGameRepo {
 
         return pairId
     }
-
+    async getStatisticByUser(userId: string): Promise<Statistic | null> {
+        const result = await this.model.getRepository(Statistic)
+            .createQueryBuilder()
+            .where({
+                userId: userId
+            })
+            .getOne()
+        return result
+    }
+    async createNewStatistic(userId: string): Promise<boolean> {
+        const createPesultPlayer = await this.model.createQueryBuilder()
+            .insert()
+            .into(Statistic)
+            .values({
+                userId: userId,
+                score: 0,
+                winsCount: 0,
+                lossesCount: 0
+            })
+            .execute()
+        return true
+    }
 
     async createNewPair(playerId: string): Promise<string> {
 
@@ -249,8 +271,10 @@ export class PairGameRepo {
             })
             .execute()
 
+
         return pairId
     }
+
 
 
     async updateResultAnswer(pairId: string, questionId: string, playerId: string, resultAnswer: boolean): Promise<answerViewModel | null> {
@@ -295,8 +319,8 @@ export class PairGameRepo {
 
     }
 
-    async updateStatusGame(pairId: string, bonusPlayerId: string, scoreBonus: number,
-        resultFirstPlayer: Pairresult, resultSecondPlayer : Pairresult): Promise<boolean | null> {
+    async updateStatusGame(pairId: string, bonusPlayerId: string,
+        winnerPlayer: any, loserPlayer: any): Promise<boolean | null> {
         try {
             const updateStatus = await this.model.createQueryBuilder()
                 .update(Pair)
@@ -309,7 +333,25 @@ export class PairGameRepo {
                 .execute()
             const updateBonusScore = await this.model.getRepository(Pairresult)
                 .increment({
-                    playerId: bonusPlayerId, pairId: pairId}, 'score', 1)                        
+                    playerId: bonusPlayerId, pairId: pairId
+                }, 'score', 1)
+            const addAndUpdateStatisticWinner = await this.model.createQueryBuilder()
+                .update(Statistic)
+                .set({
+                    score: () => `score + ${winnerPlayer.score}`,
+                    winsCount: () => `winsCount + 1`,
+                })
+                .where({ userId: winnerPlayer.id })
+                .execute()
+
+            const addAndUpdateStatisticLoser = await this.model.createQueryBuilder()
+                .update(Statistic)
+                .set({
+                    score: () => `score + ${loserPlayer.score}`,
+                    lossesCount: () => `lossesCount + 1`,
+                })
+                .where({ userId: loserPlayer.id })
+                .execute()
             return true
         } catch (e) {
             return null
@@ -321,6 +363,11 @@ export class PairGameRepo {
             .delete()
             .from(Pairresult)
             .execute()
+        const resultThree = await this.model.createQueryBuilder()
+            .delete()
+            .from(Statistic)
+            .execute()
+
         const result = await this.model.createQueryBuilder()
             .delete()
             .from(Pair)

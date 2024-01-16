@@ -1,5 +1,5 @@
 import { HttpException } from '@nestjs/common';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { newestLikes, paginatorPost, postMongoDb, postOutput } from "../model/post-model"
 import { log } from 'console';
@@ -15,7 +15,7 @@ export class PostQueryRepoPSQL {
 
     ) { }
 
-    async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost | null> {
+    async findPost(paginationQuery: queryPaginationType, userId: string | null): Promise<paginatorPost | null> {
         let sortBy = `p.${paginationQuery.sortBy}`
         if (paginationQuery.sortBy === 'blogName') {
             sortBy = `b.name`
@@ -114,7 +114,7 @@ export class PostQueryRepoPSQL {
         }
     }
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string | null): Promise<paginatorPost | null> {
+    async findPostsBlogId(paginationQuery: queryPaginationType, blogId: string, userId: string | null): Promise<paginatorPost | null> {
         try {
             const posts: Post[] | null = await this.postModel.getRepository(Post)
                 .createQueryBuilder('p')

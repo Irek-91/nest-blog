@@ -1,4 +1,4 @@
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Blog, BlogDocument } from "../models/blogs-schema"
 import { Filter, ObjectId } from "mongodb";

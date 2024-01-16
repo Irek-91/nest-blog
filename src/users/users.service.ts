@@ -1,5 +1,5 @@
 import { CreatUserInputModel, MeViewModel, emailConfirmationPSQL, userModelPSQL } from './models/users-model';
-import { QueryPaginationTypeUser } from './../helpers/query-filter';
+import { queryPaginationTypeUser } from './../helpers/query-filter';
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { UsersRepository } from "./db-mongo/users.repo";
 import { add } from 'date-fns';
@@ -16,7 +16,7 @@ export class UsersService {
   constructor(protected usersRepository: UsersRepositoryPSQL,
     protected usersQueryRepository: UsersQueryRepoPSQL) { }
 
-  async findUsers(paginationQuery: QueryPaginationTypeUser) {
+  async findUsers(paginationQuery: queryPaginationTypeUser) {
     return await this.usersQueryRepository.findUsers(paginationQuery)
   }
 

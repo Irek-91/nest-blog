@@ -1,6 +1,6 @@
 import { PostsService } from './../../posts/posts.service';
 import { Blog } from './entity/blog.entity';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { BlogDocument } from "../models/blogs-schema"
 import { Filter, ObjectId } from "mongodb";

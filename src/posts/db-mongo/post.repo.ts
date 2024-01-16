@@ -1,6 +1,6 @@
 import { LikeDocument, Like } from '../../likes/model/likes-schema';
 import { UserDocument, User } from '../../users/models/users-schema';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Post, PostDocument } from "../model/post-schema"
 import { HydratedDocument, Model } from "mongoose"

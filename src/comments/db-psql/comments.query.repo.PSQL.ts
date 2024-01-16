@@ -1,5 +1,5 @@
 import { Like } from './../../likes/entity/likes.entity';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { commentMongoModel, commentViewModel, paginatorComments } from '../model/comments-model';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -84,7 +84,7 @@ export class CommentsQueryRepoPSQL {
     }
   }
 
-  async findCommentsByPostId(postId: string, userId: string | null, pagination: QueryPaginationType): Promise<paginatorComments> {
+  async findCommentsByPostId(postId: string, userId: string | null, pagination: queryPaginationType): Promise<paginatorComments> {
     try {
       // const filter = `SELECT * FROM public."comments"
       //                 WHERE "postId" = $1

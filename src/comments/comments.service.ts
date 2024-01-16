@@ -2,7 +2,7 @@ import { UsersRepositoryPSQL } from './../users/db-psql/users.repo.PSQL';
 import { UsersQueryRepoPSQL } from './../users/db-psql/users.qurey.repo.PSQL';
 import { CommentsRepoPSQL } from './db-psql/comments.repo.PSQL';
 import { CommentsQueryRepoPSQL } from './db-psql/comments.query.repo.PSQL';
-import { QueryPaginationType } from './../helpers/query-filter';
+import { queryPaginationType } from './../helpers/query-filter';
 import { UsersRepository } from '../users/db-mongo/users.repo';
 import { UsersQueryRepository } from '../users/db-mongo/users.qurey.repo';
 import { Injectable, HttpStatus } from '@nestjs/common';
@@ -80,7 +80,7 @@ export class CommentsService {
         } catch (e) { return HttpStatus.NOT_FOUND }
     }
 
-    async findCommentsByPostId(postId: string, userId: string | null, pagination: QueryPaginationType): Promise<paginatorComments | HttpStatus.NOT_FOUND> {
+    async findCommentsByPostId(postId: string, userId: string | null, pagination: queryPaginationType): Promise<paginatorComments | HttpStatus.NOT_FOUND> {
         return this.commentsQueryRepository.findCommentsByPostId(postId, userId, pagination)
     }
 

@@ -1,18 +1,18 @@
-import { Pagination, QueryPaginationPairsType } from './../helpers/query-filter';
+import { Pagination, queryPaginationPairsType } from './../helpers/query-filter';
 import { CustomPipe } from './../application/pipe';
 import { PairGameService } from './pair.game.service';
-import { gamePairViewModel, AnswerInputModel, gameAllPairsViewModel } from './model/games.model';
+import { gamePairViewModel, AnswerInputModel, gameAllPairsViewModel, myStatisticViewModel } from './model/games.model';
 import { UserAuthGuard, CheckingActivePair } from './../auth/guards/auth.guard';
 import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Query, Request, UseGuards } from "@nestjs/common";
 
-@Controller('pair-game-quiz/pairs')
+@Controller('pair-game-quiz')
 export class PairGameController {
     constructor(protected pairGameService: PairGameService,
         private readonly pagination: Pagination
     ) {
     }
     @UseGuards(CheckingActivePair)
-    @Get('/my-current')
+    @Get('/pairs/my-current')
     async getPairMuCurrent(@Request() req: any
     ) {
         let userId = req.userId
@@ -26,7 +26,21 @@ export class PairGameController {
     }
 
     @UseGuards(UserAuthGuard)
-    @Get('/my')
+    @Get('/users/my-statistic')
+    async getStatisticByUser(@Request() req: any
+    ) {
+        let userId = req.userId
+
+        const myStatistic: myStatisticViewModel | null = await this.pairGameService.getStatisticByUser(userId)
+
+        if (!myStatistic) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
+        return myStatistic
+    }
+
+    @UseGuards(UserAuthGuard)
+    @Get('/pairs/my')
     async getAllMyPairs(@Query()
     query: {
         sortBy: string;
@@ -37,7 +51,7 @@ export class PairGameController {
         @Request() req: any
     ) {
         let userId = req.userId
-        const queryFilter : QueryPaginationPairsType  = this.pagination.getPaginationFromQueryPairs(query);
+        const queryFilter : queryPaginationPairsType  = this.pagination.getPaginationFromQueryPairs(query);
 
         const pairsAllbyUser: gameAllPairsViewModel | null = await this.pairGameService.getAllPairsByUser(queryFilter, userId)
 
@@ -48,7 +62,7 @@ export class PairGameController {
     }
 
     @UseGuards(UserAuthGuard)
-    @Get(':id')
+    @Get('/pairs:id')
     async getPairById(
         @Param('id',
         new CustomPipe()
@@ -66,13 +80,14 @@ export class PairGameController {
     }
 
     @UseGuards(UserAuthGuard)
-    @Post('/connection')
+    @Post('/pairs/connection')
     @HttpCode(200)
     async connectUserByPair(
         @Request() req: any,
     ) {
 
         const userId = req.userId
+        const createdNew = await this.pairGameService.createNewStatisticByPalyer(userId)
         const pair = await this.pairGameService.connectUserByPair(userId)
         if (!pair) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -82,7 +97,7 @@ export class PairGameController {
 
     
     @UseGuards(UserAuthGuard)
-    @Post('/my-current/answers')
+    @Post('/pairs/my-current/answers')
     @HttpCode(200)
     async sendAnswer(@Body() inputDate: AnswerInputModel,
         @Request() req: any,

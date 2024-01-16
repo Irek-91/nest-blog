@@ -1,5 +1,5 @@
 import { LikeDocument, Like } from '../../likes/model/likes-schema';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { Comment, CommentDocument, CommentSchema } from '../model/comments-schema';
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { Injector } from "@nestjs/core/injector/injector"

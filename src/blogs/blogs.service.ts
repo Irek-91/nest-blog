@@ -1,4 +1,4 @@
-import { QueryPaginationType } from './../helpers/query-filter';
+import { queryPaginationType } from './../helpers/query-filter';
 import { BlogsRepository } from "./db-mongo/blogs.repo"
 import { blogInput, blogMongoDB, blogOutput } from "./models/blogs-model"
 import mongoose from "mongoose"
@@ -14,7 +14,7 @@ export class BlogsService {
         protected blogsQueryRepository : BlogsQueryRepoPSQL) {
     }
     
-    async findBlogs(paginationQuery: QueryPaginationType) {
+    async findBlogs(paginationQuery: queryPaginationType) {
         return await this.blogsQueryRepository.findBlogs(paginationQuery)
     }
 

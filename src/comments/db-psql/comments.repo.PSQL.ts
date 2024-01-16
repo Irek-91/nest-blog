@@ -1,4 +1,4 @@
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { Injectable, HttpStatus, Query } from '@nestjs/common';
 import { Injector } from "@nestjs/core/injector/injector"
 import { InjectModel } from '@nestjs/mongoose';

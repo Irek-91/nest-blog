@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 
-export type QueryPaginationTypeUser = {
+export type queryPaginationTypeUser = {
   sortBy: string
   sortDirection: 'ASC' | 'DESC',
   pageNumber: number
@@ -9,7 +9,7 @@ export type QueryPaginationTypeUser = {
   searchEmailTerm: string
   skip: number
 }
-export type QueryPaginationType = {
+export type queryPaginationType = {
   searchNameTerm: string
   sortBy: string
   sortDirection: 'ASC' | 'DESC'
@@ -18,7 +18,7 @@ export type QueryPaginationType = {
   skip: number
 }
 
-export type QueryPaginationQuestionsType = {
+export type queryPaginationQuestionsType = {
   bodySearchTerm: string
   publishedStatus: 'all' | 'published' | 'notPublished'
   sortBy: string
@@ -28,7 +28,7 @@ export type QueryPaginationQuestionsType = {
   skip: number
 }
 
-export type QueryPaginationPairsType = {
+export type queryPaginationPairsType = {
   sortBy: string
   sortDirection: 'ASC' | 'DESC'
   pageNumber: number
@@ -38,8 +38,8 @@ export type QueryPaginationPairsType = {
 
 @Injectable()
 export class Pagination {
-  getPaginationFromQueryUser = (query: any): QueryPaginationTypeUser => {
-   const defaultValuesUsers: QueryPaginationTypeUser = {
+  getPaginationFromQueryUser = (query: any): queryPaginationTypeUser => {
+   const defaultValuesUsers: queryPaginationTypeUser = {
      sortBy: 'createdAt',
      sortDirection: 'DESC',
      pageNumber: 1,
@@ -62,8 +62,8 @@ export class Pagination {
 
   
   
-  getPaginationFromQuery = (query: any): QueryPaginationType => {
-    const defaultValues: QueryPaginationType = {
+  getPaginationFromQuery = (query: any): queryPaginationType => {
+    const defaultValues: queryPaginationType = {
       searchNameTerm: '',
       sortBy: 'createdAt',
       sortDirection: 'DESC',
@@ -81,8 +81,8 @@ export class Pagination {
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
     return defaultValues
   }
-  getPaginationFromQueryPosts = (query: any): QueryPaginationType => {
-    const defaultValues: QueryPaginationType = {
+  getPaginationFromQueryPosts = (query: any): queryPaginationType => {
+    const defaultValues: queryPaginationType = {
       searchNameTerm: '',
       sortBy: 'createdAt',
       sortDirection: 'DESC',
@@ -105,8 +105,8 @@ export class Pagination {
   }
 
 
-  getPaginationFromQueryQuestions = (query: any): QueryPaginationQuestionsType => {
-    const defaultValues: QueryPaginationQuestionsType = {
+  getPaginationFromQueryQuestions = (query: any): queryPaginationQuestionsType => {
+    const defaultValues: queryPaginationQuestionsType = {
       bodySearchTerm: '',
       publishedStatus: 'all',
       sortBy: 'createdAt',
@@ -139,8 +139,8 @@ export class Pagination {
     return defaultValues
   }
 
-  getPaginationFromQueryPairs = (query: any): QueryPaginationPairsType => {
-    const defaultValues: QueryPaginationPairsType = {
+  getPaginationFromQueryPairs = (query: any): queryPaginationPairsType => {
+    const defaultValues: queryPaginationPairsType = {
       sortBy: 'pairCreatedDate',
       sortDirection: 'DESC',
       pageNumber: 1,

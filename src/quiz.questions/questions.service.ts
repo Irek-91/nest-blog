@@ -1,4 +1,4 @@
-import { QueryPaginationQuestionsType } from './../helpers/query-filter';
+import { queryPaginationQuestionsType } from './../helpers/query-filter';
 import { QuestionsRepository } from './db-psql/questions.repo.PSQL';
 import { QuestionInputModel, questionViewModel, questionDBModel, PublishInputModel } from './model/questionModel';
 import { Injectable } from '@nestjs/common';
@@ -10,7 +10,7 @@ export class QusetionsService {
   constructor(protected questionsRepository: QuestionsRepository) { }
 
 
-  async findQuestions(paginationQuery: QueryPaginationQuestionsType) {
+  async findQuestions(paginationQuery: queryPaginationQuestionsType) {
     return await this.questionsRepository.findQuestions(paginationQuery)
   }
 

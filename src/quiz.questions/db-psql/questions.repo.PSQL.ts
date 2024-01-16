@@ -1,4 +1,4 @@
-import { QueryPaginationQuestionsType } from './../../helpers/query-filter';
+import { queryPaginationQuestionsType } from './../../helpers/query-filter';
 import { questionViewModel, questionDBModel, paginatorQuestions, QuestionInputModel, PublishInputModel } from '../model/questionModel';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Question } from './entity/question';
@@ -14,7 +14,7 @@ import { log } from 'console';
 export class QuestionsRepository {
   constructor(@InjectDataSource() private questionsModel: DataSource) { }
 
-  async findQuestions(pagination: QueryPaginationQuestionsType): Promise<paginatorQuestions> {
+  async findQuestions(pagination: queryPaginationQuestionsType): Promise<paginatorQuestions> {
     try {
       let filterPublished = {}
       if (pagination.publishedStatus === 'published') {

@@ -1,5 +1,5 @@
 import { LikeDocument, Like } from '../../likes/model/likes-schema';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { Comment, CommentDocument, CommentSchema } from '../model/comments-schema';
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { Injector } from "@nestjs/core/injector/injector"
@@ -49,7 +49,7 @@ export class CommentsQueryRepository {
     }
   }
 
-  async findCommentsByPostId(postId: string, userId: string | null, pagination: QueryPaginationType): Promise<paginatorComments> {
+  async findCommentsByPostId(postId: string, userId: string | null, pagination: queryPaginationType): Promise<paginatorComments> {
     try {
       const filter = { postId: postId }
       const comments = await this.commentModel.find(filter).

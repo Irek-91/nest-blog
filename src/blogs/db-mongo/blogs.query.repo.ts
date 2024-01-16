@@ -1,4 +1,4 @@
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
 import { Blog, BlogDocument } from "../models/blogs-schema"
 import { Filter, ObjectId } from "mongodb";
@@ -12,7 +12,7 @@ import { log } from 'console';
 export class BlogsQueryRepository {
   constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) { }
 
-  async findBlogs(pagination: QueryPaginationType): Promise<paginatorBlog> {
+  async findBlogs(pagination: queryPaginationType): Promise<paginatorBlog> {
     const blogs = await this.blogModel.
       find({ name: { $regex: pagination.searchNameTerm, $options: 'i' } }).
       //sort([[pagination.sortBy, pagination.sortDirection]]).

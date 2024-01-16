@@ -1,7 +1,7 @@
 import { HttpException } from '@nestjs/common';
 import { LikeDocument, Like } from '../../likes/model/likes-schema';
 import { UserDocument, User } from '../../users/models/users-schema';
-import { QueryPaginationType } from '../../helpers/query-filter';
+import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Post, PostDocument } from "../model/post-schema"
 import { HydratedDocument, Model } from "mongoose"
@@ -19,7 +19,7 @@ export class PostQueryRepository {
 
     ) { }
 
-    async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost> {
+    async findPost(paginationQuery: queryPaginationType, userId: string | null): Promise<paginatorPost> {
         const posts = await this.postModel.find({}).
             //sort([[paginationQuery.sortBy, paginationQuery.sortDirection]]).
             skip(paginationQuery.skip).
@@ -72,7 +72,7 @@ export class PostQueryRepository {
         }
     }
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string | null): Promise<paginatorPost | Number> {
+    async findPostsBlogId(paginationQuery: queryPaginationType, blogId: string, userId: string | null): Promise<paginatorPost | Number> {
         try {
 
             const filter = { blogId: blogId }

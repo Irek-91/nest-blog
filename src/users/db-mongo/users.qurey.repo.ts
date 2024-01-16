@@ -1,4 +1,4 @@
-import { QueryPaginationTypeUser } from '../../helpers/query-filter';
+import { queryPaginationTypeUser } from '../../helpers/query-filter';
 import { HttpCode, HttpStatus, Injectable, HttpException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { FilterQuery, Model } from "mongoose";
@@ -14,7 +14,7 @@ import { log } from "console";
 export class UsersQueryRepository {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
-  async findUsers(paginatorUser: QueryPaginationTypeUser) {
+  async findUsers(paginatorUser: queryPaginationTypeUser) {
     const filter:  FilterQuery<userMongoModel> = {};
 
     if (paginatorUser.searchLoginTerm || paginatorUser.searchEmailTerm) {

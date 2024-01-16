@@ -1,3 +1,4 @@
+import { Statistic } from './quiz.pair/dv-psql/entity/statistis';
 import { CheckingActivePair } from './auth/guards/auth.guard';
 import { CustomPipe } from './application/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
@@ -141,7 +142,7 @@ import { Question } from './quiz.questions/db-psql/entity/question';
       //           },
       //       },
     }),
-    TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult])    
+    TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic])    
     ,
     JwtModule.register({
       secret: env.JWT_SECRET,

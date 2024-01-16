@@ -1,6 +1,6 @@
 import { User } from './entity/user.entity';
 import { EmailConfirmation } from './entity/email.confirm.entity';
-import { QueryPaginationTypeUser } from '../../helpers/query-filter';
+import { queryPaginationTypeUser } from '../../helpers/query-filter';
 import { HttpCode, HttpStatus, Injectable, HttpException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { FilterQuery, Model } from "mongoose";
@@ -18,7 +18,7 @@ import { DataSource, ILike } from 'typeorm';
 export class UsersQueryRepoPSQL {
   constructor(@InjectDataSource() private userModel: DataSource) { }
 
-  async findUsers(paginatorUser: QueryPaginationTypeUser) {
+  async findUsers(paginatorUser: queryPaginationTypeUser) {
     const filter:  FilterQuery<userMongoModel> = {};
     
     let users: User[] = []

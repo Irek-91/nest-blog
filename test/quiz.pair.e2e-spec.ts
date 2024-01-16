@@ -522,7 +522,7 @@ describe('tests for questions', () => {
 
     })
 
-    describe('Возвращаем все игры пользователя', () => {
+    describe('Возвращаем все игры пользователя, /pair-game-quiz/pairs/my', () => {
 
         it('Возвращает статус 401', async () => {
 
@@ -628,5 +628,67 @@ describe('tests for questions', () => {
 
 
     })
+
+
+    describe('Возвращаем статистику /pair-game-quiz/pairs/users/my-statistic', () => {
+
+        it('Возвращает статус 401', async () => {
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/pairs/users/my-statistic')
+                .expect(401)
+        })
+
+        it('Возвращаем статистику, пользователя (userThree)', async () => {
+            const { userThree } = expect.getState()
+
+
+            const AccessToken = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })
+            const headersJWT = { Authorization: `Bearer ${AccessToken}` }
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/pairs/users/my-statistic')
+                .set(headersJWT)
+                .expect(200)
+            expect(creatResponse.body).toEqual(
+                {
+                    sumScore: 6,
+                    avgScores: 6,
+                    gamesCount: 1,
+                    winsCount: 1,
+                    lossesCount: 0,
+                    drawsCount: 0
+                }
+            )
+        })
+
+        it('Возвращаем статистику, пользователя (userFour)', async () => {
+            const { userFour } = expect.getState()
+
+
+
+            const AccessToken = jwt.sign({ userId: userFour.id }, settings.JWT_SECRET, { expiresIn: 100 })
+            const headersJWT = { Authorization: `Bearer ${AccessToken}` }
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/pairs/users/my-statistic')
+                .set(headersJWT)
+                .expect(200)
+            expect(creatResponse.body).toEqual(
+                {
+                    sumScore: 5,
+                    avgScores: 5,
+                    gamesCount: 1,
+                    winsCount: 0,
+                    lossesCount: 1,
+                    drawsCount: 0
+                }
+            )
+        })
+
+
+
+    })
+
 
 })

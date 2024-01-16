@@ -1,6 +1,6 @@
 import { BlogsQueryRepository } from '../blogs/db-mongo/blogs.query.repo';
 import { BlogsRepository } from '../blogs/db-mongo/blogs.repo';
-import { QueryPaginationType } from './../helpers/query-filter';
+import { queryPaginationType } from './../helpers/query-filter';
 import { Post, PostSchema } from './model/post-schema';
 import {HttpStatus, Injectable , HttpException} from "@nestjs/common"
 import { paginatorPost, postInputModel, postMongoDb, postOutput } from "./model/post-model"
@@ -22,12 +22,12 @@ export class PostsService {
         protected postQueryRepo: PostQueryRepoPSQL,
         protected blogQueryRepository: BlogsQueryRepoPSQL) { }
         
-    async findPost(paginationQuery: QueryPaginationType, userId: string | null): Promise<paginatorPost | null> {
+    async findPost(paginationQuery: queryPaginationType, userId: string | null): Promise<paginatorPost | null> {
         return this.postQueryRepo.findPost(paginationQuery, userId)
     }
 
 
-    async findPostsBlogId(paginationQuery: QueryPaginationType, blogId: string, userId: string|null): Promise<paginatorPost | null> {
+    async findPostsBlogId(paginationQuery: queryPaginationType, blogId: string, userId: string|null): Promise<paginatorPost | null> {
         return this.postQueryRepo.findPostsBlogId(paginationQuery, blogId, userId)
     }
 

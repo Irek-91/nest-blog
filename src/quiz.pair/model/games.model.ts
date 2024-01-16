@@ -68,3 +68,12 @@ export type gamePairDBModel = {
     startGameDate: string | null,
     finishGameDate: string | null
 }
+
+export type myStatisticViewModel = {
+    sumScore: number,
+    avgScores: number,
+    gamesCount: number,
+    winsCount: number,
+    lossesCount: number,
+    drawsCount: number
+  }

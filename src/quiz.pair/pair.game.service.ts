@@ -1,7 +1,7 @@
-import { QueryPaginationPairsType } from './../helpers/query-filter';
+import { queryPaginationPairsType } from './../helpers/query-filter';
 import { QusetionsService } from './../quiz.questions/questions.service';
 import { PairGameRepo } from './dv-psql/pair.game.Repo';
-import { gamePairViewModel, gamePairDBModel, questionPairViewModel, answerViewModel, gamePlayerProgressViewModel, gameAllPairsViewModel } from './model/games.model';
+import { gamePairViewModel, gamePairDBModel, questionPairViewModel, answerViewModel, gamePlayerProgressViewModel, gameAllPairsViewModel, myStatisticViewModel } from './model/games.model';
 
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { log } from 'node:console';
@@ -28,7 +28,7 @@ export class PairGameService {
         return result
     }
 
-    async getAllPairsByUser(queryFilter: QueryPaginationPairsType, userId: string): Promise<gameAllPairsViewModel | null> {
+    async getAllPairsByUser(queryFilter: queryPaginationPairsType, userId: string): Promise<gameAllPairsViewModel | null> {
         const pairs = await this.pairGameRepo.getAllPairsByUser(userId, queryFilter)
         if (!pairs) {
             return null
@@ -38,18 +38,33 @@ export class PairGameService {
         const result: any = await Promise.all(pairs.map(async (p) => {
             return await this.getPairMuCurrentViewModel(userId, p.id)
         }))
-            
+
         return {
             pagesCount: pagesCount,
             page: queryFilter.pageNumber,
             pageSize: queryFilter.pageSize,
             totalCount: pairs.length,
             items: result
-          }
+        }
 
     }
 
-    
+    async getStatisticByUser(userId: string): Promise<any | myStatisticViewModel | null> {
+        const result = await this.pairGameRepo.getStatisticByUser(userId)
+        const gamesCount = result!.winsCount + result!.lossesCount
+        const avgScores = result!.score /gamesCount 
+        return  {
+            sumScore: result!.score,
+            avgScores: avgScores,
+            gamesCount: gamesCount,
+            winsCount: result!.winsCount,
+            lossesCount: result!.lossesCount,
+            drawsCount: 0
+        }
+
+    }
+
+
 
     async getPairMuCurrentViewModel(userIdOne: string, pairId: string): Promise<gamePairViewModel | null> {
 
@@ -112,7 +127,7 @@ export class PairGameService {
                 score: resultPlayerTwo!.score,
             }
             const questions = await this.pairGameRepo.getQuestionsByPair(pair.id)
-            
+
             let status = 'Active'
             if (pair.finishGameDate !== null) {
                 status = 'Finished'
@@ -154,10 +169,17 @@ export class PairGameService {
             throw new HttpException('If current user tries to get pair in which user is not participant', HttpStatus.FORBIDDEN)
 
         }
-        
+
 
     }
-
+    async createNewStatisticByPalyer(userId: string): Promise<boolean> {
+        const statistic = await this.pairGameRepo.getStatisticByUser(userId)
+        if (statistic) {
+            return true
+        }
+        const newStatistic = await this.pairGameRepo.createNewStatistic(userId)
+        return newStatistic
+    }
     async connectUserByPair(userId: string): Promise<gamePairViewModel | null> {
         const pair = await this.pairGameRepo.getPairMyCurrent(userId)
         if (pair !== null && pair.finishGameDate === null && (pair.firstPlayerId === userId || pair.secondPlayerId === userId)) {
@@ -198,25 +220,53 @@ export class PairGameService {
         const resultUpdateSecondPlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
 
         if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
-            let bonusPlayerId = pair.firstPlayerId
-            let score = resultUpdateFirstPlayer!.score
-            const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4]
-            const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4]
+            let bonusPlayerId = ''
+            let scoreOne = resultUpdateFirstPlayer!.score
+            let scoreTwo = resultUpdateSecondPlayer!.score
+
+            let loserPlayerId = pair.secondPlayerId
+            const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4] //время последнего ответа пользователя 1
+            const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4] //время последнего ответа пользователя 2
             if (resultUpdateFirstPlayer!.answersStatus.includes('Correct')) {
-                score++  
+                bonusPlayerId = pair.firstPlayerId
+                scoreOne++
             }
-            
+
             if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
-                bonusPlayerId = pair.secondPlayerId
-                score = resultUpdateSecondPlayer!.score
+
                 if (resultUpdateSecondPlayer!.answersStatus.includes('Correct')) {
-                    score++ 
+                    bonusPlayerId = pair.secondPlayerId
+                    scoreTwo++
+                }
+            }
+            let winnerPlayer = {
+                id: pair.firstPlayerId,
+                score: scoreOne
+            }
+
+            let loserPlayer = {
+                id: pair.secondPlayerId,
+                score: scoreTwo
+            }
+
+            if (scoreTwo > scoreOne) {
+
+                let winnerPlayer = {
+                    id: pair.secondPlayerId,
+                    score: scoreTwo
+                }
+
+                let loserPlayer = {
+                    id: pair.firstPlayerId,
+                    score: scoreOne
                 }
             }
 
-            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, bonusPlayerId, score,resultUpdateFirstPlayer!, resultUpdateSecondPlayer!)
 
-            
+
+            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, bonusPlayerId, winnerPlayer, loserPlayer)
+
+
         }
         // if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length) {
         //     log('nen')
