@@ -1,3 +1,5 @@
+import { createFiveQuestions } from './helpers/qustions-tests-helpers';
+import { sendAnswerOneByUser } from './helpers/answers-tests-helpers';
 import jwt from 'jsonwebtoken';
 import { userInputModel } from './../src/users/models/users-model';
 import { appSettings } from './../src/app.settings';
@@ -38,7 +40,14 @@ describe('tests for questions', () => {
         await app.close()
     })
 
+    describe('Создаем вопросы для тестирования', () => {
+        it('Создали 5 вопросов ', async () => {
 
+            const created = await createFiveQuestions('admin', 'qwerty', httpServer)
+        })
+
+
+    })
 
     describe('Возвращает текущую незавершенную пользовательскую игру my-current', () => {
         it('Возвращает статус 404', async () => {
@@ -237,7 +246,7 @@ describe('tests for questions', () => {
                 .expect(401)
         })
 
-        it('Возвращает 403 статус при connection повторно первого пользователя', async () => {
+        it('Возвращает 403 статус при connection повторно первого(userThree) пользователя', async () => {
             const { userThree } = expect.getState()
 
             const AccessToken = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })
@@ -249,7 +258,7 @@ describe('tests for questions', () => {
                 .expect(403)
         })
 
-        it('Подключение второго игрока к паре', async () => {
+        it('Подключение второго(userFour) игрока к паре', async () => {
             const { userThree } = expect.getState()
 
             const model: userInputModel = {
@@ -296,13 +305,13 @@ describe('tests for questions', () => {
             })
         })
 
-        it('Возвращает текущую незавершенную пользовательскую игру от первого пользователя', async () => {
+        it('Возвращает текущую незавершенную пользовательскую игру от первого(userThree) пользователя', async () => {
             const { userThree } = expect.getState()
             const { userFour } = expect.getState()
 
             const AccessToken = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })
             const headersJWT = { Authorization: `Bearer ${AccessToken}` }
-            
+
             const connectMuCorrent = await request(httpServer)
                 .get('/pair-game-quiz/pairs/my-current')
                 .set(headersJWT)
@@ -336,13 +345,13 @@ describe('tests for questions', () => {
 
         })
 
-        it('Возвращает текущую незавершенную пользовательскую игру от второго пользователя', async () => {
+        it('Возвращает текущую незавершенную пользовательскую игру от второго(userFour) пользователя', async () => {
             const { userThree } = expect.getState()
             const { userFour } = expect.getState()
 
             const AccessToken = jwt.sign({ userId: userFour.id }, settings.JWT_SECRET, { expiresIn: 100 })
             const headersJWT = { Authorization: `Bearer ${AccessToken}` }
-            
+
             const connectMuCorrent = await request(httpServer)
                 .get('/pair-game-quiz/pairs/my-current')
                 .set(headersJWT)
@@ -376,7 +385,7 @@ describe('tests for questions', () => {
 
         })
 
-        it('Возвращает игру по id от первого пользователя', async () => {
+        it('Возвращает игру по id от первого(userThree) пользователя', async () => {
             const { userThree } = expect.getState()
             const { userFour } = expect.getState()
 
@@ -393,7 +402,7 @@ describe('tests for questions', () => {
         })
 
 
-        it('Возвращает 403 статус при connection повторно второго пользователя', async () => {
+        it('Возвращает 403 статус при connection повторно второго(userFour) пользователя', async () => {
             const { userFour } = expect.getState()
 
 
@@ -406,8 +415,33 @@ describe('tests for questions', () => {
                 .expect(403)
         })
 
+        it('Возвращает статус 201, после ответа первого(userThree) пользователя', async () => {
+            const { userThree } = expect.getState()
 
-        it('Подключение третьего игрока, создание новой пары', async () => {
+            const inputData = {
+                answer: "первый"
+            }
+            const resultAnswer1 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer2 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer3 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer4 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer5 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+        })
+        it('Возвращает статус 201, после ответа второго (userFour) пользователя', async () => {
+            const { userFour } = expect.getState()
+
+            const inputData = {
+                answer: "первый"
+            }
+            const resultAnswer1 = await sendAnswerOneByUser(userFour, inputData, httpServer)
+            const resultAnswer2 = await sendAnswerOneByUser(userFour, inputData, httpServer)
+            const resultAnswer3 = await sendAnswerOneByUser(userFour, inputData, httpServer)
+            const resultAnswer4 = await sendAnswerOneByUser(userFour, inputData, httpServer)
+            const resultAnswer5 = await sendAnswerOneByUser(userFour, inputData, httpServer)
+        })
+
+
+        it('Подключение третьего(userFive) игрока, создание новой пары', async () => {
 
             const model: userInputModel = {
                 login: 'userFive',
@@ -445,10 +479,154 @@ describe('tests for questions', () => {
             })
         })
 
+        it('Подключение первого(userThree) игрока к игре  третьим(userFive) игроком', async () => {
+            const { userThree } = expect.getState()
+            const { userFive } = expect.getState()
+
+            const AccessToken = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })
+            const headersJWT = { Authorization: `Bearer ${AccessToken}` }
+
+            const connectionPair = await request(httpServer)
+                .post('/pair-game-quiz/pairs/connection')
+                .set(headersJWT)
+                .expect(200)
+
+            expect(connectionPair.body).toEqual({
+                id: expect.any(String),
+                firstPlayerProgress: {
+                    answers: expect.any(Array),
+                    player: {
+                        id: userFive.id,
+                        login: userFive.login
+                    },
+                    score: 0
+                },
+                secondPlayerProgress: {
+                    answers: expect.any(Array),
+                    player: {
+                        id: userThree.id,
+                        login: userThree.login
+                    },
+                    score: 0
+                },
+                questions: expect.any(Array),
+                status: 'Active',
+                pairCreatedDate: expect.any(String),
+                startGameDate: expect.any(String),
+                finishGameDate: null
+            })
+        })
+
+
 
 
     })
 
+    describe('Возвращаем все игры пользователя', () => {
 
+        it('Возвращает статус 401', async () => {
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/pairs/my')
+                .expect(401)
+        })
+        it('Возвращаем пустой массив, пользователь который не играл', async () => {
+            const model: userInputModel = {
+                login: 'userSix',
+                password: 'userSix2023',
+                email: 'userSix@mail.com',
+            }
+
+            const user = await createUser('admin', 'qwerty', model, httpServer)
+            expect.setState({ userSix: user.user })
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/pairs/my')
+                .set(user.headers)
+                .expect(200)
+            expect(creatResponse.body).toEqual(
+                {
+                    pagesCount: expect.any(Number),
+                    page: 1,
+                    pageSize: 10,
+                    totalCount: expect.any(Number),
+                    items: []
+                }
+            )
+        })
+        it('Возвращаем игры, пользователя (userThree)', async () => {
+            const { userThree } = expect.getState()
+
+
+            const AccessToken = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })
+            const headersJWT = { Authorization: `Bearer ${AccessToken}` }
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/pairs/my')
+                .set(headersJWT)
+                .expect(200)
+            expect(creatResponse.body).toEqual(
+                {
+                    pagesCount: expect.any(Number),
+                    page: 1,
+                    pageSize: 10,
+                    totalCount: 2,
+                    items: [
+                        {
+                            id: expect.any(String),
+                            firstPlayerProgress: {
+                                answers: expect.any(Array),
+                                player: {
+                                    id: expect.any(String),
+                                    login: expect.any(String)
+                                },
+                                score: expect.any(Number)
+                            },
+                            secondPlayerProgress: {
+                                answers: expect.any(Array),
+                                player: {
+                                    id: userThree.id,
+                                    login: userThree.login
+                                },
+                                score: expect.any(Number)
+                            },
+                            questions: expect.any(Array),
+                            status: "Active",
+                            pairCreatedDate: expect.any(String),
+                            startGameDate: expect.any(String),
+                            finishGameDate: null
+                        },
+                        {
+                            id: expect.any(String),
+                            firstPlayerProgress: {
+                                answers: expect.any(Array),
+                                player: {
+                                    id: userThree.id,
+                                    login: userThree.login
+                                },
+                                score: expect.any(Number)
+                            },
+                            secondPlayerProgress: {
+                                answers: expect.any(Array),
+                                player: {
+                                    id: expect.any(String),
+                                    login: expect.any(String)
+                                },
+                                score: expect.any(Number)
+                            },
+                            questions: expect.any(Array),
+                            status: "Finished",
+                            pairCreatedDate: expect.any(String),
+                            startGameDate: expect.any(String),
+                            finishGameDate: expect.any(String)
+                        }
+                    ]
+                }
+            )
+        })
+
+
+
+    })
 
 })

@@ -28,6 +28,14 @@ export type QueryPaginationQuestionsType = {
   skip: number
 }
 
+export type QueryPaginationPairsType = {
+  sortBy: string
+  sortDirection: 'ASC' | 'DESC'
+  pageNumber: number
+  pageSize: number
+  skip: number
+}
+
 @Injectable()
 export class Pagination {
   getPaginationFromQueryUser = (query: any): QueryPaginationTypeUser => {
@@ -118,6 +126,31 @@ export class Pagination {
     if (query.sortBy === 'createdAt' || query.sortBy === 'published' || query.sortBy === 'updatedAt' ||
         query.sortBy === 'body' || query.sortBy === 'id') { defaultValues.sortBy = query.sortBy }
     else {defaultValues.sortBy = 'createdAt'};
+
+    if (query.sortDirection === 'asc' || query.sortDirection === 'desc' || 
+    query.sortDirection === 'ASC' || query.sortDirection === 'DESC') { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
+    else  {defaultValues.sortDirection = 'DESC'};
+
+    if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
+
+    if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
+    defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
+    
+    return defaultValues
+  }
+
+  getPaginationFromQueryPairs = (query: any): QueryPaginationPairsType => {
+    const defaultValues: QueryPaginationPairsType = {
+      sortBy: 'pairCreatedDate',
+      sortDirection: 'DESC',
+      pageNumber: 1,
+      pageSize: 10,
+      skip: 0
+    }
+
+
+    if (query.sortBy === 'status' || query.sortBy === 'startGameDate' || query.sortBy === 'finishGameDate') { defaultValues.sortBy = query.sortBy }
+    else {defaultValues.sortBy = 'pairCreatedDate'};
 
     if (query.sortDirection === 'asc' || query.sortDirection === 'desc' || 
     query.sortDirection === 'ASC' || query.sortDirection === 'DESC') { defaultValues.sortDirection = query.sortDirection.toUpperCase() }

@@ -1,12 +1,14 @@
+import { Pagination, QueryPaginationPairsType } from './../helpers/query-filter';
 import { CustomPipe } from './../application/pipe';
 import { PairGameService } from './pair.game.service';
-import { gamePairViewModel, AnswerInputModel } from './model/games.model';
+import { gamePairViewModel, AnswerInputModel, gameAllPairsViewModel } from './model/games.model';
 import { UserAuthGuard, CheckingActivePair } from './../auth/guards/auth.guard';
-import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Query, Request, UseGuards } from "@nestjs/common";
 
 @Controller('pair-game-quiz/pairs')
 export class PairGameController {
-    constructor(protected pairGameService: PairGameService
+    constructor(protected pairGameService: PairGameService,
+        private readonly pagination: Pagination
     ) {
     }
     @UseGuards(CheckingActivePair)
@@ -21,6 +23,28 @@ export class PairGameController {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
         return pairMyCurrent
+    }
+
+    @UseGuards(UserAuthGuard)
+    @Get('/my')
+    async getAllMyPairs(@Query()
+    query: {
+        sortBy: string;
+        sortDirection: string;
+        pageNumber: string;
+        pageSize: string;
+    },
+        @Request() req: any
+    ) {
+        let userId = req.userId
+        const queryFilter : QueryPaginationPairsType  = this.pagination.getPaginationFromQueryPairs(query);
+
+        const pairsAllbyUser: gameAllPairsViewModel | null = await this.pairGameService.getAllPairsByUser(queryFilter, userId)
+
+        if (!pairsAllbyUser) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
+        return pairsAllbyUser
     }
 
     @UseGuards(UserAuthGuard)

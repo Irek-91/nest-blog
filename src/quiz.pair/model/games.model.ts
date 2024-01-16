@@ -15,10 +15,10 @@ export type playerViewModel = {
 enum answerStatus {
     'Correct',
     'Incorrect',
-  }
+}
 export type answerViewModel = {
     questionId: string,
-    answerStatus:  string
+    answerStatus: string
     addedAt: string
 }
 
@@ -37,7 +37,7 @@ export type questionPairViewModel = {
 
 enum statusGame {
     'PendingSecondPlayer', 'Active', 'Finished'
-  }
+}
 
 export type gamePairViewModel = {
     id: string,
@@ -49,6 +49,16 @@ export type gamePairViewModel = {
     startGameDate: string | null,
     finishGameDate: string | null
 }
+
+export type gameAllPairsViewModel = {
+    pagesCount: number,
+    page: number,
+    pageSize: number,
+    totalCount: number,
+    items: gamePairViewModel[]
+}
+
+
 
 export type gamePairDBModel = {
     id: string,

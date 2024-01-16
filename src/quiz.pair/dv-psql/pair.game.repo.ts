@@ -1,3 +1,4 @@
+import { QueryPaginationPairsType } from './../../helpers/query-filter';
 import { Question } from '../../quiz.questions/db-psql/entity/question';
 import { QuestionsRepository } from '../../quiz.questions/db-psql/questions.repo.PSQL';
 import { answerViewModel, questionPairViewModel } from '../model/games.model';
@@ -35,6 +36,29 @@ export class PairGameRepo {
         } catch (e) {
             return null
         }
+    }
+
+    async getAllPairsByUser(userId: string, queryFilter: QueryPaginationPairsType): Promise<Pair[] | null> {
+        try {
+            const result = await this.model.getRepository(Pair)
+                .createQueryBuilder('p')
+                .where({
+                    firstPlayerId: userId
+                })
+                .orWhere({
+                    secondPlayerId: userId
+                })
+                .orderBy(`p.${queryFilter.sortBy}`, queryFilter.sortDirection)
+                .skip(queryFilter.skip)
+                .take(queryFilter.pageSize)
+                .getMany()
+
+            return result
+
+        } catch (e) {
+            return null
+        }
+
     }
 
     async getPairById(pairId: string): Promise<Pair | null> {
@@ -108,7 +132,7 @@ export class PairGameRepo {
             const questions = pair!.questionsId
             const answersAddedAt = result!.answersAddedAt
             const answerStatus = result!.answersStatus
-            
+
 
             let answer: answerViewModel[] = answerStatus.map(function (e, i) {
 
@@ -224,7 +248,7 @@ export class PairGameRepo {
                 score: 0
             })
             .execute()
-        
+
         return pairId
     }
 
@@ -271,7 +295,8 @@ export class PairGameRepo {
 
     }
 
-    async updateStatusGame(pairId: string, bonusPlayerId: string, score: number): Promise<boolean | null> {
+    async updateStatusGame(pairId: string, bonusPlayerId: string, scoreBonus: number,
+        resultFirstPlayer: Pairresult, resultSecondPlayer : Pairresult): Promise<boolean | null> {
         try {
             const updateStatus = await this.model.createQueryBuilder()
                 .update(Pair)
@@ -282,16 +307,9 @@ export class PairGameRepo {
                     id: pairId
                 })
                 .execute()
-            const updateBonusScore = await this.model.createQueryBuilder()
-                .update(Pairresult)
-                .set({
-                    score: score
-                })
-                .where({
-                    playerId: bonusPlayerId
-                })
-                .execute()
-
+            const updateBonusScore = await this.model.getRepository(Pairresult)
+                .increment({
+                    playerId: bonusPlayerId, pairId: pairId}, 'score', 1)                        
             return true
         } catch (e) {
             return null

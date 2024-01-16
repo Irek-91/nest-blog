@@ -1,6 +1,7 @@
+import { QueryPaginationPairsType } from './../helpers/query-filter';
 import { QusetionsService } from './../quiz.questions/questions.service';
 import { PairGameRepo } from './dv-psql/pair.game.Repo';
-import { gamePairViewModel, gamePairDBModel, questionPairViewModel, answerViewModel, gamePlayerProgressViewModel } from './model/games.model';
+import { gamePairViewModel, gamePairDBModel, questionPairViewModel, answerViewModel, gamePlayerProgressViewModel, gameAllPairsViewModel } from './model/games.model';
 
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { log } from 'node:console';
@@ -25,6 +26,27 @@ export class PairGameService {
         }
         const result = await this.getPairMuCurrentViewModel(userIdOne, pair.id)
         return result
+    }
+
+    async getAllPairsByUser(queryFilter: QueryPaginationPairsType, userId: string): Promise<gameAllPairsViewModel | null> {
+        const pairs = await this.pairGameRepo.getAllPairsByUser(userId, queryFilter)
+        if (!pairs) {
+            return null
+        }
+        const pagesCount = Math.ceil(pairs.length / queryFilter.pageSize)
+
+        const result: any = await Promise.all(pairs.map(async (p) => {
+            return await this.getPairMuCurrentViewModel(userId, p.id)
+        }))
+            
+        return {
+            pagesCount: pagesCount,
+            page: queryFilter.pageNumber,
+            pageSize: queryFilter.pageSize,
+            totalCount: pairs.length,
+            items: result
+          }
+
     }
 
     
@@ -192,7 +214,7 @@ export class PairGameService {
                 }
             }
 
-            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, bonusPlayerId, score)
+            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, bonusPlayerId, score,resultUpdateFirstPlayer!, resultUpdateSecondPlayer!)
 
             
         }
