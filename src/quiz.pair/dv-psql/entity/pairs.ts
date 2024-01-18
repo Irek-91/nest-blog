@@ -19,7 +19,6 @@ secondPlayerId: string
 @Column("simple-json")
 questionsId: string[]
 
-
 @Column()
 pairCreatedDate: string
 
@@ -28,6 +27,10 @@ startGameDate: string
 
 @Column({nullable: true})
 finishGameDate: string
+
+@Column({nullable: true})
+status: string
+
 
 // @OneToMany((type) => Pairresult, (result) => result.pairId)
 // @JoinColumn({

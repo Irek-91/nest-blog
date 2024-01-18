@@ -1,3 +1,4 @@
+import { User } from './../../../users/db-psql/entity/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Pair } from "./pairs";
 
@@ -12,8 +13,11 @@ export class Pairresult {
     @Column()
     pairId: string
 
-    @Column()
-    playerId: string
+    @ManyToOne(() => User, (pair) => pair._id)
+    @JoinColumn({
+     name: 'playerId'
+    })
+    public playerId: User
 
     @Column("simple-json", { nullable: true })
     answersAddedAt: string[]

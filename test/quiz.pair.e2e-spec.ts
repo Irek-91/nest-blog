@@ -415,29 +415,33 @@ describe('tests for questions', () => {
                 .expect(403)
         })
 
-        it('Возвращает статус 201, после ответа первого(userThree) пользователя', async () => {
+        it(`Возвращает статус 201, после ответов первого(userThree) и  второго (userFour)
+         пользователя, победа первого(userThree) и бонус у второго(userFour)`, async () => {
             const { userThree } = expect.getState()
-
-            const inputData = {
-                answer: "первый"
-            }
-            const resultAnswer1 = await sendAnswerOneByUser(userThree, inputData, httpServer)
-            const resultAnswer2 = await sendAnswerOneByUser(userThree, inputData, httpServer)
-            const resultAnswer3 = await sendAnswerOneByUser(userThree, inputData, httpServer)
-            const resultAnswer4 = await sendAnswerOneByUser(userThree, inputData, httpServer)
-            const resultAnswer5 = await sendAnswerOneByUser(userThree, inputData, httpServer)
-        })
-        it('Возвращает статус 201, после ответа второго (userFour) пользователя', async () => {
             const { userFour } = expect.getState()
 
             const inputData = {
                 answer: "первый"
             }
-            const resultAnswer1 = await sendAnswerOneByUser(userFour, inputData, httpServer)
-            const resultAnswer2 = await sendAnswerOneByUser(userFour, inputData, httpServer)
-            const resultAnswer3 = await sendAnswerOneByUser(userFour, inputData, httpServer)
-            const resultAnswer4 = await sendAnswerOneByUser(userFour, inputData, httpServer)
-            const resultAnswer5 = await sendAnswerOneByUser(userFour, inputData, httpServer)
+            const inputIncorrectData = {
+                answer: "второй"
+            }
+
+            const answeruserThree1 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const answeruserFour1 = await sendAnswerOneByUser(userFour, inputData, httpServer)
+
+            const answeruserThree2 = await sendAnswerOneByUser(userThree, inputIncorrectData, httpServer)
+            const answeruserFour2 = await sendAnswerOneByUser(userFour, inputIncorrectData, httpServer)
+
+            const answeruserThree3 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const answeruserFour3 = await sendAnswerOneByUser(userFour, inputIncorrectData, httpServer)
+
+            const answeruserThree4 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const answeruserFour4 = await sendAnswerOneByUser(userFour, inputIncorrectData, httpServer)
+
+            const answeruserThree5 = await sendAnswerOneByUser(userFour, inputIncorrectData, httpServer)
+            const answeruserFour5 = await sendAnswerOneByUser(userThree, inputIncorrectData, httpServer)
+
         })
 
 
@@ -479,7 +483,7 @@ describe('tests for questions', () => {
             })
         })
 
-        it('Подключение первого(userThree) игрока к игре  третьим(userFive) игроком', async () => {
+        it('Подключение первого(userThree) игрока к игре с третьим(userFive) игроком', async () => {
             const { userThree } = expect.getState()
             const { userFive } = expect.getState()
 
@@ -515,6 +519,37 @@ describe('tests for questions', () => {
                 startGameDate: expect.any(String),
                 finishGameDate: null
             })
+        })
+
+        it(`Игра первого(userThree) игрока с третьим(userFive) игроком, результат ничья, 
+        ,бонус у третьего (userFive)`, async () => {
+            const { userThree } = expect.getState()
+            const { userFive } = expect.getState()
+
+            const inputData = {
+                answer: "первый"
+            }
+            const inputIncorrectData = {
+                answer: "второй"
+            }
+
+            const resultAnswer6 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer1 = await sendAnswerOneByUser(userFive, inputData, httpServer)
+
+            const resultAnswer7 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer2 = await sendAnswerOneByUser(userFive, inputData, httpServer)
+
+            const resultAnswer8 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer3 = await sendAnswerOneByUser(userFive, inputData, httpServer)
+
+
+            const resultAnswer9 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer4 = await sendAnswerOneByUser(userFive, inputData, httpServer)
+
+            const resultAnswer5 = await sendAnswerOneByUser(userFive, inputIncorrectData, httpServer)
+            const resultAnswer10 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+
+
         })
 
 
@@ -580,7 +615,7 @@ describe('tests for questions', () => {
                                     id: expect.any(String),
                                     login: expect.any(String)
                                 },
-                                score: expect.any(Number)
+                                score: 5
                             },
                             secondPlayerProgress: {
                                 answers: expect.any(Array),
@@ -588,13 +623,13 @@ describe('tests for questions', () => {
                                     id: userThree.id,
                                     login: userThree.login
                                 },
-                                score: expect.any(Number)
+                                score: 5
                             },
                             questions: expect.any(Array),
-                            status: "Active",
+                            status: "Finished",
                             pairCreatedDate: expect.any(String),
                             startGameDate: expect.any(String),
-                            finishGameDate: null
+                            finishGameDate: expect.any(String)
                         },
                         {
                             id: expect.any(String),
@@ -604,7 +639,7 @@ describe('tests for questions', () => {
                                     id: userThree.id,
                                     login: userThree.login
                                 },
-                                score: expect.any(Number)
+                                score: 3
                             },
                             secondPlayerProgress: {
                                 answers: expect.any(Array),
@@ -612,7 +647,7 @@ describe('tests for questions', () => {
                                     id: expect.any(String),
                                     login: expect.any(String)
                                 },
-                                score: expect.any(Number)
+                                score: 2
                             },
                             questions: expect.any(Array),
                             status: "Finished",
@@ -630,12 +665,12 @@ describe('tests for questions', () => {
     })
 
 
-    describe('Возвращаем статистику /pair-game-quiz/pairs/users/my-statistic', () => {
+    describe('Возвращаем статистику /pair-game-quiz/users/my-statistic', () => {
 
         it('Возвращает статус 401', async () => {
 
             const creatResponse = await request(httpServer)
-                .get('/pair-game-quiz/pairs/users/my-statistic')
+                .get('/pair-game-quiz/users/my-statistic')
                 .expect(401)
         })
 
@@ -647,17 +682,17 @@ describe('tests for questions', () => {
             const headersJWT = { Authorization: `Bearer ${AccessToken}` }
 
             const creatResponse = await request(httpServer)
-                .get('/pair-game-quiz/pairs/users/my-statistic')
+                .get('/pair-game-quiz/users/my-statistic')
                 .set(headersJWT)
                 .expect(200)
             expect(creatResponse.body).toEqual(
                 {
-                    sumScore: 6,
-                    avgScores: 6,
-                    gamesCount: 1,
+                    sumScore: 8,
+                    avgScores: 4,
+                    gamesCount: 2,
                     winsCount: 1,
                     lossesCount: 0,
-                    drawsCount: 0
+                    drawsCount: 1
                 }
             )
         })
@@ -671,13 +706,13 @@ describe('tests for questions', () => {
             const headersJWT = { Authorization: `Bearer ${AccessToken}` }
 
             const creatResponse = await request(httpServer)
-                .get('/pair-game-quiz/pairs/users/my-statistic')
+                .get('/pair-game-quiz/users/my-statistic')
                 .set(headersJWT)
                 .expect(200)
             expect(creatResponse.body).toEqual(
                 {
-                    sumScore: 5,
-                    avgScores: 5,
+                    sumScore: 2,
+                    avgScores: 2,
                     gamesCount: 1,
                     winsCount: 0,
                     lossesCount: 1,
@@ -686,8 +721,92 @@ describe('tests for questions', () => {
             )
         })
 
+        it('Возвращаем статистику, пользователя (userFive)', async () => {
+            const { userFive } = expect.getState()
 
 
+
+            const AccessToken = jwt.sign({ userId: userFive.id }, settings.JWT_SECRET, { expiresIn: 100 })
+            const headersJWT = { Authorization: `Bearer ${AccessToken}` }
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/users/my-statistic')
+                .set(headersJWT)
+                .expect(200)
+            expect(creatResponse.body).toEqual(
+                {
+                    sumScore: 5,
+                    avgScores: 5,
+                    gamesCount: 1,
+                    winsCount: 0,
+                    lossesCount: 0,
+                    drawsCount: 1
+                }
+            )
+        })
+
+
+    })
+
+
+    describe('Возвращаем статистику TOP /pair-game-quiz/users/top', () => {
+
+        it('Возвращает статус 200', async () => {
+            const { userThree } = expect.getState()
+            const { userFour } = expect.getState()
+            const { userFive } = expect.getState()
+
+
+            const creatResponse = await request(httpServer)
+                .get('/pair-game-quiz/users/top')
+                .expect(200)
+            expect(creatResponse.body).toEqual(
+                {
+                    pagesCount: 1,
+                    page: 1,
+                    pageSize: 10,
+                    totalCount: 3,
+                    items: [
+                        {
+                            sumScore: 8,
+                            avgScores: 4,
+                            gamesCount: 2,
+                            winsCount: 1,
+                            lossesCount: 0,
+                            drawsCount: 1,
+                            player: {
+                                id: userThree.id,
+                                login: userThree.login
+                              }
+                        },
+                        {
+                            sumScore: 5,
+                            avgScores: 5,
+                            gamesCount: 1,
+                            winsCount: 0,
+                            lossesCount: 0,
+                            drawsCount: 1,
+                            player: {
+                                id: userFive.id,
+                                login: userFive.login
+                              }
+                        },
+                        {
+                            sumScore: 2,
+                            avgScores: 2,
+                            gamesCount: 1,
+                            winsCount: 0,
+                            lossesCount: 1,
+                            drawsCount: 0,
+                            player: {
+                                id: userFour.id,
+                                login: userFour.login
+                              }
+                        }
+                    ]
+                }
+            )
+        })
     })
 
 

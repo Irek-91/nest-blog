@@ -36,32 +36,39 @@ export type queryPaginationPairsType = {
   skip: number
 }
 
+export type queryPaginationTopUsersType = {
+  sort: string[]
+  pageNumber: number
+  pageSize: number
+  skip: number
+}
+
 @Injectable()
 export class Pagination {
   getPaginationFromQueryUser = (query: any): queryPaginationTypeUser => {
-   const defaultValuesUsers: queryPaginationTypeUser = {
-     sortBy: 'createdAt',
-     sortDirection: 'DESC',
-     pageNumber: 1,
-     pageSize: 10,
-     searchLoginTerm: '',
-     searchEmailTerm: '',
-     skip: 0
-   }
-   if (query.sortBy) {defaultValuesUsers.sortBy = query.sortBy};
-   if (query.sortDirection) {defaultValuesUsers.sortDirection = query.sortDirection.toUpperCase()}
-   if (query.pageNumber) {defaultValuesUsers.pageNumber = +query.pageNumber}
-   if (query.pageSize) {defaultValuesUsers.pageSize = +query.pageSize}
-   if (query.searchLoginTerm) {defaultValuesUsers.searchLoginTerm = query.searchLoginTerm}
-   if (query.searchEmailTerm) {defaultValuesUsers.searchEmailTerm = query.searchEmailTerm}
-   defaultValuesUsers.skip = (defaultValuesUsers.pageNumber - 1)*defaultValuesUsers.pageSize
-   
-   return defaultValuesUsers
+    const defaultValuesUsers: queryPaginationTypeUser = {
+      sortBy: 'createdAt',
+      sortDirection: 'DESC',
+      pageNumber: 1,
+      pageSize: 10,
+      searchLoginTerm: '',
+      searchEmailTerm: '',
+      skip: 0
+    }
+    if (query.sortBy) { defaultValuesUsers.sortBy = query.sortBy };
+    if (query.sortDirection) { defaultValuesUsers.sortDirection = query.sortDirection.toUpperCase() }
+    if (query.pageNumber) { defaultValuesUsers.pageNumber = +query.pageNumber }
+    if (query.pageSize) { defaultValuesUsers.pageSize = +query.pageSize }
+    if (query.searchLoginTerm) { defaultValuesUsers.searchLoginTerm = query.searchLoginTerm }
+    if (query.searchEmailTerm) { defaultValuesUsers.searchEmailTerm = query.searchEmailTerm }
+    defaultValuesUsers.skip = (defaultValuesUsers.pageNumber - 1) * defaultValuesUsers.pageSize
+
+    return defaultValuesUsers
   }
 
 
-  
-  
+
+
   getPaginationFromQuery = (query: any): queryPaginationType => {
     const defaultValues: queryPaginationType = {
       searchNameTerm: '',
@@ -71,10 +78,10 @@ export class Pagination {
       pageSize: 10,
       skip: 0
     }
-  
+
     if (query.searchNameTerm) { defaultValues.searchNameTerm = query.searchNameTerm };
     if (query.sortBy === 'createdAt' || query.sortBy === 'name') { defaultValues.sortBy = query.sortBy }
-    else {query.sortBy = 'createdAt'};
+    else { query.sortBy = 'createdAt' };
     if (query.sortDirection) { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
@@ -90,13 +97,13 @@ export class Pagination {
       pageSize: 10,
       skip: 0
     }
-  
+
     if (query.searchNameTerm) { defaultValues.searchNameTerm = query.searchNameTerm };
-    if (query.sortBy === 'createdAt' || query.sortBy === 'blogName' || query.sortBy === 'title' 
-        || query.sortBy === 'shortDescription' || query.sortBy === 'content' || query.sortBy === 'blogId'
-        || query.sortBy === 'blogName' 
+    if (query.sortBy === 'createdAt' || query.sortBy === 'blogName' || query.sortBy === 'title'
+      || query.sortBy === 'shortDescription' || query.sortBy === 'content' || query.sortBy === 'blogId'
+      || query.sortBy === 'blogName'
     ) { defaultValues.sortBy = query.sortBy }
-    else {query.sortBy = 'createdAt'};
+    else { query.sortBy = 'createdAt' };
     if (query.sortDirection) { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
@@ -115,27 +122,27 @@ export class Pagination {
       pageSize: 10,
       skip: 0
     }
-  
+
     if (query.bodySearchTerm) { defaultValues.bodySearchTerm = query.bodySearchTerm };
 
-    if (query.publishedStatus === 'all' || query.publishedStatus === 'published' || 
-    query.publishedStatus === 'notPublished') { defaultValues.publishedStatus = query.publishedStatus } 
-    else {defaultValues.publishedStatus === 'all'}
+    if (query.publishedStatus === 'all' || query.publishedStatus === 'published' ||
+      query.publishedStatus === 'notPublished') { defaultValues.publishedStatus = query.publishedStatus }
+    else { defaultValues.publishedStatus === 'all' }
 
 
     if (query.sortBy === 'createdAt' || query.sortBy === 'published' || query.sortBy === 'updatedAt' ||
-        query.sortBy === 'body' || query.sortBy === 'id') { defaultValues.sortBy = query.sortBy }
-    else {defaultValues.sortBy = 'createdAt'};
+      query.sortBy === 'body' || query.sortBy === 'id') { defaultValues.sortBy = query.sortBy }
+    else { defaultValues.sortBy = 'createdAt' };
 
-    if (query.sortDirection === 'asc' || query.sortDirection === 'desc' || 
-    query.sortDirection === 'ASC' || query.sortDirection === 'DESC') { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
-    else  {defaultValues.sortDirection = 'DESC'};
+    if (query.sortDirection === 'asc' || query.sortDirection === 'desc' ||
+      query.sortDirection === 'ASC' || query.sortDirection === 'DESC') { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
+    else { defaultValues.sortDirection = 'DESC' };
 
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
 
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
-    
+
     return defaultValues
   }
 
@@ -150,19 +157,35 @@ export class Pagination {
 
 
     if (query.sortBy === 'status' || query.sortBy === 'startGameDate' || query.sortBy === 'finishGameDate') { defaultValues.sortBy = query.sortBy }
-    else {defaultValues.sortBy = 'pairCreatedDate'};
+    else { defaultValues.sortBy = 'pairCreatedDate' };
 
-    if (query.sortDirection === 'asc' || query.sortDirection === 'desc' || 
-    query.sortDirection === 'ASC' || query.sortDirection === 'DESC') { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
-    else  {defaultValues.sortDirection = 'DESC'};
+    if (query.sortDirection === 'asc' || query.sortDirection === 'desc' ||
+      query.sortDirection === 'ASC' || query.sortDirection === 'DESC') { defaultValues.sortDirection = query.sortDirection.toUpperCase() }
+    else { defaultValues.sortDirection = 'DESC' };
 
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
 
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
-    
+
     return defaultValues
   }
+  getPaginationFromQueryTopUsers = (query: any): queryPaginationTopUsersType => {
+    const defaultValues: queryPaginationTopUsersType = {
+      sort: ['avgScores desc', 'sumScore desc'],
+      pageNumber: 1,
+      pageSize: 10,
+      skip: 0
+    }
+
+    if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
+
+    if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
+    defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
+
+    return defaultValues
+  }
+
 
 
 }

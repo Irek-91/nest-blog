@@ -1,8 +1,9 @@
+import { myStatisticViewModel } from './../../../dist/quiz.pair/model/games.model.d';
 import { Statistic } from './entity/statistis';
-import { queryPaginationPairsType } from './../../helpers/query-filter';
+import { queryPaginationPairsType, queryPaginationTopUsersType } from './../../helpers/query-filter';
 import { Question } from '../../quiz.questions/db-psql/entity/question';
 import { QuestionsRepository } from '../../quiz.questions/db-psql/questions.repo.PSQL';
-import { answerViewModel, questionPairViewModel } from '../model/games.model';
+import { answerViewModel, questionPairViewModel, userStatisticViewModel } from '../model/games.model';
 
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -15,14 +16,14 @@ import { log } from 'console';
 @Injectable()
 
 export class PairGameRepo {
-    constructor(@InjectDataSource() private model: DataSource,
+    constructor(@InjectDataSource() private dataSource: DataSource,
         private questionsRepo: QuestionsRepository
 
     ) { }
 
     async getPairMyCurrent(userId: string): Promise<Pair | null> {
         try {
-            const result = await this.model.getRepository(Pair)
+            const result = await this.dataSource.getRepository(Pair)
                 .createQueryBuilder()
                 .where({
                     firstPlayerId: userId, finishGameDate: IsNull()
@@ -41,7 +42,24 @@ export class PairGameRepo {
 
     async getAllPairsByUser(userId: string, queryFilter: queryPaginationPairsType): Promise<Pair[] | null> {
         try {
-            const result = await this.model.getRepository(Pair)
+            if (queryFilter.sortBy === 'status') {
+                const result = await this.dataSource.getRepository(Pair)
+                    .createQueryBuilder('p')
+                    .where({
+                        firstPlayerId: userId
+                    })
+                    .orWhere({
+                        secondPlayerId: userId
+                    })
+                    .orderBy(`p.${queryFilter.sortBy}`, queryFilter.sortDirection)
+                    .addOrderBy("p.pairCreatedDate", "DESC")
+                    .skip(queryFilter.skip)
+                    .take(queryFilter.pageSize)
+                    .getMany()
+
+                return result
+            }
+            const result = await this.dataSource.getRepository(Pair)
                 .createQueryBuilder('p')
                 .where({
                     firstPlayerId: userId
@@ -64,7 +82,7 @@ export class PairGameRepo {
 
     async getPairById(pairId: string): Promise<Pair | null> {
         try {
-            const result = await this.model.getRepository(Pair)
+            const result = await this.dataSource.getRepository(Pair)
                 .createQueryBuilder()
                 .where({
                     id: pairId
@@ -80,7 +98,7 @@ export class PairGameRepo {
 
     async getPairByIdAndUserId(userIdOne: string, pairId: string): Promise<Pair | null> {
         try {
-            const result = await this.model.getRepository(Pair)
+            const result = await this.dataSource.getRepository(Pair)
                 .createQueryBuilder()
                 .where({
                     firstPlayerId: userIdOne, id: pairId
@@ -99,7 +117,7 @@ export class PairGameRepo {
 
     async getResultPairsByPlayerId(pairId: string, userId: string): Promise<Pairresult | null> {
         try {
-            const result = await this.model.getRepository(Pairresult)
+            const result = await this.dataSource.getRepository(Pairresult)
                 .createQueryBuilder()
                 .where({
                     pairId: pairId
@@ -119,7 +137,7 @@ export class PairGameRepo {
     async getAnswersByPlayerId(userId: string, pairId: string): Promise<answerViewModel[] | null> {
         try {
 
-            const result: Pairresult | null = await this.model.getRepository(Pairresult)
+            const result: Pairresult | null = await this.dataSource.getRepository(Pairresult)
                 .createQueryBuilder()
                 .where({
                     playerId: userId
@@ -149,7 +167,7 @@ export class PairGameRepo {
 
     async getQuestionsByPair(pairId: string): Promise<questionPairViewModel[] | null> {
         try {
-            const questionsPair = await this.model.getRepository(Pair)
+            const questionsPair = await this.dataSource.getRepository(Pair)
                 .createQueryBuilder()
                 .where({
                     id: pairId
@@ -158,7 +176,7 @@ export class PairGameRepo {
             const questionsId = questionsPair!.questionsId
 
             const result: questionPairViewModel[] = await Promise.all(questionsId.map(async (q) => {
-                const question = await this.model.getRepository(Question)
+                const question = await this.dataSource.getRepository(Question)
                     .createQueryBuilder()
                     .where({ id: q })
                     .getOne()
@@ -178,7 +196,7 @@ export class PairGameRepo {
 
 
     async getPairWhereSecondPlayerNull(): Promise<Pair | null> {
-        const result = await this.model.getRepository(Pair)
+        const result = await this.dataSource.getRepository(Pair)
             .createQueryBuilder()
             .where({
                 secondPlayerId: IsNull()
@@ -191,24 +209,25 @@ export class PairGameRepo {
     }
 
     async addPlayerInPair(playerId: string, pairId: string): Promise<string> {
-        const addPlayerPair = await this.model.createQueryBuilder()
+        const addPlayerPair = await this.dataSource.createQueryBuilder()
             .update(Pair)
             .set({
                 secondPlayerId: playerId,
-                startGameDate: new Date().toISOString()
+                startGameDate: new Date().toISOString(),
+                status: 'Active'
             })
             .where({
                 id: pairId
             })
             .execute()
 
-        const createPesultPlayer = await this.model.createQueryBuilder()
+        const createPesultPlayer = await this.dataSource.createQueryBuilder()
             .insert()
             .into(Pairresult)
             .values({
                 id: uuidv4(),
                 pairId: pairId,
-                playerId: playerId,
+                playerId: { _id: playerId },
                 answersAddedAt: [],
                 answersStatus: [],
                 score: 0
@@ -218,7 +237,7 @@ export class PairGameRepo {
         return pairId
     }
     async getStatisticByUser(userId: string): Promise<Statistic | null> {
-        const result = await this.model.getRepository(Statistic)
+        const result = await this.dataSource.getRepository(Statistic)
             .createQueryBuilder()
             .where({
                 userId: userId
@@ -226,15 +245,46 @@ export class PairGameRepo {
             .getOne()
         return result
     }
+
+    async getTopUsers(queryFilter: queryPaginationTopUsersType): Promise<userStatisticViewModel[] | []> {
+        const resultMany = await this.dataSource.getRepository(Statistic)
+            .createQueryBuilder('s')
+            .leftJoinAndSelect('s.userId', 'player')
+            .orderBy('s.score', "DESC" )
+            .getMany()
+        if (!resultMany) {
+            return []
+        }
+        const result: userStatisticViewModel[] = await Promise.all(resultMany.map(async (b) => {
+            const gamesCount = b.drawcount + b.lossesCount + b.winsCount
+            return {
+                sumScore: b.score,
+                avgScores: b.avgScores,
+                gamesCount: gamesCount,
+                winsCount: b.winsCount,
+                lossesCount: b.lossesCount,
+                drawsCount: b.drawcount,
+                player: {
+                    id: b.userId._id,
+                    login: b.userId.login
+                }
+            }
+        }))
+        return result
+
+    }
+
+
     async createNewStatistic(userId: string): Promise<boolean> {
-        const createPesultPlayer = await this.model.createQueryBuilder()
+        const createPesultPlayer = await this.dataSource.createQueryBuilder()
             .insert()
             .into(Statistic)
             .values({
-                userId: userId,
+                userId: { _id: userId },
                 score: 0,
                 winsCount: 0,
-                lossesCount: 0
+                lossesCount: 0,
+                drawcount: 0
             })
             .execute()
         return true
@@ -247,24 +297,25 @@ export class PairGameRepo {
 
         const pairCreatedDate = new Date().toISOString()
         const questions = await this.questionsRepo.getFiveRandomQuestions()
-        const createNewPair = await this.model.createQueryBuilder()
+        const createNewPair = await this.dataSource.createQueryBuilder()
             .insert()
             .into(Pair)
             .values({
                 id: pairId,
                 firstPlayerId: playerId,
                 questionsId: questions,
-                pairCreatedDate: pairCreatedDate
+                pairCreatedDate: pairCreatedDate,
+                status: 'PendingSecondPlayer'
             })
             .execute()
 
-        const createPesultPlayer = await this.model.createQueryBuilder()
+        const createPesultPlayer = await this.dataSource.createQueryBuilder()
             .insert()
             .into(Pairresult)
             .values({
                 id: uuidv4(),
                 pairId: pairId,
-                playerId: playerId,
+                playerId: { _id: playerId },
                 answersAddedAt: [],
                 answersStatus: [],
                 score: 0
@@ -293,7 +344,7 @@ export class PairGameRepo {
             const score = resultPlayer!.score + count
             let finishGameDate: string | null = null
 
-            const updateResult = await this.model.createQueryBuilder()
+            const updateResult = await this.dataSource.createQueryBuilder()
                 .update(Pairresult)
                 .set({
                     answersAddedAt: resultPlayer!.answersAddedAt,
@@ -319,23 +370,71 @@ export class PairGameRepo {
 
     }
 
-    async updateStatusGame(pairId: string, bonusPlayerId: string,
+    async updateStatusGame(pairId: string,
         winnerPlayer: any, loserPlayer: any): Promise<boolean | null> {
+        const queryRunner = this.dataSource.createQueryRunner()
+        // await queryRunner.startTransaction()
+
         try {
-            const updateStatus = await this.model.createQueryBuilder()
+            const updateStatus = await this.dataSource.createQueryBuilder()
                 .update(Pair)
                 .set({
-                    finishGameDate: new Date().toISOString()
+                    finishGameDate: new Date().toISOString(),
+                    status: "Finished"
                 })
                 .where({
                     id: pairId
                 })
                 .execute()
-            const updateBonusScore = await this.model.getRepository(Pairresult)
-                .increment({
-                    playerId: bonusPlayerId, pairId: pairId
-                }, 'score', 1)
-            const addAndUpdateStatisticWinner = await this.model.createQueryBuilder()
+
+            const updatePairResultLoserPlayer = await this.dataSource.createQueryBuilder()
+                .update(Pairresult)
+                .set({
+                    score: loserPlayer.score
+                })
+                .where({
+                    pairId: pairId
+                })
+                .andWhere({
+                    playerId: loserPlayer.id
+                })
+                .execute()
+
+            const updatePairResultWinnerPlayer = await this.dataSource.createQueryBuilder()
+                .update(Pairresult)
+                .set({
+                    score: winnerPlayer.score
+                })
+                .where({
+                    pairId: pairId
+                })
+                .andWhere({
+                    playerId: winnerPlayer.id
+                })
+                .execute()
+
+            if (winnerPlayer.score === loserPlayer.score) {
+                const addAndUpdateStatisticWinner = await this.dataSource.createQueryBuilder()
+                    .update(Statistic)
+                    .set({
+                        score: () => `score + ${winnerPlayer.score}`,
+                        drawcount: () => "drawcount + 1",
+                    })
+                    .where({ userId: winnerPlayer.id })
+                    .execute()
+
+                const addAndUpdateStatisticLoser = await this.dataSource.createQueryBuilder()
+                    .update(Statistic)
+                    .set({
+                        score: () => `score + ${loserPlayer.score}`,
+                        drawcount: () => "drawcount + 1",
+                    })
+                    .where({ userId: loserPlayer.id })
+                    .execute()
+                return true
+            }
+
+            const addAndUpdateStatisticWinner = await this.dataSource.createQueryBuilder()
                 .update(Statistic)
                 .set({
                     score: () => `score + ${winnerPlayer.score}`,
@@ -344,7 +443,7 @@ export class PairGameRepo {
                 .where({ userId: winnerPlayer.id })
                 .execute()
 
-            const addAndUpdateStatisticLoser = await this.model.createQueryBuilder()
+            const addAndUpdateStatisticLoser = await this.dataSource.createQueryBuilder()
                 .update(Statistic)
                 .set({
                     score: () => `score + ${loserPlayer.score}`,
@@ -352,23 +451,27 @@ export class PairGameRepo {
                 })
                 .where({ userId: loserPlayer.id })
                 .execute()
+            //await queryRunner.commitTransaction()
             return true
         } catch (e) {
+            // await queryRunner.rollbackTransaction()
             return null
+        } finally {
+            // await queryRunner.release()
         }
     }
 
     async deleteAll() {
-        const resultTwo = await this.model.createQueryBuilder()
+        const resultTwo = await this.dataSource.createQueryBuilder()
             .delete()
             .from(Pairresult)
             .execute()
-        const resultThree = await this.model.createQueryBuilder()
+        const resultThree = await this.dataSource.createQueryBuilder()
             .delete()
             .from(Statistic)
             .execute()
 
-        const result = await this.model.createQueryBuilder()
+        const result = await this.dataSource.createQueryBuilder()
             .delete()
             .from(Pair)
             .execute()

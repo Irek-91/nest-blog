@@ -1,7 +1,7 @@
-import { queryPaginationPairsType } from './../helpers/query-filter';
+import { queryPaginationPairsType, queryPaginationTopUsersType } from './../helpers/query-filter';
 import { QusetionsService } from './../quiz.questions/questions.service';
 import { PairGameRepo } from './dv-psql/pair.game.Repo';
-import { gamePairViewModel, gamePairDBModel, questionPairViewModel, answerViewModel, gamePlayerProgressViewModel, gameAllPairsViewModel, myStatisticViewModel } from './model/games.model';
+import { gamePairViewModel, gamePairDBModel, questionPairViewModel, answerViewModel, gamePlayerProgressViewModel, gameAllPairsViewModel, myStatisticViewModel, topGamePlayerViewModel } from './model/games.model';
 
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { log } from 'node:console';
@@ -35,9 +35,13 @@ export class PairGameService {
         }
         const pagesCount = Math.ceil(pairs.length / queryFilter.pageSize)
 
-        const result: any = await Promise.all(pairs.map(async (p) => {
+        let result: any = await Promise.all(pairs.map(async (p) => {
             return await this.getPairMuCurrentViewModel(userId, p.id)
         }))
+        if (!result) {
+            result = []
+        }
+
 
         return {
             pagesCount: pagesCount,
@@ -48,18 +52,47 @@ export class PairGameService {
         }
 
     }
+    async getTopUsers(queryFilter: queryPaginationTopUsersType): Promise<topGamePlayerViewModel> {
+        const result = await this.pairGameRepo.getTopUsers(queryFilter)
+        const pagesCount = Math.ceil(result.length / queryFilter.pageSize)
 
-    async getStatisticByUser(userId: string): Promise<any | myStatisticViewModel | null> {
+        
+        return {
+            pagesCount: pagesCount,
+            page: queryFilter.pageNumber,
+            pageSize: queryFilter.pageSize,
+            totalCount: result.length,
+            items: result
+        }
+
+
+    }
+
+    async getStatisticByUser(userId: string): Promise<myStatisticViewModel> {
         const result = await this.pairGameRepo.getStatisticByUser(userId)
-        const gamesCount = result!.winsCount + result!.lossesCount
-        const avgScores = result!.score /gamesCount 
-        return  {
-            sumScore: result!.score,
+        if (!result) {
+            return {
+                sumScore: 0,
+                avgScores: 0,
+                gamesCount: 0,
+                winsCount: 0,
+                lossesCount: 0,
+                drawsCount: 0
+            }
+        }
+        function roundUp(num, precision) {
+            precision = Math.pow(10, precision)
+            return Math.ceil(num * precision) / precision
+          }
+        const gamesCount = result.winsCount + result.lossesCount + result.drawcount
+        const avgScores = roundUp(result.score / gamesCount, 2)
+        return {
+            sumScore: result.score,
             avgScores: avgScores,
             gamesCount: gamesCount,
-            winsCount: result!.winsCount,
-            lossesCount: result!.lossesCount,
-            drawsCount: 0
+            winsCount: result.winsCount,
+            lossesCount: result.lossesCount,
+            drawsCount: result.drawcount
         }
 
     }
@@ -95,7 +128,7 @@ export class PairGameService {
                 firstPlayerProgress: firstPlayerProgress,
                 secondPlayerProgress: secondPlayerProgress,
                 questions: questions,
-                status: status,
+                status: pair.status,
                 pairCreatedDate: pair.pairCreatedDate,
                 startGameDate: pair.startGameDate,
                 finishGameDate: pair.finishGameDate
@@ -139,7 +172,7 @@ export class PairGameService {
                 firstPlayerProgress: firstPlayerProgress,
                 secondPlayerProgress: secondPlayerProgress,
                 questions: questions,
-                status: status,
+                status: pair.status,
                 pairCreatedDate: pair.pairCreatedDate,
                 startGameDate: pair.startGameDate,
                 finishGameDate: pair.finishGameDate
@@ -180,6 +213,7 @@ export class PairGameService {
         const newStatistic = await this.pairGameRepo.createNewStatistic(userId)
         return newStatistic
     }
+
     async connectUserByPair(userId: string): Promise<gamePairViewModel | null> {
         const pair = await this.pairGameRepo.getPairMyCurrent(userId)
         if (pair !== null && pair.finishGameDate === null && (pair.firstPlayerId === userId || pair.secondPlayerId === userId)) {
@@ -214,31 +248,34 @@ export class PairGameService {
         }
         const numberQusetion = resultPlayer!.answersAddedAt.length
         const questionId = pair.questionsId[numberQusetion]
+        
         const resultAnswer = await this.qusetionsService.checkingCorrectAnswer(questionId, answer)
         const updateResultAnswer = await this.pairGameRepo.updateResultAnswer(pair.id, questionId, playerId, resultAnswer)
+        
         const resultUpdateFirstPlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.firstPlayerId)
         const resultUpdateSecondPlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
 
+
         if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
-            let bonusPlayerId = ''
             let scoreOne = resultUpdateFirstPlayer!.score
             let scoreTwo = resultUpdateSecondPlayer!.score
 
-            let loserPlayerId = pair.secondPlayerId
             const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4] //время последнего ответа пользователя 1
             const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4] //время последнего ответа пользователя 2
+            
             if (resultUpdateFirstPlayer!.answersStatus.includes('Correct')) {
-                bonusPlayerId = pair.firstPlayerId
-                scoreOne++
-            }
+                if (new Date(answersAddedAtOne) < new Date(answersAddedAtTwo)) {
+                    scoreOne++
+                }
+            } //бонусный бал
 
-            if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
-
-                if (resultUpdateSecondPlayer!.answersStatus.includes('Correct')) {
-                    bonusPlayerId = pair.secondPlayerId
+            if (resultUpdateSecondPlayer!.answersStatus.includes('Correct')) {
+                if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
                     scoreTwo++
                 }
             }
+            
+
             let winnerPlayer = {
                 id: pair.firstPlayerId,
                 score: scoreOne
@@ -262,17 +299,11 @@ export class PairGameService {
                 }
             }
 
-
-
-            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, bonusPlayerId, winnerPlayer, loserPlayer)
+            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, winnerPlayer, loserPlayer)
 
 
         }
-        // if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length) {
-        //     log('nen')
-        //     const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id)
-        // }
-
+        
         return updateResultAnswer
     }
 

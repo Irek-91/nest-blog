@@ -28,7 +28,7 @@ export const sendAnswerOneByUser = async (user: any,  model: AnswerInputModel, h
     expect(result.body).toEqual(
         {
             questionId: expect.any(String),
-            answerStatus: "Correct",
+            answerStatus: expect.any(String),
             addedAt: expect.any(String)
         }
     )

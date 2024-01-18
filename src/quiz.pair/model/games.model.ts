@@ -55,8 +55,29 @@ export type gameAllPairsViewModel = {
     page: number,
     pageSize: number,
     totalCount: number,
-    items: gamePairViewModel[]
+    items: gamePairViewModel[] | []
 }
+
+export type topGamePlayerViewModel = {
+    pagesCount: number,
+    page: number,
+    pageSize: number,
+    totalCount: number,
+    items: userStatisticViewModel[] | []
+}
+
+export type userStatisticViewModel = {
+    sumScore: number,
+    avgScores: number,
+    gamesCount: number,
+    winsCount: number,
+    lossesCount: number,
+    drawsCount: number, 
+    player: {
+        id: string,
+        login: string
+    }
+  }
 
 
 
