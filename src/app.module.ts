@@ -1,3 +1,4 @@
+import { PairGameQueryRepo } from './quiz.pair/dv-psql/pair.game.query.repo';
 import { Statistic } from './quiz.pair/dv-psql/entity/statistis';
 import { CheckingActivePair } from './auth/guards/auth.guard';
 import { CustomPipe } from './application/pipe';
@@ -151,6 +152,7 @@ import { Question } from './quiz.questions/db-psql/entity/question';
     PassportModule
   ],
 
+  
   controllers: [AppController, 
     TestingController, 
     UsersController, UsersSAController,
@@ -184,7 +186,7 @@ import { Question } from './quiz.questions/db-psql/entity/question';
     SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
     LikesRepository,
     QusetionsService, QuestionsRepository,
-    PairGameService, PairGameRepo,
+    PairGameService, PairGameRepo,PairGameQueryRepo,
     CustomPipe,
     CheckingActivePair
   ],

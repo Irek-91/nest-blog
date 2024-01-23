@@ -8,6 +8,7 @@ import { log } from 'node:console';
 import { v4 as uuidv4 } from 'uuid';
 import { Pair } from './dv-psql/entity/pairs';
 import { UsersService } from '../users/users.service';
+import { PairGameQueryRepo } from './dv-psql/pair.game.query.repo';
 
 
 @Injectable()
@@ -15,12 +16,13 @@ import { UsersService } from '../users/users.service';
 export class PairGameService {
 
     constructor(protected pairGameRepo: PairGameRepo,
+        protected pairGameQueryRepo: PairGameQueryRepo,
         protected userService: UsersService,
         protected qusetionsService: QusetionsService
     ) { }
     async getPairMuCurrent(userIdOne: string): Promise<gamePairViewModel | null> {
 
-        const pair = await this.pairGameRepo.getPairMyCurrent(userIdOne)
+        const pair = await this.pairGameQueryRepo.getPairMyCurrent(userIdOne)
         if (!pair) {
             return null
         }
@@ -29,7 +31,7 @@ export class PairGameService {
     }
 
     async getAllPairsByUser(queryFilter: queryPaginationPairsType, userId: string): Promise<gameAllPairsViewModel | null> {
-        const pairs = await this.pairGameRepo.getAllPairsByUser(userId, queryFilter)
+        const pairs = await this.pairGameQueryRepo.getAllPairsByUser(userId, queryFilter)
         if (!pairs) {
             return null
         }
@@ -53,15 +55,16 @@ export class PairGameService {
 
     }
     async getTopUsers(queryFilter: queryPaginationTopUsersType): Promise<topGamePlayerViewModel> {
-        const result = await this.pairGameRepo.getTopUsers(queryFilter)
-        const pagesCount = Math.ceil(result.length / queryFilter.pageSize)
+        const result = await this.pairGameQueryRepo.getTopUsers(queryFilter)
+        const totalCount = await this.pairGameQueryRepo.getAllStatisticByUsers()
+        const pagesCount = Math.ceil(totalCount!.length / queryFilter.pageSize)
 
-        
+
         return {
             pagesCount: pagesCount,
             page: queryFilter.pageNumber,
             pageSize: queryFilter.pageSize,
-            totalCount: result.length,
+            totalCount: totalCount!.length,
             items: result
         }
 
@@ -69,7 +72,7 @@ export class PairGameService {
     }
 
     async getStatisticByUser(userId: string): Promise<myStatisticViewModel> {
-        const result = await this.pairGameRepo.getStatisticByUser(userId)
+        const result = await this.pairGameQueryRepo.getStatisticByUser(userId)
         if (!result) {
             return {
                 sumScore: 0,
@@ -83,16 +86,16 @@ export class PairGameService {
         function roundUp(num, precision) {
             precision = Math.pow(10, precision)
             return Math.ceil(num * precision) / precision
-          }
-        const gamesCount = result.winsCount + result.lossesCount + result.drawcount
-        const avgScores = roundUp(result.score / gamesCount, 2)
+        }
+        const gamesCount = (+result.winsCount) + (+result.lossesCount) + (+result.drawcount)
+        const avgScores = roundUp(+result.sumScore / gamesCount, 2)
         return {
-            sumScore: result.score,
+            sumScore: +result.sumScore,
             avgScores: avgScores,
             gamesCount: gamesCount,
-            winsCount: result.winsCount,
-            lossesCount: result.lossesCount,
-            drawsCount: result.drawcount
+            winsCount: +result.winsCount,
+            lossesCount: +result.lossesCount,
+            drawsCount: +result.drawcount
         }
 
     }
@@ -101,14 +104,14 @@ export class PairGameService {
 
     async getPairMuCurrentViewModel(userIdOne: string, pairId: string): Promise<gamePairViewModel | null> {
 
-        const pair = await this.pairGameRepo.getPairByIdAndUserId(userIdOne, pairId)
+        const pair = await this.pairGameQueryRepo.getPairByIdAndUserId(userIdOne, pairId)
         if (!pair) {
             return null
         }
 
         if (pair.secondPlayerId === null) {
 
-            const resultOnePlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, userIdOne)
+            const resultOnePlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, userIdOne)
             const userOne = await this.userService.findByUserId(userIdOne)
             const answersOne = []
             const firstPlayerProgress = {
@@ -136,9 +139,9 @@ export class PairGameService {
             return result
 
         } else {
-            const resultPlayerOne = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.firstPlayerId)
+            const resultPlayerOne = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.firstPlayerId)
             const userOne = await this.userService.findByUserId(pair.firstPlayerId)
-            const answersOne = await this.pairGameRepo.getAnswersByPlayerId(pair.firstPlayerId, pair.id)
+            const answersOne = await this.pairGameQueryRepo.getAnswersByPlayerId(pair.firstPlayerId, pair.id)
             const firstPlayerProgress = {
                 answers: answersOne!,
                 player: {
@@ -148,9 +151,9 @@ export class PairGameService {
                 score: resultPlayerOne!.score,
             }
 
-            const resultPlayerTwo = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
+            const resultPlayerTwo = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
             const userTwo = await this.userService.findByUserId(pair.secondPlayerId)
-            const answersTwo = await this.pairGameRepo.getAnswersByPlayerId(pair.secondPlayerId, pair.id)
+            const answersTwo = await this.pairGameQueryRepo.getAnswersByPlayerId(pair.secondPlayerId, pair.id)
             const secondPlayerProgress = {
                 answers: answersTwo!,
                 player: {
@@ -159,7 +162,7 @@ export class PairGameService {
                 },
                 score: resultPlayerTwo!.score,
             }
-            const questions = await this.pairGameRepo.getQuestionsByPair(pair.id)
+            const questions = await this.pairGameQueryRepo.getQuestionsByPair(pair.id)
 
             let status = 'Active'
             if (pair.finishGameDate !== null) {
@@ -186,7 +189,7 @@ export class PairGameService {
 
     async getPairById(pairId: string, userId: string): Promise<gamePairViewModel | null> {
 
-        const pair = await this.pairGameRepo.getPairById(pairId)
+        const pair = await this.pairGameQueryRepo.getPairById(pairId)
         if (!pair) {
             return null
         }
@@ -206,8 +209,8 @@ export class PairGameService {
 
     }
     async createNewStatisticByPalyer(userId: string): Promise<boolean> {
-        const statistic = await this.pairGameRepo.getStatisticByUser(userId)
-        if (statistic) {
+        const statistic = await this.pairGameQueryRepo.getStatisticByUser(userId)
+        if (statistic !== null) {
             return true
         }
         const newStatistic = await this.pairGameRepo.createNewStatistic(userId)
@@ -215,45 +218,43 @@ export class PairGameService {
     }
 
     async connectUserByPair(userId: string): Promise<gamePairViewModel | null> {
-        const pair = await this.pairGameRepo.getPairMyCurrent(userId)
+        const pair = await this.pairGameQueryRepo.getPairMyCurrent(userId)
         if (pair !== null && pair.finishGameDate === null && (pair.firstPlayerId === userId || pair.secondPlayerId === userId)) {
             throw new HttpException('If current user is already participating in active pair', HttpStatus.FORBIDDEN)
         }
 
-
-        const secondPlayerPair = await this.pairGameRepo.getPairWhereSecondPlayerNull()
+        const secondPlayerPair = await this.pairGameQueryRepo.getPairWhereSecondPlayerNull()
         if (!secondPlayerPair) {
             const newPairId = await this.pairGameRepo.createNewPair(userId)
-            const result = await this.getPairMuCurrentViewModel(userId, newPairId)
+            const result = await this.getPairMuCurrentViewModel(userId, newPairId!)
             return result
         } else {
             const addPlayerInPairId = await this.pairGameRepo.addPlayerInPair(userId, secondPlayerPair.id)
-            const result = await this.getPairMuCurrentViewModel(userId, addPlayerInPairId)
+            const result = await this.getPairMuCurrentViewModel(userId, addPlayerInPairId!)
             return result
         }
     }
 
 
     async sendAnswer(answer: string, playerId: string): Promise<answerViewModel | null | 403> {
-        const pair = await this.pairGameRepo.getPairMyCurrent(playerId)
+        const pair = await this.pairGameQueryRepo.getPairMyCurrent(playerId)
 
         if (!pair || !pair.startGameDate) {
             return 403
         }
 
-
-        const resultPlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, playerId)
+        const resultPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, playerId)
         if (resultPlayer!.answersStatus.length >= 5) {
             return 403
         }
         const numberQusetion = resultPlayer!.answersAddedAt.length
         const questionId = pair.questionsId[numberQusetion]
-        
+
         const resultAnswer = await this.qusetionsService.checkingCorrectAnswer(questionId, answer)
         const updateResultAnswer = await this.pairGameRepo.updateResultAnswer(pair.id, questionId, playerId, resultAnswer)
-        
-        const resultUpdateFirstPlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.firstPlayerId)
-        const resultUpdateSecondPlayer = await this.pairGameRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
+
+        const resultUpdateFirstPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.firstPlayerId)
+        const resultUpdateSecondPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
 
 
         if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
@@ -262,7 +263,7 @@ export class PairGameService {
 
             const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4] //время последнего ответа пользователя 1
             const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4] //время последнего ответа пользователя 2
-            
+
             if (resultUpdateFirstPlayer!.answersStatus.includes('Correct')) {
                 if (new Date(answersAddedAtOne) < new Date(answersAddedAtTwo)) {
                     scoreOne++
@@ -273,8 +274,8 @@ export class PairGameService {
                 if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
                     scoreTwo++
                 }
-            }
-            
+            }//бонусный бал
+
 
             let winnerPlayer = {
                 id: pair.firstPlayerId,
@@ -287,23 +288,24 @@ export class PairGameService {
             }
 
             if (scoreTwo > scoreOne) {
-
-                let winnerPlayer = {
+                winnerPlayer = {
                     id: pair.secondPlayerId,
                     score: scoreTwo
                 }
-
-                let loserPlayer = {
+                loserPlayer = {
                     id: pair.firstPlayerId,
                     score: scoreOne
                 }
             }
 
-            const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, winnerPlayer, loserPlayer)
-
-
+            if (scoreTwo !== scoreOne ) {
+                const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, winnerPlayer, loserPlayer)
+            }
+            if (scoreTwo === scoreOne) {
+                const updateDateFinish = await this.pairGameRepo. resultUpdateIsAdraw(pair.id, winnerPlayer, loserPlayer)
+            }
         }
-        
+
         return updateResultAnswer
     }
 

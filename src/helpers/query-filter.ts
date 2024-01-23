@@ -37,7 +37,7 @@ export type queryPaginationPairsType = {
 }
 
 export type queryPaginationTopUsersType = {
-  sort: string[]
+  sort:  string[]
   pageNumber: number
   pageSize: number
   skip: number
@@ -172,14 +172,50 @@ export class Pagination {
   }
   getPaginationFromQueryTopUsers = (query: any): queryPaginationTopUsersType => {
     const defaultValues: queryPaginationTopUsersType = {
-      sort: ['avgScores desc', 'sumScore desc'],
+      sort: ['avgScores: DESC', 'sumScore; DESC'],
       pageNumber: 1,
       pageSize: 10,
       skip: 0
     }
+            
+            let resultFilter = query.sort //'avgScores desc' ||  ["avgScores desc", "sumScore desc", "winsCount desc", "lossesCount asc"]
+            // const array = ["sumScore desc", "avgScores desc"]
+            
+            if (typeof resultFilter == "object") {
+                let array = (resultFilter).join(' ').split(' ')
+                resultFilter = array.reduce(function (result, value, index,) {
 
+                    if ((index === 0 || index % 2 == 0) && value === 'avgScores') {
+                        result += `"${value}"`
+                    } else if (index === 0 || index % 2 == 0) {
+                        result += `"s"."${value}"`
+                    }
+                    if (index === (array.length - 1) && index % 2 !== 0) {
+                        result += ` ${value.toUpperCase()}`
+                    }
+                    else if (index % 2 !== 0) {
+                        result += ` ${value.toUpperCase()},`
+                    }
+                    return result.split(',')
+                }, '')
+                defaultValues.sort = resultFilter
+            } else {
+              let array = (resultFilter).split(' ')
+              resultFilter = array.reduce(function (result, value, index,) {
+                if (index === 0 && value === "avgScores") {
+                  result += `"${value}"`
+                }
+                else if (index === 0 && value !== "avgScores") {
+                  result += `"s"."${value}"`
+                } else {
+                  result += ` ${value.toUpperCase()}`
+                }
+                return [result]
+              }, '')
+              defaultValues.sort = resultFilter
+            } 
+            
     if (query.pageNumber) { defaultValues.pageNumber = +query.pageNumber }
-
     if (query.pageSize) { defaultValues.pageSize = +query.pageSize }
     defaultValues.skip = (defaultValues.pageNumber - 1) * defaultValues.pageSize
 

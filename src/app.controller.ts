@@ -51,11 +51,12 @@ export class TestingController {
   @Delete()
   async deleteAll() {
     await this.commentModel.deleteCommentsAll();
+    await this.pairModel.deleteAll()
+
     await this.userModel.deleteUserAll();
     await this.postModel.deletePostAll();
     await this.blogModel.deleteBlogAll();
     await this.questionModel.deleteAllQuestions()
-    await this.pairModel.deleteAll()
     //await this.deviceModel.deleteMany();
     //await this.ipAndURIModel.deleteMany()
     console.log('Delete All')

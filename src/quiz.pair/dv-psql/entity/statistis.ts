@@ -17,21 +17,25 @@ export class Statistic {
     })
     public userId: User
 
-    @Column()
-    score: number
+    @Column({
+        type: "numeric"
+    })
+    sumScore: number
 
-    @Column()
+    @Column({
+        type: "numeric"
+    })
     winsCount: number
 
-    @Column()
+    @Column({
+        type: "numeric"
+    })
     lossesCount: number
 
-    @Column()
+    @Column({
+        type: "numeric"
+    })
     drawcount: number
-
-    @Column({default: 0})
-    avgScores: number;
-
 
     // @OneToMany((type) => Pairresult, (result) => result.pairId)
     // @JoinColumn({

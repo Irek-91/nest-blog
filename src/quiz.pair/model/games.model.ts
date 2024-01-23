@@ -78,6 +78,15 @@ export type userStatisticViewModel = {
         login: string
     }
   }
+  export type statisticByUsertDB = {
+    id: number,  
+    score: number,
+    winsCount: number,
+    lossesCount: number,
+    drawcount: number,
+    userId: string,
+    avgScores: number
+}  
 
 
 

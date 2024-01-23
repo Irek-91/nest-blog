@@ -758,27 +758,15 @@ describe('tests for questions', () => {
 
 
             const creatResponse = await request(httpServer)
-                .get('/pair-game-quiz/users/top')
+                .get('/pair-game-quiz/users/top?pageSize=3&pageNumber=1&sort=avgScores desc')
                 .expect(200)
             expect(creatResponse.body).toEqual(
                 {
                     pagesCount: 1,
                     page: 1,
-                    pageSize: 10,
+                    pageSize: 3,
                     totalCount: 3,
                     items: [
-                        {
-                            sumScore: 8,
-                            avgScores: 4,
-                            gamesCount: 2,
-                            winsCount: 1,
-                            lossesCount: 0,
-                            drawsCount: 1,
-                            player: {
-                                id: userThree.id,
-                                login: userThree.login
-                              }
-                        },
                         {
                             sumScore: 5,
                             avgScores: 5,
@@ -791,6 +779,19 @@ describe('tests for questions', () => {
                                 login: userFive.login
                               }
                         },
+                        {
+                            sumScore: 8,
+                            avgScores: 4,
+                            gamesCount: 2,
+                            winsCount: 1,
+                            lossesCount: 0,
+                            drawsCount: 1,
+                            player: {
+                                id: userThree.id,
+                                login: userThree.login
+                              }
+                        }
+                        ,
                         {
                             sumScore: 2,
                             avgScores: 2,
