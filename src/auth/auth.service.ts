@@ -1,4 +1,4 @@
-import { EmailAdapter } from './../application/email-adapter';
+import { EmailAdapter } from '../adapters/email-adapter';
 import { User } from './../users/models/users-schema';
 import { userMongoModel, userViewModel } from './../users/models/users-model';
 import { UsersQueryRepository } from '../users/db-mongo/users.qurey.repo';

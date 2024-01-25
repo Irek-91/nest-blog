@@ -1156,6 +1156,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nestjs/cqrs@npm:^10.2.6":
+  version: 10.2.6
+  resolution: "@nestjs/cqrs@npm:10.2.6"
+  dependencies:
+    uuid: "npm:9.0.0"
+  peerDependencies:
+    "@nestjs/common": ^9.0.0 || ^10.0.0
+    "@nestjs/core": ^9.0.0 || ^10.0.0
+    reflect-metadata: 0.1.13
+    rxjs: ^7.2.0
+  checksum: 36bc64308bb07f52856ae9a407126e71272103e14bc76cd7d44df4399378c4ae5f40e80187e0c91222fade7f1eebd4cb0f6b7fd6c5551f041da475ce39d5d883
+  languageName: node
+  linkType: hard
+
 "@nestjs/jwt@npm:^10.1.1":
   version: 10.1.1
   resolution: "@nestjs/jwt@npm:10.1.1"
@@ -2790,6 +2804,7 @@ __metadata:
     "@nestjs/common": "npm:^10.2.7"
     "@nestjs/config": "npm:^3.1.1"
     "@nestjs/core": "npm:^10.2.7"
+    "@nestjs/cqrs": "npm:^10.2.6"
     "@nestjs/jwt": "npm:^10.1.1"
     "@nestjs/mongoose": "npm:^10.0.1"
     "@nestjs/passport": "npm:^10.0.2"

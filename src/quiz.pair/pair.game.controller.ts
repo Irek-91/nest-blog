@@ -1,5 +1,5 @@
 import { Pagination, queryPaginationPairsType, queryPaginationTopUsersType } from './../helpers/query-filter';
-import { CustomPipe } from './../application/pipe';
+import { CustomPipe } from '../adapters/pipe';
 import { PairGameService } from './pair.game.service';
 import { gamePairViewModel, AnswerInputModel, gameAllPairsViewModel, myStatisticViewModel, topGamePlayerViewModel } from './model/games.model';
 import { UserAuthGuard, CheckingActivePair } from './../auth/guards/auth.guard';

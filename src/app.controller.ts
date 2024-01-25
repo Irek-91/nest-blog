@@ -1,5 +1,6 @@
+import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo';
 import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.Repo';
-import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo.PSQL';
+import { QuestionsQueryRepository } from './quiz.questions/db-psql/questions.query.repo';
 import { LikesRepository } from './likes/likes.repo';
 import { CommentsService } from './comments/comments.service';
 import { Controller, Delete, Get, HttpException, HttpStatus } from '@nestjs/common';

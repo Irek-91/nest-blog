@@ -810,5 +810,72 @@ describe('tests for questions', () => {
         })
     })
 
+    describe('тестируем окончание игры, после 10 секунд', ()=> {
+        it( 'Создаем новуб пару с userThree',async ()=> {
+            const { userThree } = expect.getState()
+            const { userFour } = expect.getState()
+            const { userFive } = expect.getState()
+            
+            const AccessTokenUserThree = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })
+            const headersJWTuserThree = { Authorization: `Bearer ${AccessTokenUserThree}` }
+
+            const creatNewPair = await request(httpServer)
+                .post('/pair-game-quiz/pairs/connection')
+                .set(headersJWTuserThree)
+                .expect(200)
+        })
+        it( 'Подключаемся к userThree игроком userFive',async ()=> {
+            const { userThree } = expect.getState()
+            const { userFour } = expect.getState()
+            const { userFive } = expect.getState()
+            
+            const AccessTokenUserFive = jwt.sign({ userId: userFive.id }, settings.JWT_SECRET, { expiresIn: 100 })
+            const headersJWTuserFive = { Authorization: `Bearer ${AccessTokenUserFive}` }
+
+            const creatNewPair = await request(httpServer)
+                .post('/pair-game-quiz/pairs/connection')
+                .set(headersJWTuserFive)
+                .expect(200)
+        })
+
+        it(`Начинаем отвечать, игрок userThree отвечает первым на 5 вопросов,
+         игрок  userFive только на один`, async () => {
+            const { userThree } = expect.getState()
+            const { userFive } = expect.getState()
+
+            const inputData = {
+                answer: "первый"
+            }
+         
+
+            const resultAnswer6 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+            const resultAnswer1 = await sendAnswerOneByUser(userFive, inputData, httpServer)
+
+            const resultAnswer7 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+
+            const resultAnswer8 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+
+
+            const resultAnswer9 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+
+            const resultAnswer10 = await sendAnswerOneByUser(userThree, inputData, httpServer)
+
+        })
+
+        it('Проверем мою игру через 10 секунд, должен вернуть 404', async ()=> {
+            setTimeout(async ()=> {
+                const { userThree } = expect.getState()
+
+                const AccessToken = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })
+                const headersJWT = { Authorization: `Bearer ${AccessToken}` }
+    
+                const connectMuCorrent = await request(httpServer)
+                    .get('/pair-game-quiz/pairs/my-current')
+                    .set(headersJWT)
+                    .expect(404)
+            }, 10000)
+        })
+
+    })
 
 })

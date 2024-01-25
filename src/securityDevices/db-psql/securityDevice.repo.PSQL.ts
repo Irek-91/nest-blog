@@ -5,7 +5,7 @@ import { devicesMongo, devicesPSQL } from "../model/device-model";
 import { DevicesModel, DevicesModelDocument } from "../model/device-schema";
 import mongoose, { Model, ObjectId } from "mongoose";
 import { Injectable } from "@nestjs/common"
-import { JwtService } from "../../application/jwt-service";
+import { JwtService } from "../../adapters/jwt-service";
 import { InjectDataSource, InjectEntityManager } from "@nestjs/typeorm";
 import { DataSource, EntityManager, Not } from "typeorm";
 import { log } from "console";

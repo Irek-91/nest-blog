@@ -1,5 +1,5 @@
 import { User } from './../../../users/db-psql/entity/user.entity';
-import { AfterLoad, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { AfterLoad, BeforeInsert, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Pairresult } from "./result.pair";
 
 
@@ -36,6 +36,18 @@ export class Statistic {
         type: "numeric"
     })
     drawcount: number
+
+    // @Column({
+    //     type: "numeric",
+    //     nullable: true,
+    //     default: 0//()=> 'sumScore / (winsCount + lossesCount + drawcount)'
+    // })
+    // avgScores: number
+
+    // @BeforeInsert()
+    // calculeteValue(){
+    //     this.avgScores = (this.sumScore / (this.winsCount + this.lossesCount + this.drawcount))
+    // }
 
     // @OneToMany((type) => Pairresult, (result) => result.pairId)
     // @JoinColumn({

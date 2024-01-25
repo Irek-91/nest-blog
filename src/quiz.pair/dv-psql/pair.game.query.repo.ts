@@ -1,7 +1,7 @@
 import { Statistic } from './entity/statistis';
 import { queryPaginationPairsType, queryPaginationTopUsersType } from '../../helpers/query-filter';
 import { Question } from '../../quiz.questions/db-psql/entity/question';
-import { QuestionsRepository } from '../../quiz.questions/db-psql/questions.repo.PSQL';
+import { QuestionsQueryRepository } from '../../quiz.questions/db-psql/questions.query.repo';
 import { answerViewModel, questionPairViewModel, userStatisticViewModel } from '../model/games.model';
 
 import { Injectable } from '@nestjs/common';
@@ -16,7 +16,7 @@ import { log } from 'console';
 
 export class PairGameQueryRepo {
     constructor(@InjectDataSource() private dataSource: DataSource,
-        private questionsRepo: QuestionsRepository
+        private questionsQueryRepository: QuestionsQueryRepository
 
     ) { }
 

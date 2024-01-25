@@ -1,5 +1,5 @@
 import { UsersService } from './../users/users.service';
-import { JwtService } from './../application/jwt-service';
+import { JwtService } from '../adapters/jwt-service';
 import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response, BadRequestException, HttpCode } from '@nestjs/common';
 import { log } from 'console';
 import { AuthGuard } from '@nestjs/passport';

@@ -7,7 +7,7 @@ import { log } from 'console';
 import { addSeconds } from 'date-fns';
 import { Model } from 'mongoose';
 import { IPAndURIDocument, IPAndURIModel, IPAndURISchema } from '../../securityDevices/model/IPAndURIModel';
-import { JwtService } from '../../application/jwt-service';
+import { JwtService } from '../../adapters/jwt-service';
 import { SecurityDeviceServicePSQL } from '../../securityDevices/db-psql/securityDevice.service.PSQL';
 
 

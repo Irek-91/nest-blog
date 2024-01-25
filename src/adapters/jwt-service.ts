@@ -1,5 +1,5 @@
 import { log } from 'console';
-import { settings } from './../settings';
+import { settings } from '../settings';
 import jwt from 'jsonwebtoken'
 import mongoose from "mongoose";
 import { Injectable } from "@nestjs/common"

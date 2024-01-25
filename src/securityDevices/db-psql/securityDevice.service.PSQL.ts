@@ -1,4 +1,4 @@
-import { JwtService } from '../../application/jwt-service';
+import { JwtService } from '../../adapters/jwt-service';
 import { DeviceViewModel, devicesMongo } from "../model/device-model"
 import mongoose, { ObjectId } from "mongoose"
 import { log } from "console"

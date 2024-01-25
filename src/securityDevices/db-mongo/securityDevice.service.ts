@@ -3,7 +3,7 @@ import { SecurityDeviceRepository } from "./securityDevice.repo"
 import mongoose, { ObjectId } from "mongoose"
 import { log } from "console"
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
-import { JwtService } from "../../application/jwt-service"
+import { JwtService } from "../../adapters/jwt-service"
 
 @Injectable()
 export class SecurityDeviceService {
