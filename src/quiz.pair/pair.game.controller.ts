@@ -1,23 +1,33 @@
+import { SendAnswerCommand } from './application/use-case/send.answer.use.case';
+import { CreateNewStatisticByPalyerCommand } from './application/use-case/create.new.statistic.by.palyer.use.case';
+import { GetPairByIdCommand } from './application/use-case/get.pair.by.id';
+import { GetAllPairsByUserCommand } from './application/use-case/get.all.pairs.by.user.use.case';
+import { GetTopUsersCommand } from './application/use-case/get.top.users';
+import { GetPairMyCurrentCommand } from './application/use-case/get.pair.my.current.use.case';
 import { Pagination, queryPaginationPairsType, queryPaginationTopUsersType } from './../helpers/query-filter';
 import { CustomPipe } from '../adapters/pipe';
-import { PairGameService } from './pair.game.service';
+import { PairGameService } from './application/pair.game.service';
 import { gamePairViewModel, AnswerInputModel, gameAllPairsViewModel, myStatisticViewModel, topGamePlayerViewModel } from './model/games.model';
 import { UserAuthGuard, CheckingActivePair } from './../auth/guards/auth.guard';
 import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, ParseIntPipe, Post, Query, Request, UseGuards } from "@nestjs/common";
+import { CommandBus } from '@nestjs/cqrs';
+import { GetStatisticByUserCommand } from './application/use-case/get.statistic.by.user.use.case';
+import { ConnectUserByPairCommand } from './application/use-case/connect.user.by.pair.use.case';
 
 @Controller('pair-game-quiz')
 export class PairGameController {
     constructor(protected pairGameService: PairGameService,
+        private commandBus: CommandBus,
         private readonly pagination: Pagination
     ) {
     }
     @UseGuards(CheckingActivePair)
     @Get('/pairs/my-current')
-    async getPairMuCurrent(@Request() req: any
+    async getPairMyCurrent(@Request() req: any
     ) {
         let userId = req.userId
 
-        const pairMyCurrent: gamePairViewModel | null = await this.pairGameService.getPairMuCurrent(userId)
+        const pairMyCurrent: gamePairViewModel | null = await this.commandBus.execute(new GetPairMyCurrentCommand(userId))
 
         if (!pairMyCurrent) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -32,7 +42,7 @@ export class PairGameController {
     ) {
         let userId = req.userId
 
-        const myStatistic: myStatisticViewModel = await this.pairGameService.getStatisticByUser(userId)
+        const myStatistic: myStatisticViewModel = await this.commandBus.execute(new GetStatisticByUserCommand(userId))
         return myStatistic
     }
 
@@ -46,7 +56,7 @@ export class PairGameController {
     ) {
         const queryFilter: queryPaginationTopUsersType = this.pagination.getPaginationFromQueryTopUsers(query);
 
-        const getUsersTop: topGamePlayerViewModel = await this.pairGameService.getTopUsers(queryFilter)
+        const getUsersTop: topGamePlayerViewModel = await this.commandBus.execute(new GetTopUsersCommand(queryFilter))
 
         return getUsersTop
     }
@@ -66,7 +76,7 @@ export class PairGameController {
         let userId = req.userId
         const queryFilter: queryPaginationPairsType = this.pagination.getPaginationFromQueryPairs(query);
 
-        const pairsAllbyUser: gameAllPairsViewModel | null = await this.pairGameService.getAllPairsByUser(queryFilter, userId)
+        const pairsAllbyUser: gameAllPairsViewModel | null = await this.commandBus.execute(new GetAllPairsByUserCommand(queryFilter, userId))
 
         if (!pairsAllbyUser) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -86,7 +96,7 @@ export class PairGameController {
     ) {
         let userId = req.userId
 
-        const pairMyCurrent: gamePairViewModel | null = await this.pairGameService.getPairById(pairId, userId)
+        const pairMyCurrent: gamePairViewModel | null = await this.commandBus.execute(new GetPairByIdCommand(pairId, userId))
 
         if (!pairMyCurrent) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -102,8 +112,8 @@ export class PairGameController {
     ) {
 
         const userId = req.userId
-        const createdNew = await this.pairGameService.createNewStatisticByPalyer(userId)
-        const pair = await this.pairGameService.connectUserByPair(userId)
+        const createdNew = await this.commandBus.execute(new CreateNewStatisticByPalyerCommand(userId))
+        const pair = await this.commandBus.execute(new ConnectUserByPairCommand(userId))
         if (!pair) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
@@ -119,7 +129,9 @@ export class PairGameController {
     ) {
 
         const userId = req.userId
-        const result = await this.pairGameService.sendAnswer(inputDate.answer, userId)
+        const result = await this.commandBus.execute(new SendAnswerCommand(inputDate, userId))
+
+        
         if (result === 403) {
             throw new HttpException(`If current user is not inside active pair or u
             ser is in active pair but has already answered to all questions`, HttpStatus.FORBIDDEN)

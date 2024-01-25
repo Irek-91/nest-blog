@@ -1,4 +1,6 @@
-import { PairGameService } from './../../quiz.pair/pair.game.service';
+import { GetPairMyCurrentCommand } from '../../quiz.pair/application/use-case/get.pair.my.current.use.case';
+import { CommandBus } from '@nestjs/cqrs';
+import { PairGameService } from '../../quiz.pair/application/pair.game.service';
 import { UsersService } from './../../users/users.service';
 import { HttpStatus, BadRequestException } from '@nestjs/common';
 import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
@@ -141,6 +143,7 @@ export class ChekRefreshTokenDeleteDevice {
 @Injectable()
 export class CheckingActivePair implements CanActivate {
     constructor(protected jwtService: JwtService,
+        private commanBus: CommandBus,
         protected pairGameService: PairGameService) { }
 
     async canActivate(context: ExecutionContext): Promise<any> {
@@ -153,7 +156,7 @@ export class CheckingActivePair implements CanActivate {
         if (!userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
-        const getActivPair = await this.pairGameService.getPairMuCurrent(userId)
+        const getActivPair = await this.commanBus.execute(new GetPairMyCurrentCommand(userId))
         if (!getActivPair) {
             throw new HttpException('NOT_FOUND', HttpStatus.NOT_FOUND)
         }

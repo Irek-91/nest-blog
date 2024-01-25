@@ -1,3 +1,11 @@
+import { SendAnswerUseCase } from './quiz.pair/application/use-case/send.answer.use.case';
+import { ConnectUserByPairUseCase } from './quiz.pair/application/use-case/connect.user.by.pair.use.case';
+import { CreateNewStatisticByPalyerUseCase } from './quiz.pair/application/use-case/create.new.statistic.by.palyer.use.case';
+import { GetPairByIdUseCase } from './quiz.pair/application/use-case/get.pair.by.id';
+import { GetAllPairsByUserUseCase } from './quiz.pair/application/use-case/get.all.pairs.by.user.use.case';
+import { GetTopUsersUseCase } from './quiz.pair/application/use-case/get.top.users';
+import { GetStatisticByUserCommand, GetStatisticByUserUseCase } from './quiz.pair/application/use-case/get.statistic.by.user.use.case';
+import { GetPairMyCurrentUseCase } from './quiz.pair/application/use-case/get.pair.my.current.use.case';
 import { DeleteQuestionIdUseCase } from './quiz.questions/application/use-cases/delete.question.id.use.case';
 import { UpdateQuestionInPublishUseCase } from './quiz.questions/application/use-cases/update.question.in.publish';
 import { UpdateQuestionIdUseCase } from './quiz.questions/application/use-cases/update.question.id.use.case';
@@ -11,7 +19,7 @@ import { CustomPipe } from './adapters/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
 import { Pair } from './quiz.pair/dv-psql/entity/pairs';
 import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.Repo';
-import { PairGameService } from './quiz.pair/pair.game.service';
+import { PairGameService } from './quiz.pair/application/pair.game.service';
 import { PairGameController } from './quiz.pair/pair.game.controller';
 import { QuestionsQueryRepository } from './quiz.questions/db-psql/questions.query.repo';
 
@@ -84,16 +92,22 @@ import { UserSchema } from './users/models/users-schema';
 import { EmailConfirmation } from './users/db-psql/entity/email.confirm.entity';
 import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
 import { Question } from './quiz.questions/db-psql/entity/question';
-import AppDataSource from './db/data-source';
+import AppDataSource, { options } from './db/data-source';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ScheduleModule } from '@nestjs/schedule';
 
 const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase, 
   UpdateQuestionIdUseCase, UpdateQuestionInPublishUseCase,
   DeleteQuestionIdUseCase]
+const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase, 
+  GetTopUsersUseCase, GetAllPairsByUserUseCase, GetPairByIdUseCase,
+  CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
 
 
 @Module({
-  imports: [CqrsModule,
+  imports: [
+    ScheduleModule.forRoot(),
+    CqrsModule,
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
@@ -134,7 +148,8 @@ const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
     //])
     //
     
-    TypeOrmModule.forRoot({
+    TypeOrmModule.forRoot(
+      {
       //useFactory: (configService: ConfigService<ConfigType>) => ({
       type: 'postgres',
       host: process.env.PGHOSTLOCAL,
@@ -142,22 +157,15 @@ const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
       username: process.env.PGUSERLOCAL,
       password: process.env.PGPASSWORDLOCAL,
       database: process.env.PGDATABASELOCAL,
-      autoLoadEntities: true,
-      synchronize: true,
-      migrations: ['migrations/*.ts'],
+      autoLoadEntities: false,
+      synchronize: false,
+      entities:[User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic],
+      migrations: [__dirname +'/db/migrations/*.ts'],
       migrationsTableName: "custom_migration_table",
       logging: true,
       namingStrategy: new CustomNaimingStrategy()
-      //ssl: true,
-      // connection: {
-      //   options: `project=${ENDPOINT_ID}`,
-      // },
-      // extra: {
-      //           ssl: {
-      //               rejectUnauthorized: false,
-      //           },
-      //       },
-    }),
+    }
+    ),
     TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic])    
     ,
     JwtModule.register({
@@ -201,7 +209,7 @@ const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
     SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
     LikesRepository,
     QusetionsService, QuestionsRepository, QuestionsQueryRepository, ...questionsUseCase,
-    PairGameService, PairGameRepo,PairGameQueryRepo,
+    PairGameService, PairGameRepo,PairGameQueryRepo, ...pairGameUseCase,
     CustomPipe,
     CheckingActivePair
   ],

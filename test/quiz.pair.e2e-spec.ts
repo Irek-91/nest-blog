@@ -863,7 +863,7 @@ describe('tests for questions', () => {
         })
 
         it('Проверем мою игру через 10 секунд, должен вернуть 404', async ()=> {
-            setTimeout(async ()=> {
+            await setTimeout(async ()=> {
                 const { userThree } = expect.getState()
 
                 const AccessToken = jwt.sign({ userId: userThree.id }, settings.JWT_SECRET, { expiresIn: 100 })

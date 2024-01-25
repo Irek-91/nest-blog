@@ -15,7 +15,7 @@ import { Injectable } from '@nestjs/common';
 
 config();
 
-const options: DataSourceOptions = {
+export const options: DataSourceOptions = {
     type: 'postgres',
     host: process.env.PGHOSTLOCAL,
     port:  Number(process.env.PORTLOCAL),
@@ -24,10 +24,14 @@ const options: DataSourceOptions = {
     database: process.env.PGDATABASELOCAL,
     synchronize: false,
     entities:[User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic],
-    migrations: [__dirname + '/migrations/*{.ts, .js}'],
+    //migrations: [__dirname + '/migrations/*{.ts, .js}'],
+    migrations:{
+directory: 'src/db/migrations'
+    },
     migrationsTableName: "custom_migration_table",
     logging: true,
     namingStrategy: new CustomNaimingStrategy()
+    
 }
 const AppDataSource = new DataSource(options);
 
