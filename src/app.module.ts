@@ -1,10 +1,11 @@
+import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.repo';
 import { SendAnswerUseCase } from './quiz.pair/application/use-case/send.answer.use.case';
 import { ConnectUserByPairUseCase } from './quiz.pair/application/use-case/connect.user.by.pair.use.case';
 import { CreateNewStatisticByPalyerUseCase } from './quiz.pair/application/use-case/create.new.statistic.by.palyer.use.case';
 import { GetPairByIdUseCase } from './quiz.pair/application/use-case/get.pair.by.id';
 import { GetAllPairsByUserUseCase } from './quiz.pair/application/use-case/get.all.pairs.by.user.use.case';
 import { GetTopUsersUseCase } from './quiz.pair/application/use-case/get.top.users';
-import { GetStatisticByUserCommand, GetStatisticByUserUseCase } from './quiz.pair/application/use-case/get.statistic.by.user.use.case';
+import { GetStatisticByUserUseCase } from './quiz.pair/application/use-case/get.statistic.by.user.use.case';
 import { GetPairMyCurrentUseCase } from './quiz.pair/application/use-case/get.pair.my.current.use.case';
 import { DeleteQuestionIdUseCase } from './quiz.questions/application/use-cases/delete.question.id.use.case';
 import { UpdateQuestionInPublishUseCase } from './quiz.questions/application/use-cases/update.question.in.publish';
@@ -18,7 +19,6 @@ import { CheckingActivePair } from './auth/guards/auth.guard';
 import { CustomPipe } from './adapters/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
 import { Pair } from './quiz.pair/dv-psql/entity/pairs';
-import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.Repo';
 import { PairGameService } from './quiz.pair/application/pair.game.service';
 import { PairGameController } from './quiz.pair/pair.game.controller';
 import { QuestionsQueryRepository } from './quiz.questions/db-psql/questions.query.repo';
@@ -87,12 +87,9 @@ import { BlogsSAController } from './blogs/blogs.SA.controller';
 import { CommentsQueryRepoPSQL } from './comments/db-psql/comments.query.repo.PSQL';
 import { User } from './users/db-psql/entity/user.entity';
 import { Post } from './posts/db-psql/entity/post.entity';
-
-import { UserSchema } from './users/models/users-schema';
 import { EmailConfirmation } from './users/db-psql/entity/email.confirm.entity';
 import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
 import { Question } from './quiz.questions/db-psql/entity/question';
-import AppDataSource, { options } from './db/data-source';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -162,7 +159,7 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
       entities:[User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic],
       migrations: [__dirname +'/db/migrations/*.ts'],
       migrationsTableName: "custom_migration_table",
-      logging: true,
+      logging: false,
       namingStrategy: new CustomNaimingStrategy()
     }
     ),
@@ -187,7 +184,7 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
     QusetionsSAController,
     PairGameController
   ],
-  providers: [AppService,
+  providers: [ AppService,
     AuthService, 
     EmailAdapter,
     Pagination,
@@ -209,7 +206,7 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
     SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
     LikesRepository,
     QusetionsService, QuestionsRepository, QuestionsQueryRepository, ...questionsUseCase,
-    PairGameService, PairGameRepo,PairGameQueryRepo, ...pairGameUseCase,
+    PairGameService, PairGameRepo, PairGameQueryRepo, ...pairGameUseCase,
     CustomPipe,
     CheckingActivePair
   ],

@@ -1,5 +1,5 @@
+import { queryPaginationQuestionsType } from './../../../helpers/query-filter';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { queryPaginationQuestionsType, queryPaginationPairsType } from '../../../../dist/helpers/query-filter';
 import { QuestionsQueryRepository } from '../../db-psql/questions.query.repo';
 import { Injectable } from "@nestjs/common";
 

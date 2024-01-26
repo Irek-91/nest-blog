@@ -1615,6 +1615,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cron@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "@types/cron@npm:2.4.0"
+  dependencies:
+    cron: "npm:*"
+  checksum: a0deb757122deb6b1395ef328e93d98c8ceb5e9fc37dfce0c1afa13122a1f0e070364cef691f08ffd0e2e817e7b6b8c3160832afa91410302b2c6f8304bca262
+  languageName: node
+  linkType: hard
+
 "@types/ejs@npm:^3.1.2":
   version: 3.1.4
   resolution: "@types/ejs@npm:3.1.4"
@@ -2837,6 +2846,7 @@ __metadata:
     "@nestjs/throttler": "npm:^5.0.1"
     "@nestjs/typeorm": "npm:^10.0.1"
     "@types/cookie-parser": "npm:^1.4.5"
+    "@types/cron": "npm:^2.4.0"
     "@types/express": "npm:^4.17.20"
     "@types/jest": "npm:^29.5.2"
     "@types/node": "npm:^20.9.1"
@@ -3747,6 +3757,16 @@ __metadata:
   version: 1.1.1
   resolution: "create-require@npm:1.1.1"
   checksum: 157cbc59b2430ae9a90034a5f3a1b398b6738bf510f713edc4d4e45e169bc514d3d99dd34d8d01ca7ae7830b5b8b537e46ae8f3c8f932371b0875c0151d7ec91
+  languageName: node
+  linkType: hard
+
+"cron@npm:*":
+  version: 3.1.6
+  resolution: "cron@npm:3.1.6"
+  dependencies:
+    "@types/luxon": "npm:~3.3.0"
+    luxon: "npm:~3.4.0"
+  checksum: f8328ce1052531bc14372acbfbddb38db33b30b29ac878d574b317779160b2947c9315c81dccb8a33724418cd86440a92269055037c96a2e917c867d57274009
   languageName: node
   linkType: hard
 

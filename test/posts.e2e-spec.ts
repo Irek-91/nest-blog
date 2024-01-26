@@ -1,4 +1,4 @@
-import { userInputModel } from './../dist/users/models/users-model.d';
+import { userInputModel } from './../src/users/models/users-model';
 import { postInputModel, postInputModelSpecific } from '../src/posts/model/post-model';
 import { blogInput } from '../src/blogs/models/blogs-model';
 import { appSettings } from '../src/app.settings';
@@ -198,7 +198,7 @@ describe ('tests for posts', () => {
     it('создание коментария для поста', async () => {
         const {blog} = expect.getState()
         const {post} = expect.getState()
-        const userModel: userInputModel = {
+        const userModel: userInputModel= {
             login: 'userModel1',
             password: 'panda2023',
             email: 'panda@mail.com',

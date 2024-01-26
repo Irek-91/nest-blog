@@ -13,6 +13,7 @@ import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Param, Pars
 import { CommandBus } from '@nestjs/cqrs';
 import { GetStatisticByUserCommand } from './application/use-case/get.statistic.by.user.use.case';
 import { ConnectUserByPairCommand } from './application/use-case/connect.user.by.pair.use.case';
+import { Cron } from '@nestjs/schedule';
 
 @Controller('pair-game-quiz')
 export class PairGameController {
@@ -130,8 +131,9 @@ export class PairGameController {
 
         const userId = req.userId
         const result = await this.commandBus.execute(new SendAnswerCommand(inputDate, userId))
-
         
+      
+
         if (result === 403) {
             throw new HttpException(`If current user is not inside active pair or u
             ser is in active pair but has already answered to all questions`, HttpStatus.FORBIDDEN)
@@ -139,8 +141,8 @@ export class PairGameController {
         if (!result) {
             throw new HttpException(`Not found`, HttpStatus.NOT_FOUND)
         }
-
+        
         return result
     }
-
+    
 }

@@ -1,4 +1,4 @@
-import { gamePairViewModel } from '../../../../dist/quiz.pair/model/games.model';
+import { gamePairViewModel } from './../../model/games.model';
 import { PairGameService } from '../pair.game.service';
 import { PairGameQueryRepo } from '../../dv-psql/pair.game.query.repo';
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";

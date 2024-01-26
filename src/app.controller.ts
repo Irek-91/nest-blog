@@ -1,5 +1,5 @@
 import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo';
-import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.Repo';
+import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.repo';
 import { QuestionsQueryRepository } from './quiz.questions/db-psql/questions.query.repo';
 import { LikesRepository } from './likes/likes.repo';
 import { CommentsService } from './comments/comments.service';

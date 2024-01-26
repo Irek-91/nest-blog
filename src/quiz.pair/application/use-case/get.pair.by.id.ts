@@ -1,6 +1,6 @@
+import { gamePairViewModel } from './../../model/games.model';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { PairGameService } from '../pair.game.service';
-import { gamePairViewModel } from './../../../../dist/quiz.pair/model/games.model.d';
 import { PairGameQueryRepo } from './../../dv-psql/pair.game.query.repo';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 

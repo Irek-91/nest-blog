@@ -1,7 +1,7 @@
 import { chekAnswer } from '../../helpers/chekAnswer';
 import { queryPaginationPairsType, queryPaginationTopUsersType } from '../../helpers/query-filter';
 import { QusetionsService } from '../../quiz.questions/application/questions.service';
-import { PairGameRepo } from '../dv-psql/pair.game.Repo';
+import { PairGameRepo } from '../dv-psql/pair.game.repo';
 import { gamePairViewModel, gamePairDBModel, questionPairViewModel, answerViewModel, gamePlayerProgressViewModel, gameAllPairsViewModel, myStatisticViewModel, topGamePlayerViewModel } from '../model/games.model';
 
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';

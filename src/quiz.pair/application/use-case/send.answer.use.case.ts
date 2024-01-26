@@ -4,25 +4,27 @@ import { PairGameRepo } from './../../dv-psql/pair.game.repo';
 import { PairGameQueryRepo } from './../../dv-psql/pair.game.query.repo';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AnswerInputModel, answerViewModel } from './../../model/games.model';
+import { Cron } from '@nestjs/schedule';
+import { log } from 'console';
 
 
 export class SendAnswerCommand {
-    constructor(public inputDate: AnswerInputModel, public userId :string) {
+    constructor(public inputDate: AnswerInputModel, public userId: string) {
 
     }
 }
 
 @CommandHandler(SendAnswerCommand)
 export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
-    constructor(private pairGameQueryRepo: PairGameQueryRepo, 
-        private pairGameRepo:PairGameRepo,
+    constructor(private pairGameQueryRepo: PairGameQueryRepo,
+        private pairGameRepo: PairGameRepo,
         private pairGameService: PairGameService,
         private qusetionsService: QusetionsService) {
     }
     async execute(command: SendAnswerCommand): Promise<answerViewModel | null | 403> {
         const answer = command.inputDate.answer
         const playerId = command.userId
-        
+
         const pair = await this.pairGameQueryRepo.getPairMyCurrent(playerId)
 
         if (!pair || !pair.startGameDate) {
@@ -36,7 +38,7 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
         const numberQusetion = resultPlayer!.answersAddedAt.length
         const questionId = pair.questionsId[numberQusetion]
 
-        const resultAnswer = await this.qusetionsService.checkingCorrectAnswer(questionId, answer)
+        const resultAnswer = await this.qusetionsService.checkingCorrectAnswer(questionId, answer) //проверяем ответ, если правильно то true
         let statusAnswer = 'Correct'
         let countByAnswer = 1
         if (resultAnswer === false) {
@@ -48,64 +50,145 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
         const resultUpdateFirstPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.firstPlayerId)
         const resultUpdateSecondPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
 
-        if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
-            let scoreOne = resultUpdateFirstPlayer!.score
-            let scoreTwo = resultUpdateSecondPlayer!.score
-            const updateStatusByPair = await this.pairGameRepo.updateStatusByPair(pair.id)
 
-            const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4] //время последнего ответа пользователя 1
-            const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4] //время последнего ответа пользователя 2
+        // if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
+        //     let scoreOne = resultUpdateFirstPlayer!.score
+        //     let scoreTwo = resultUpdateSecondPlayer!.score
+        //     const updateStatusByPair = await this.pairGameRepo.updateStatusByPair(pair.id)
 
-            if (resultUpdateFirstPlayer!.answersStatus.includes('Correct')) {
-                if (new Date(answersAddedAtOne) < new Date(answersAddedAtTwo)) {
-                    scoreOne++
+        //     const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4] //время последнего ответа пользователя 1
+        //     const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4] //время последнего ответа пользователя 2
+
+        //     if (resultUpdateFirstPlayer!.answersStatus.includes('Correct')) {
+        //         if (new Date(answersAddedAtOne) < new Date(answersAddedAtTwo)) {
+        //             scoreOne++
+        //         }
+        //     } //бонусный бал
+
+        //     if (resultUpdateSecondPlayer!.answersStatus.includes('Correct')) {
+        //         if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
+        //             scoreTwo++
+        //         }
+        //     }//бонусный бал
+
+        //     let winnerPlayer = {
+        //         id: pair.firstPlayerId,
+        //         score: scoreOne
+        //     }
+
+        //     let loserPlayer = {
+        //         id: pair.secondPlayerId,
+        //         score: scoreTwo
+        //     }
+
+        //     if (scoreTwo > scoreOne) {
+        //         winnerPlayer = {
+        //             id: pair.secondPlayerId,
+        //             score: scoreTwo
+        //         }
+        //         loserPlayer = {
+        //             id: pair.firstPlayerId,
+        //             score: scoreOne
+        //         }
+        //     }
+
+        //     if (scoreTwo !== scoreOne) {
+        //         const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, winnerPlayer, loserPlayer)
+        //     }
+        //     if (scoreTwo === scoreOne) {
+        //         const updateDateFinish = await this.pairGameRepo.resultUpdateIsAdraw(pair.id, winnerPlayer, loserPlayer)
+        //     }
+        // }
+        if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 || resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
+            setTimeout(async () => {
+                const resPair = await this.pairGameQueryRepo.getPairById(pair.id)
+                const resultFirstPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(resPair!.id, pair!.firstPlayerId)
+                const resultSecondPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(resPair!.id, pair!.secondPlayerId)
+
+                while (resultFirstPlayer!.answersStatus.length < 5) {
+                    resultFirstPlayer!.answersStatus.push('Incorrect')
+                    resultFirstPlayer!.answersAddedAt.push(`${(new Date()).toISOString()}`)
                 }
-            } //бонусный бал
 
-            if (resultUpdateSecondPlayer!.answersStatus.includes('Correct')) {
-                if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
-                    scoreTwo++
+                while (resultSecondPlayer!.answersStatus.length < 5) {
+                    resultSecondPlayer!.answersStatus.push('Incorrect')
+                    resultSecondPlayer!.answersAddedAt.push(`${(new Date()).toISOString()}`)
                 }
-            }//бонусный бал
 
-            let winnerPlayer = {
-                id: pair.firstPlayerId,
-                score: scoreOne
-            }
+                const updateResultFirstPlayer = await this.pairGameRepo.
+                    updateResultFinish(resPair!.id, pair!.firstPlayerId, resultFirstPlayer!.answersStatus, resultFirstPlayer!.answersAddedAt)
+                const updateResultSecondPlayer = await this.pairGameRepo.
+                    updateResultFinish(resPair!.id, pair!.secondPlayerId, resultSecondPlayer!.answersStatus, resultSecondPlayer!.answersAddedAt)
+                const updateStatusByPair = await this.pairGameRepo.updateStatusByPair(resPair!.id)
 
-            let loserPlayer = {
-                id: pair.secondPlayerId,
-                score: scoreTwo
-            }
+                const resultFinishFirstPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(resPair!.id, pair!.firstPlayerId)
+                const resultFinishSecondPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(resPair!.id, pair!.secondPlayerId)
 
-            if (scoreTwo > scoreOne) {
-                winnerPlayer = {
-                    id: pair.secondPlayerId,
-                    score: scoreTwo
-                }
-                loserPlayer = {
-                    id: pair.firstPlayerId,
+
+                let scoreOne = 0
+                let scoreTwo = 0
+
+                scoreOne = resultFinishFirstPlayer!.answersStatus.reduce(function (accumulator, item) {
+                    if (item === 'Correct') {
+                        accumulator++
+                    }
+                    return accumulator
+                }, 0)
+
+                scoreTwo = resultFinishSecondPlayer!.answersStatus.reduce(function (accumulator, item) {
+                    if (item === 'Correct') {
+                        accumulator++
+                    }
+                    return accumulator
+                }, 0)
+
+
+
+                const answersAddedAtOne = resultFinishFirstPlayer!.answersAddedAt[4] //время последнего ответа пользователя 1
+                const answersAddedAtTwo = resultFinishSecondPlayer!.answersAddedAt[4] //время последнего ответа пользователя 2
+
+                if (resultFinishFirstPlayer!.answersStatus.includes('Correct')) {
+                    if (new Date(answersAddedAtOne) < new Date(answersAddedAtTwo)) {
+                        scoreOne++
+                    }
+                } //бонусный бал
+
+                if (resultFinishSecondPlayer!.answersStatus.includes('Correct')) {
+                    if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
+                        scoreTwo++
+                    }
+                }//бонусный бал
+
+                let winnerPlayer = {
+                    id: pair!.firstPlayerId,
                     score: scoreOne
                 }
-            }
 
-            if (scoreTwo !== scoreOne) {
-                const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, winnerPlayer, loserPlayer)
-            }
-            if (scoreTwo === scoreOne) {
-                const updateDateFinish = await this.pairGameRepo.resultUpdateIsAdraw(pair.id, winnerPlayer, loserPlayer)
-            }
+                let loserPlayer = {
+                    id: pair!.secondPlayerId,
+                    score: scoreTwo
+                }
+
+                if (scoreTwo > scoreOne) {
+                    winnerPlayer = {
+                        id: pair!.secondPlayerId,
+                        score: scoreTwo
+                    }
+                    loserPlayer = {
+                        id: pair!.firstPlayerId,
+                        score: scoreOne
+                    }
+                }
+
+                if (scoreTwo !== scoreOne) {
+                    const updateDateFinish = await this.pairGameRepo.updateStatusGame(resPair!.id, winnerPlayer, loserPlayer)
+                }
+                if (scoreTwo === scoreOne) {
+                    const updateDateFinish = await this.pairGameRepo.resultUpdateIsAdraw(resPair!.id, winnerPlayer, loserPlayer)
+                }
+                log(winnerPlayer, loserPlayer)
+            }, 10000)
         }
-        // if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length !== 5) {
-        //     setTimeout(()=> {
-        //         chekAnswer(pair.id, pair.firstPlayerId, this.pairGameRepo, this.pairGameQueryRepo)
-        //     }, 10000);
-        // }
-        // if (resultUpdateFirstPlayer!.answersAddedAt.length !== 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
-        //     setTimeout(()=> {
-        //         chekAnswer(pair.id, pair.secondPlayerId, this.pairGameRepo, this.pairGameQueryRepo)
-        //     }, 10000);
-        // }
 
         return updateResultAnswer
     }

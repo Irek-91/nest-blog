@@ -1,5 +1,4 @@
-import { questionViewModel } from '../../../../dist/quiz.questions/model/questionModel';
-import { QuestionInputModel, questionDBModel } from '../../model/questionModel';
+import { QuestionInputModel, questionDBModel, questionViewModel } from '../../model/questionModel';
 import { QuestionsRepository } from '../../db-psql/questions.repo';
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';

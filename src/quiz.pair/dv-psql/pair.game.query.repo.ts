@@ -13,7 +13,6 @@ import { Pairresult } from './entity/result.pair';
 import { log } from 'console';
 
 @Injectable()
-
 export class PairGameQueryRepo {
     constructor(@InjectDataSource() private dataSource: DataSource,
         private questionsQueryRepository: QuestionsQueryRepository
