@@ -6,7 +6,7 @@ import { INestApplication} from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { appSettings } from '../src/app.settings';
 import { blogInput } from '../src/blogs/models/blogs-model';
-import { BlogsService } from '../src/blogs/blogs.service';
+import { BlogsService } from '../src/blogs/application/blogs.service';
 import { createBlog } from './helpers/blogs-tests-helpers';
 
 

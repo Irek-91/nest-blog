@@ -1,3 +1,6 @@
+import { GetBlogNameByIdUseCase } from './blogs/application/use-case/get.blog.name.by.id';
+import { UpdateBlogUseCase } from './blogs/application/use-case/update.blog.use.case';
+import { CreateBlogUseCase } from './blogs/application/use-case/create.blog.use.case';
 import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.repo';
 import { SendAnswerUseCase } from './quiz.pair/application/use-case/send.answer.use.case';
 import { ConnectUserByPairUseCase } from './quiz.pair/application/use-case/connect.user.by.pair.use.case';
@@ -41,7 +44,7 @@ import { UsersService } from './users/users.service';
 import { UsersRepository } from './users/db-mongo/users.repo';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BlogsController } from './blogs/blogs.controller';
-import { BlogsService } from './blogs/blogs.service';
+import { BlogsService } from './blogs/application/blogs.service';
 import { BlogsRepository } from './blogs/db-mongo/blogs.repo';
 import { env } from 'process';
 import { Pagination } from './helpers/query-filter';
@@ -92,6 +95,9 @@ import { CustomNaimingStrategy } from './auth/strategies/naiming.strategy';
 import { Question } from './quiz.questions/db-psql/entity/question';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DeleteBlogIdUseCase } from './blogs/application/use-case/delete.blog.id.use.case';
+import { DeleteBlogsAllUseCase } from './blogs/application/use-case/delete.blogs.all.use.case';
+import { GetBlogIdUseCase } from './blogs/application/use-case/get.blog.id.use.case';
 
 const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase, 
   UpdateQuestionIdUseCase, UpdateQuestionInPublishUseCase,
@@ -99,6 +105,9 @@ const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
 const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase, 
   GetTopUsersUseCase, GetAllPairsByUserUseCase, GetPairByIdUseCase,
   CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
+
+const blogUseCase = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
+  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase]
 
 
 @Module({
@@ -193,7 +202,7 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
     UsersService, 
     //UsersRepository, UsersQueryRepository,
     UsersQueryRepoPSQL,UsersRepositoryPSQL,  
-    BlogsService, 
+    BlogsService, ...blogUseCase,
     //BlogsRepository, BlogsQueryRepository, 
     IsBlogIdAlreadyExistConstraint, BlogsQueryRepoPSQL, BlogsRepoPSQL,
     PostsService, 

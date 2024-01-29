@@ -18,8 +18,10 @@ import { IPAndURIModel } from './securityDevices/model/IPAndURIModel';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { SecurityDeviceServicePSQL } from './securityDevices/db-psql/securityDevice.service.PSQL';
-import { BlogsService } from './blogs/blogs.service';
+import { BlogsService } from './blogs/application/blogs.service';
 import { PostsService } from './posts/posts.service';
+import { CommandBus } from '@nestjs/cqrs';
+import { DeleteBlogsAllCommand } from './blogs/application/use-case/delete.blogs.all.use.case';
 
 @Controller()
 export class AppController {
@@ -42,7 +44,8 @@ export class TestingController {
     private commentModel: CommentsService,
     private likeModel: LikesRepository,
     private questionModel: QuestionsRepository,
-    private pairModel: PairGameRepo
+    private pairModel: PairGameRepo,
+    private commandBus : CommandBus
 
 
     //@InjectModel(IPAndURIModel.name) private ipAndURIModel: Model<DevicesModelDocument>
@@ -56,7 +59,7 @@ export class TestingController {
 
     await this.userModel.deleteUserAll();
     await this.postModel.deletePostAll();
-    await this.blogModel.deleteBlogAll();
+    await this.commandBus.execute(new DeleteBlogsAllCommand());
     await this.questionModel.deleteAllQuestions()
     //await this.deviceModel.deleteMany();
     //await this.ipAndURIModel.deleteMany()

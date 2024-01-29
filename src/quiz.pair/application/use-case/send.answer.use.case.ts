@@ -28,7 +28,7 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
         const pair = await this.pairGameQueryRepo.getPairMyCurrent(playerId)
 
         if (!pair || !pair.startGameDate) {
-            return 403
+            return 403//ошибка..
         }
 
         const resultPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, playerId)
@@ -39,7 +39,7 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
         const questionId = pair.questionsId[numberQusetion]
 
         const resultAnswer = await this.qusetionsService.checkingCorrectAnswer(questionId, answer) //проверяем ответ, если правильно то true
-        let statusAnswer = 'Correct'
+        let statusAnswer = 'Correct'//enum
         let countByAnswer = 1
         if (resultAnswer === false) {
             statusAnswer = 'Incorrect'
@@ -133,7 +133,7 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
                         accumulator++
                     }
                     return accumulator
-                }, 0)
+                }, 0)//
 
                 scoreTwo = resultFinishSecondPlayer!.answersStatus.reduce(function (accumulator, item) {
                     if (item === 'Correct') {

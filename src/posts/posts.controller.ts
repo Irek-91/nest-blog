@@ -3,7 +3,7 @@ import { AuthGuard } from './../auth.guard';
 import { commentInput } from './../comments/model/comments-model';
 import { CommentsService } from './../comments/comments.service';
 import { Pagination } from './../helpers/query-filter';
-import { BlogsService } from './../blogs/blogs.service';
+import { BlogsService } from '../blogs/application/blogs.service';
 import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';

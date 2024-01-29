@@ -37,17 +37,17 @@ export class Statistic {
     })
     drawcount: number
 
-    // @Column({
-    //     type: "numeric",
-    //     nullable: true,
-    //     default: 0//()=> 'sumScore / (winsCount + lossesCount + drawcount)'
-    // })
-    // avgScores: number
+    @Column({
+        type: "numeric",
+        nullable: true,
+        default: 'sumScore / (winsCount + lossesCount + drawcount)'
+    })
+    avgScores: number
 
-    // @BeforeInsert()
-    // calculeteValue(){
-    //     this.avgScores = (this.sumScore / (this.winsCount + this.lossesCount + this.drawcount))
-    // }
+    @BeforeInsert()
+    calculeteValue(){
+        this.avgScores = (this.sumScore / (this.winsCount + this.lossesCount + this.drawcount))
+    }
 
     // @OneToMany((type) => Pairresult, (result) => result.pairId)
     // @JoinColumn({
