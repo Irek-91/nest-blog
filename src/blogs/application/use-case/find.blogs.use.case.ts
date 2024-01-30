@@ -3,7 +3,8 @@ import { queryPaginationType } from './../../../helpers/query-filter';
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 export class FindBlogsCommand {
-    constructor (public paginationQuery: queryPaginationType) {}
+    constructor (public paginationQuery: queryPaginationType,
+        public userId: string | null) {}
 
 }
 
@@ -13,7 +14,7 @@ export class FindBlogsUseCase implements ICommandHandler<FindBlogsCommand> {
 
     }
     async execute(command: FindBlogsCommand) {
-        return await this.blogsQueryRepository.findBlogs(command.paginationQuery)
+        return await this.blogsQueryRepository.findBlogs(command.paginationQuery, command.userId)
     }
 
 

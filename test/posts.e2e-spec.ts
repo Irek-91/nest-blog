@@ -395,7 +395,7 @@ describe ('tests for posts', () => {
       const userModelTwo: userInputModel = {
         login: 'userModel2',
         password: 'nosorog2023',
-        email: 'panda@mail.com',
+        email: 'nosorog@mail.com',
       }
       const userResponse = await createUser('admin', 'qwerty', userModelTwo, httpServer)
       const userTwo = userResponse
@@ -404,7 +404,7 @@ describe ('tests for posts', () => {
       const userModelThree: userInputModel = {
         login: 'userModel3',
         password: 'userFree2023',
-        email: 'panda@mail.com',
+        email: 'userFree@mail.com',
       }
       const userResponseThree = await createUser('admin', 'qwerty', userModelThree, httpServer)
       const userThree = userResponseThree
@@ -412,8 +412,8 @@ describe ('tests for posts', () => {
       
       const userModelFour: userInputModel = {
         login: 'userModel4',
-        password: 'userFree2023',
-        email: 'panda@mail.com',
+        password: 'userFour2023',
+        email: 'userFour@mail.com',
       }
       const userResponseFour = await createUser('admin', 'qwerty', userModelFour, httpServer)
       const userFour = userResponseFour
@@ -421,8 +421,8 @@ describe ('tests for posts', () => {
 
       const userModelFive: userInputModel = {
         login: 'userModel5',
-        password: 'userFree2023',
-        email: 'panda@mail.com',
+        password: 'userFive2023',
+        email: 'userFive@mail.com',
       }
       const userResponseFive = await createUser('admin', 'qwerty', userModelFive, httpServer)
       const userFive = userResponseFive

@@ -256,7 +256,7 @@ export class PostQueryRepoPSQL {
     }
 
 
-    async getPostId(postId: string, userId: string | null): Promise<postOutput> {
+    async getPostId(postId: string, userId: string | null): Promise<postOutput | null> {
         try {
             const post: Post | null = await this.postModel.getRepository(Post)
                 .createQueryBuilder('p')
@@ -264,7 +264,7 @@ export class PostQueryRepoPSQL {
                 .where('p._id = :id', { id: postId })
                 .getOne()
             if (!post) {
-                throw new HttpException('Not found', HttpStatus.NOT_FOUND)
+                return null
             }
 
             let myStatus = 'None'

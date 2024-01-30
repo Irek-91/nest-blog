@@ -1,3 +1,13 @@
+import { BloggerController } from './blogs/blogger.controller';
+import { DeletePostsAllUseCase } from './posts/application/use-case/delete.posts.all';
+import { updateLikeStatusPostUseCase } from './posts/application/use-case/update.like.status.post.use.case';
+import { CreatedPostByBlogIdUseCase } from './posts/application/use-case/created.post.by.blog.id.use.case';
+import { DeletePostsByBlogIdUseCase } from './posts/application/use-case/delete.posts.by.blog.id.use.case';
+import { DeletePostIdUseCase } from './posts/application/use-case/delete.post.id.use.case';
+import { GetPostIdUseCase } from './posts/application/use-case/get.post.id.use.case';
+import { FindPostsByBlogIdUseCase } from './posts/application/use-case/find.posts.by.blog.id.use.case';
+import { FindPostsUseCase } from './posts/application/use-case/find.post.use.case';
+import { FindBlogsUseCase } from './blogs/application/use-case/find.blogs.use.case';
 import { GetBlogNameByIdUseCase } from './blogs/application/use-case/get.blog.name.by.id';
 import { UpdateBlogUseCase } from './blogs/application/use-case/update.blog.use.case';
 import { CreateBlogUseCase } from './blogs/application/use-case/create.blog.use.case';
@@ -17,7 +27,7 @@ import { CreateQuestionUseCase } from './quiz.questions/application/use-cases/cr
 import { FindQuestionsUseCase } from './quiz.questions/application/use-cases/find.questions.use.case';
 import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo';
 import { PairGameQueryRepo } from './quiz.pair/dv-psql/pair.game.query.repo';
-import { Statistic } from './quiz.pair/dv-psql/entity/statistis';
+import { Statistic } from './quiz.pair/dv-psql/entity/statistic';
 import { CheckingActivePair } from './auth/guards/auth.guard';
 import { CustomPipe } from './adapters/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
@@ -49,7 +59,7 @@ import { BlogsRepository } from './blogs/db-mongo/blogs.repo';
 import { env } from 'process';
 import { Pagination } from './helpers/query-filter';
 import { PostsController } from './posts/posts.controller';
-import { PostsService } from './posts/posts.service';
+import { PostsService } from './posts/application/posts.service';
 import { CommentSchema } from './comments/model/comments-schema';
 import { CommentsRepository } from './comments/db-mongo/comments.repo';
 import { CommentsController } from './comments/comments.controller';
@@ -98,6 +108,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DeleteBlogIdUseCase } from './blogs/application/use-case/delete.blog.id.use.case';
 import { DeleteBlogsAllUseCase } from './blogs/application/use-case/delete.blogs.all.use.case';
 import { GetBlogIdUseCase } from './blogs/application/use-case/get.blog.id.use.case';
+import { UpdatePostUseCase } from './posts/application/use-case/update.post.use.case';
 
 const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase, 
   UpdateQuestionIdUseCase, UpdateQuestionInPublishUseCase,
@@ -106,8 +117,11 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
   GetTopUsersUseCase, GetAllPairsByUserUseCase, GetPairByIdUseCase,
   CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
 
-const blogUseCase = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
+const blogUseCase = [FindBlogsUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
   DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase]
+
+const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
+  DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase]
 
 
 @Module({
@@ -154,6 +168,7 @@ const blogUseCase = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
     //])
     //
     
+
     TypeOrmModule.forRoot(
       {
       //useFactory: (configService: ConfigService<ConfigType>) => ({
@@ -168,7 +183,7 @@ const blogUseCase = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
       entities:[User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic],
       migrations: [__dirname +'/db/migrations/*.ts'],
       migrationsTableName: "custom_migration_table",
-      logging: false,
+      logging: true,
       namingStrategy: new CustomNaimingStrategy()
     }
     ),
@@ -185,7 +200,7 @@ const blogUseCase = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
   controllers: [AppController, 
     TestingController, 
     UsersController, UsersSAController,
-    BlogsController,BlogsSAController,
+    BlogsController,BlogsSAController, BloggerController,
     PostsController, 
     CommentsController,
     AuthController,
@@ -205,8 +220,7 @@ const blogUseCase = [CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
     BlogsService, ...blogUseCase,
     //BlogsRepository, BlogsQueryRepository, 
     IsBlogIdAlreadyExistConstraint, BlogsQueryRepoPSQL, BlogsRepoPSQL,
-    PostsService, 
-    //PostRepository, PostQueryRepository, 
+    PostsService, ...postUseCase,
     PostQueryRepoPSQL, PostRepoPSQL,
     CommentsService, 
     //CommentsRepository,CommentsQueryRepository,

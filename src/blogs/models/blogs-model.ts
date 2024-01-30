@@ -14,6 +14,19 @@ export type blogMongoDB = {
   isMembership: boolean
 }
 
+export type blogPSQLDB = {
+  _id: string,
+  name: string,
+  description: string,
+  websiteUrl: string,
+  createdAt: string,
+  isMembership: boolean,
+  postId: [] | null
+  userId: string | null,
+  userLogin: string | null,
+
+}
+
 export type blogOutput = {
   id: string,
   name: string,

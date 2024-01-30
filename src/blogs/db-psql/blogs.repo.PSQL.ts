@@ -1,4 +1,7 @@
-import { PostsService } from './../../posts/posts.service';
+import { blogPSQLDB } from './../models/blogs-model';
+import { User } from './../../users/db-psql/entity/user.entity';
+import { DeletePostsByBlogIdCommand } from './../../posts/application/use-case/delete.posts.by.blog.id.use.case';
+import { PostsService } from '../../posts/application/posts.service';
 import { Blog } from './entity/blog.entity';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -12,48 +15,60 @@ import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { log } from 'console';
+import { CommandBus } from '@nestjs/cqrs';
 
 @Injectable()
 export class BlogsRepoPSQL {
-  constructor(@InjectDataSource() private blogModel: DataSource,
-              @InjectRepository(Blog) private blogRepoTypeORM: Repository<Blog>,
-              protected postService : PostsService
+  constructor(@InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(Blog) private blogRepoTypeORM: Repository<Blog>,
+
+    protected postService: PostsService,
+    private commandBus: CommandBus
   ) { }
 
-  async createBlog(newBlog: blogMongoDB) {
-    //return await this.blogModel.insertMany({ ...newBlog })
-    const query = `INSERT INTO public."blogs"(
-      _id, name, description, "websiteUrl", "createdAt", "isMembership")
-      VALUES  ('${newBlog._id}', '${newBlog.name}', '${newBlog.description}',
-                '${newBlog.websiteUrl}', '${newBlog.createdAt}', '${newBlog.isMembership}')
-      `
-    const user =  this.blogRepoTypeORM.create({
-      _id: newBlog._id.toString(),
-      name: newBlog.name,
-      description: newBlog.description,
-      websiteUrl: newBlog.websiteUrl,
-      createdAt: newBlog.createdAt,
-      isMembership: newBlog.isMembership
-    })
-    await this.blogRepoTypeORM.save(user)
+  async createBlog(inputData: blogPSQLDB) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
 
-
-    return newBlog
+    await queryRunner.startTransaction()
+    try {
+      const newBlog = this.dataSource.createQueryBuilder()
+        .insert()
+        .into(Blog)
+        .values({
+          _id: inputData._id,
+          name: inputData.name,
+          description: inputData.description,
+          websiteUrl: inputData.websiteUrl,
+          createdAt: inputData.createdAt,
+          isMembership: inputData.isMembership,
+          userId: inputData.userId,
+          userLogin: inputData.userLogin
+        })
+        .execute()
+      return newBlog
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   async updateBlog(blogId: string, bloginputData: blogInput): Promise<Number> {
     try {
 
       const blog = await this.blogRepoTypeORM.update(
-        {_id: blogId}, 
-        {name: bloginputData.name, description: bloginputData.description, websiteUrl: bloginputData.websiteUrl}
+        { _id: blogId },
+        { name: bloginputData.name, description: bloginputData.description, websiteUrl: bloginputData.websiteUrl }
       )
       // const blog = await this.blogModel.query(`
       // UPDATE public."blogs"
       // SET name=$2, description=$3, "websiteUrl"=$4
       // WHERE "_id" = $1`, [blogId, bloginputData.name,
       //                   bloginputData.description, bloginputData.websiteUrl])
-        return HttpStatus.NO_CONTENT
+      return HttpStatus.NO_CONTENT
     }
     catch (e) {
       return HttpStatus.NOT_FOUND
@@ -62,8 +77,8 @@ export class BlogsRepoPSQL {
 
   async deleteBlogId(id: string): Promise<Number> {
     try {
-      
-      const postsDeleted = await this.postService.deletePostsByBlogId(id)
+
+      const postsDeleted = await this.commandBus.execute(new DeletePostsByBlogIdCommand(id))
       const blogDeleted = await this.blogRepoTypeORM.delete({
         _id: id
       })

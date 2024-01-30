@@ -1,5 +1,6 @@
 import { Post } from './../../../posts/db-psql/entity/post.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { User } from './../../../users/db-psql/entity/user.entity';
 
 @Entity()
 export class Blog {
@@ -23,6 +24,19 @@ export class Blog {
 
     @Column()
     isMembership: boolean
+
+    @Column({type: 'varchar',nullable: true})
+    userId: string | null
+
+    @Column({type: 'varchar', nullable: true})
+    userLogin: string | null
+
+    // @OneToOne(() => User, {nullable: true})
+    // @JoinColumn({
+    //     name: 'userId'
+    // })
+    // public userId: User
+
 
     @OneToMany((type) => Post, (post) => post._id, {nullable: true})
     @JoinColumn({

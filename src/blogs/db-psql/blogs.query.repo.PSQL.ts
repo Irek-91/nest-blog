@@ -13,16 +13,15 @@ import { Blog } from './entity/blog.entity';
 
 @Injectable()
 export class BlogsQueryRepoPSQL {
-  constructor(
-              @InjectDataSource() private blogModel: DataSource,
-              @InjectRepository(Blog) private blogRepoTypeORM: Repository<Blog>,
+  constructor(@InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(Blog) private blogRepoTypeORM: Repository<Blog>,
   ) { }
 
-  async findBlogs(pagination: queryPaginationType): Promise<paginatorBlog> {
+  async findBlogs(pagination: queryPaginationType, userId: string | null): Promise<paginatorBlog> {
     // let query = `SELECT * FROM public."blogs"
     //                 ORDER BY "${pagination.sortBy}" ${pagination.sortDirection}                 
     //          `
-    const sortDirection= pagination.sortDirection
+    const sortDirection = pagination.sortDirection
 
     let sortBy = {
     }
@@ -50,34 +49,41 @@ export class BlogsQueryRepoPSQL {
     //       // }
     //     }
     // }
-    
-
     // const queryResult = `${query} ` + ` LIMIT $1 OFFSET $2`
     // const blogs = await this.blogModel.query(queryResult,
     //     [pagination.pageSize, pagination.skip])
-    const blogs = await this.blogRepoTypeORM.find({
-      where: {name: ILike(`%${pagination.searchNameTerm}%`)},
-      order: sortBy,
-      skip: pagination.skip,
-      take: pagination.pageSize
-    })
-   
-    
+
+    let blogsOne = await this.dataSource.getRepository(Blog).createQueryBuilder()
+      .where({ name: ILike(`%${pagination.searchNameTerm}%`) })
+    if (userId) {
+      blogsOne = await blogsOne.andWhere({
+        userId: userId
+      })
+    }
+
+
+    const blogsResult = await blogsOne
+      .orderBy(sortBy)
+      .skip(pagination.skip)
+      .take(pagination.pageSize)
+      .getMany()
+
+
     // find({ name: { $regex: pagination.searchNameTerm, $options: 'i' } }).
     //   //sort([[pagination.sortBy, pagination.sortDirection]]).
     //   skip(pagination.skip).
     //   limit(pagination.pageSize).
     //   lean()
-    
-    
-    const totalCount = await this.blogRepoTypeORM.findAndCount({
-        where: {
-          name: ILike(`%${pagination.searchNameTerm}%`)
-        }
-      }
-    )
-    
-    const blogsOutput: blogOutput[] = blogs.map((b) => {
+
+
+    const totalCount = await this.dataSource.getRepository(Blog).createQueryBuilder()
+      .select()
+      .where({
+        name: ILike(`%${pagination.searchNameTerm}%`)
+      })
+      .getMany()
+
+    const blogsOutput: blogOutput[] = blogsResult.map((b) => {
       return {
         id: b._id,
         name: b.name,
@@ -88,10 +94,10 @@ export class BlogsQueryRepoPSQL {
       }
     })
     return {
-      pagesCount: Math.ceil(totalCount[1] / pagination.pageSize),
+      pagesCount: Math.ceil(totalCount.length / pagination.pageSize),
       page: pagination.pageNumber,
       pageSize: pagination.pageSize,
-      totalCount: totalCount[1],
+      totalCount: totalCount.length,
       items: blogsOutput
     }
   }
@@ -99,33 +105,20 @@ export class BlogsQueryRepoPSQL {
   async getBlogId(id: string): Promise<blogOutput> {
     try {
 
-      const blog = await this.blogRepoTypeORM.findOneBy({_id: id})
-      
-      if (!blog) {throw new HttpException('Not found', HttpStatus.NOT_FOUND)}
+      const blog = await this.blogRepoTypeORM.findOneBy({ _id: id })
+
+      if (!blog) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
       else {
-      return {
-        id: blog._id.toString(),
-        name: blog.name,
-        description: blog.description,
-        websiteUrl: blog.websiteUrl,
-        createdAt: blog.createdAt,
-        isMembership: false,
-      }
+        return {
+          id: blog._id.toString(),
+          name: blog.name,
+          description: blog.description,
+          websiteUrl: blog.websiteUrl,
+          createdAt: blog.createdAt,
+          isMembership: false,
+        }
 
       }
-      // const blog = await this.blogModel.query(`
-      //   SELECT * FROM public."blogs" as b
-      //   WHERE b."_id" = $1
-      //   `, [id])
-      // if (blog.length === 0) throw new HttpException('Not found', HttpStatus.NOT_FOUND)//return HttpStatus.NOT_FOUND
-      // return {
-      //   id: blog[0]._id.toString(),
-      //   name: blog[0].name,
-      //   description: blog[0].description,
-      //   websiteUrl: blog[0].websiteUrl,
-      //   createdAt: blog[0].createdAt,
-      //   isMembership: false,
-      // }
     }
     catch (e) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND)
@@ -133,8 +126,8 @@ export class BlogsQueryRepoPSQL {
   }
   async getBlogNameById(id: string): Promise<string | null> {
     try {
-      const blog = await this.blogRepoTypeORM.findOneBy({_id: id})
-      if (!blog) {return null}
+      const blog = await this.blogRepoTypeORM.findOneBy({ _id: id })
+      if (!blog) { return null }
       return blog.name
 
       // const blog = await this.blogModel.query(`
@@ -150,10 +143,10 @@ export class BlogsQueryRepoPSQL {
   }
 
 
-  async getByBlogId(id: string): Promise< Blog | null> {
+  async getByBlogId(id: string): Promise<Blog | null> {
     try {
-      const blog = await this.blogRepoTypeORM.findOneBy({_id: id})
-      if (!blog) {return null}
+      const blog = await this.blogRepoTypeORM.findOneBy({ _id: id })
+      if (!blog) { return null }
       return blog
 
       //   const blog = await this.blogModel.query(`

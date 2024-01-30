@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
 
-import { Statistic } from './quiz.pair/dv-psql/entity/statistis';
+import { Statistic } from './quiz.pair/dv-psql/entity/statistic';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
 import { Pair } from './quiz.pair/dv-psql/entity/pairs';
 import { Question } from './quiz.questions/db-psql/entity/question';
@@ -26,7 +26,7 @@ export default new DataSource ({
     database: process.env.PGDATABASELOCAL,
     synchronize: false,
     entities:[User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic],
-    //migrations: [__dirname + '/migrations/*{.ts, .js}'],
+    migrations: [__dirname + '/db/migrations/*{.ts, .js}'],
 //     migrations:{
 // directory: 'src/db/migrations'
 //     },

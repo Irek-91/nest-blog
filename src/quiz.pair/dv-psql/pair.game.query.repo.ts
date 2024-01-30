@@ -1,4 +1,4 @@
-import { Statistic } from './entity/statistis';
+import { Statistic } from './entity/statistic';
 import { queryPaginationPairsType, queryPaginationTopUsersType } from '../../helpers/query-filter';
 import { Question } from '../../quiz.questions/db-psql/entity/question';
 import { QuestionsQueryRepository } from '../../quiz.questions/db-psql/questions.query.repo';

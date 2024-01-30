@@ -1,3 +1,6 @@
+import { CreatedPostByBlogIdCommand } from './application/use-case/created.post.by.blog.id.use.case';
+import { DeletePostIdCommand } from './application/use-case/delete.post.id.use.case';
+import { FindPostsCommand } from './application/use-case/find.post.use.case';
 import { likeStatus } from './../likes/model/likes-model';
 import { AuthGuard } from './../auth.guard';
 import { commentInput } from './../comments/model/comments-model';
@@ -5,11 +8,15 @@ import { CommentsService } from './../comments/comments.service';
 import { Pagination } from './../helpers/query-filter';
 import { BlogsService } from '../blogs/application/blogs.service';
 import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request } from '@nestjs/common';
-import { PostsService } from './posts.service';
+import { PostsService } from './application/posts.service';
 import { paginatorPost, postInputModel, postOutput } from './model/post-model';
 import { log } from 'console';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
+import { CommandBus } from '@nestjs/cqrs';
+import { GetPostIdCommand } from './application/use-case/get.post.id.use.case';
+import { UpdatePostCommand } from './application/use-case/update.post.use.case';
+import { UpdateLikeStatusPostCommand } from './application/use-case/update.like.status.post.use.case';
 
 
 @Controller('posts')
@@ -18,6 +25,7 @@ export class PostsController {
         private readonly pagination: Pagination,
         private readonly blogsService: BlogsService,
         private readonly commentsService: CommentsService,
+        private commandBus: CommandBus
 
     ) {
     }
@@ -38,7 +46,7 @@ export class PostsController {
             userId = null
         }
         const paginationPost = this.pagination.getPaginationFromQueryPosts(query)
-        const posts: paginatorPost | null = await this.postsService.findPost(paginationPost, userId);
+        const posts: paginatorPost | null = await this.commandBus.execute(new FindPostsCommand(paginationPost, userId));
         if (!posts) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
@@ -54,7 +62,10 @@ export class PostsController {
         if (!userId) {
             userId = null
         }
-        let post: postOutput | number = await this.postsService.getPostId(postId, userId)
+        let post: postOutput = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
+        if (!post) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
         return post
     }
 
@@ -64,21 +75,22 @@ export class PostsController {
         @Param('postId') postId: string,
         @Request() req: any,
         @Query()
-            query: {
-                searchNameTerm?: string;
-                sortBy?: string;
-                sortDirection?: string;
-                pageNumber?: string;
-                pageSize?: string;
-            }
-        ) {
+        query: {
+            searchNameTerm?: string;
+            sortBy?: string;
+            sortDirection?: string;
+            pageNumber?: string;
+            pageSize?: string;
+        }
+    ) {
         let userId = req.userId//исправить после авторизации
         if (!userId) {
             userId = null
         }
         const pagination = this.pagination.getPaginationFromQueryPosts(query)
 
-        const resultPostId = await this.postsService.getPostId(postId, userId)
+        const resultPostId = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
+
         const commentsPostId = await this.commentsService.findCommentsByPostId(postId, userId, pagination)
         return commentsPostId
     }
@@ -87,11 +99,11 @@ export class PostsController {
     @Post()
     async createdPost(@Body() postInputData: postInputModel,
     ) {
-        let post = await this.postsService.createdPostBlogId(postInputData)
+        let post = await this.commandBus.execute(new CreatedPostByBlogIdCommand(postInputData))
         // if (!post) {
         //     throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         // } else {
-            return post
+        return post
         // }
     }
 
@@ -100,9 +112,12 @@ export class PostsController {
     async createdCommentPostId(@Body() commentInputData: commentInput,
         @Request() req: any,
         @Param('postId') postId: string) {
-            
+
         const userId = req.userId
-        const post = await this.postsService.getPostId(postId, userId)
+        let post: postOutput = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
+        if (!post) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
         let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
         return comment
     }
@@ -111,7 +126,14 @@ export class PostsController {
     @Put(':id')
     async updatePostId(@Body() postInputData: postInputModel,
         @Param('id') postId: string) {
-        let postResult = await this.postsService.updatePostId(postId, postInputData.title, postInputData.shortDescription, postInputData.content)
+        let postResult = await this.commandBus.execute(new UpdatePostCommand(postId, postInputData.title,
+            postInputData.shortDescription, postInputData.content))
+        if (postResult) {
+            throw new HttpException('No content', HttpStatus.NO_CONTENT);
+        }
+        else {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
     }
 
     @UseGuards(UserAuthGuard)
@@ -119,9 +141,10 @@ export class PostsController {
     async updateLikeStatusPostId(@Param('postId') postId: string,
         @Request() req: any,
         @Body() likeStatus: likeStatus) {
-        
+
         const userId = req.userId
-        const resultUpdateLikeStatusPost = await this.postsService.updateLikeStatusPostId(postId, userId, likeStatus.likeStatus)
+        const resultUpdateLikeStatusPost = await this.commandBus.
+                                                execute(new UpdateLikeStatusPostCommand(postId, userId, likeStatus.likeStatus))
         if (resultUpdateLikeStatusPost) {
             throw new HttpException('No content', HttpStatus.NO_CONTENT);
         }
@@ -135,7 +158,7 @@ export class PostsController {
     async deletePost(
         @Param('id') postId: string
     ) {
-        let post = await this.postsService.deletePostId(postId);
+        const post = await this.commandBus.execute(new DeletePostIdCommand(postId));
         if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {

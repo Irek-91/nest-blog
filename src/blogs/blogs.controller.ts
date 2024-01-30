@@ -1,9 +1,10 @@
+import { FindPostsByBlogIdCommand } from './../posts/application/use-case/find.posts.by.blog.id.use.case';
 import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
 import { GetBlogIdCommand } from './application/use-case/get.blog.id.use.case';
 import { CreateBlogCommand } from './application/use-case/create.blog.use.case';
 import { CommandBus } from '@nestjs/cqrs';
 import { postInputModelSpecific } from './../posts/model/post-model';
-import { PostsService } from './../posts/posts.service';
+import { PostsService } from '../posts/application/posts.service';
 import { Pagination } from './../helpers/query-filter';
 import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards, Request } from "@nestjs/common";
 import { BlogsService } from "./application/blogs.service";
@@ -13,6 +14,7 @@ import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 import { GetUserIdByAuth } from './../auth/guards/auth.guard';
 import { UpdateBlogCommand } from './application/use-case/update.blog.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
+import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/created.post.by.blog.id.use.case';
 
 
 @Controller('blogs')
@@ -23,7 +25,7 @@ export class BlogsController {
         private commandBus: CommandBus
     ) {
     }
-
+    @UseGuards(GetUserIdByAuth)
     @Get()
     async getBlogs(@Query()
     query: {
@@ -32,9 +34,13 @@ export class BlogsController {
         sortDirection?: string;
         pageNumber?: string;
         pageSize?: string;
-    }) {
+    }, @Request() req: any) {
+        let userId = req.userId//исправить после авторизации
+        if (!userId) {
+            userId = null
+        }
         const queryFilter = this.pagination.getPaginationFromQuery(query);
-        return await this.commandBus.execute(new FindBlogsCommand(queryFilter))
+        return await this.commandBus.execute(new FindBlogsCommand(queryFilter, userId))
     }
     @Get(':id')
     async getBlogId(@Param('id') blogId: string) {
@@ -52,7 +58,7 @@ export class BlogsController {
         pageNumber?: string;
         pageSize?: string;
     },
-    @Request() req: any,
+        @Request() req: any,
         @Param('blogId') blogId: string) {
         let userId = req.userId//исправить после авторизации
         if (!userId) {
@@ -61,7 +67,7 @@ export class BlogsController {
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
-        const foundPosts = await this.postsService.findPostsBlogId(pagination, blogId, userId);
+        const foundPosts = await this.commandBus.execute(new FindPostsByBlogIdCommand(pagination, blogId, userId));
 
         if (!foundPosts) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
@@ -73,7 +79,7 @@ export class BlogsController {
     @UseGuards(BasicAuthGuard)
     @Post()
     async createBlog(@Body() blogInputData: blogInput) {
-        const blog = await this.commandBus.execute(new CreateBlogCommand(blogInputData))
+        const blog = await this.commandBus.execute(new CreateBlogCommand(blogInputData, null))
         return blog
     }
 
@@ -87,10 +93,10 @@ export class BlogsController {
             content: inputData.content,
             blogId: blogId,
         }
-        
+
         const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
-        
-        const newPost = await this.postsService.createdPostBlogId(inputDataModel);
+
+        const newPost = await this.commandBus.execute(new CreatedPostByBlogIdCommand(inputDataModel));
 
         if (!newPost) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
@@ -104,7 +110,7 @@ export class BlogsController {
     @Put(':id')
     async updateBlog(@Param('id') blogId: string,
         @Body() blogInputData: blogInput) {
-            const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
 
         const blogUpdate = await this.commandBus.execute(new UpdateBlogCommand(blogId, blogInputData))
 
@@ -119,7 +125,7 @@ export class BlogsController {
     @Delete(':id')
     async deletBlog(@Param('id') blogId: string) {
         let result = await this.commandBus.execute(new DeleteBlogIdCommand(blogId))
-        if (result === HttpStatus.NOT_FOUND ) {
+        if (result === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
             throw new HttpException('No Content', HttpStatus.NO_CONTENT)

@@ -1,3 +1,4 @@
+import { DeletePostsAllCommand } from './posts/application/use-case/delete.posts.all';
 import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo';
 import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.repo';
 import { QuestionsQueryRepository } from './quiz.questions/db-psql/questions.query.repo';
@@ -19,7 +20,7 @@ import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { SecurityDeviceServicePSQL } from './securityDevices/db-psql/securityDevice.service.PSQL';
 import { BlogsService } from './blogs/application/blogs.service';
-import { PostsService } from './posts/posts.service';
+import { PostsService } from './posts/application/posts.service';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteBlogsAllCommand } from './blogs/application/use-case/delete.blogs.all.use.case';
 
@@ -58,7 +59,7 @@ export class TestingController {
     await this.pairModel.deleteAll()
 
     await this.userModel.deleteUserAll();
-    await this.postModel.deletePostAll();
+    await this.commandBus.execute(new DeletePostsAllCommand());
     await this.commandBus.execute(new DeleteBlogsAllCommand());
     await this.questionModel.deleteAllQuestions()
     //await this.deviceModel.deleteMany();

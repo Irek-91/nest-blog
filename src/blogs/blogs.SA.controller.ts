@@ -1,8 +1,10 @@
+import { UpdatePostCommand } from './../posts/application/use-case/update.post.use.case';
+import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/created.post.by.blog.id.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
 import { UpdateBlogCommand } from './application/use-case/update.blog.use.case';
 import { CreateBlogCommand } from './application/use-case/create.blog.use.case';
 import { postInputModelSpecific } from '../posts/model/post-model';
-import { PostsService } from '../posts/posts.service';
+import { PostsService } from '../posts/application/posts.service';
 import { Pagination } from '../helpers/query-filter';
 import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards, Request } from "@nestjs/common";
 import { BlogsService } from "./application/blogs.service";
@@ -13,6 +15,8 @@ import { GetUserIdByAuth } from '../auth/guards/auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { GetBlogIdCommand } from './application/use-case/get.blog.id.use.case';
 import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
+import { FindPostsByBlogIdCommand } from './../posts/application/use-case/find.posts.by.blog.id.use.case';
+import { DeletePostIdCommand } from './../posts/application/use-case/delete.post.id.use.case';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/blogs')
@@ -23,7 +27,7 @@ export class BlogsSAController {
         private commandBus: CommandBus
     ) {
     }
-    
+
     @Get()
     async getBlogs(@Query()
     query: {
@@ -33,8 +37,9 @@ export class BlogsSAController {
         pageNumber: string;
         pageSize: string;
     }) {
+        let userId = null//так как супер админ создает
         const queryFilter = this.pagination.getPaginationFromQuery(query);
-        return await this.commandBus.execute(new FindBlogsCommand(queryFilter))
+        return await this.commandBus.execute(new FindBlogsCommand(queryFilter, userId))
     }
 
     @Get(':id')
@@ -53,7 +58,7 @@ export class BlogsSAController {
         pageNumber: string;
         pageSize: string;
     },
-    @Request() req: any,
+        @Request() req: any,
         @Param('blogId') blogId: string) {
         let userId = req.userId//исправить после авторизации
         if (!userId) {
@@ -62,7 +67,7 @@ export class BlogsSAController {
         const pagination = this.pagination.getPaginationFromQuery(query)
 
         const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
-        const foundPosts = await this.postsService.findPostsBlogId(pagination, blogId, userId);
+        const foundPosts = await this.commandBus.execute(new FindPostsByBlogIdCommand(pagination, blogId, userId));
 
         if (!foundPosts) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
@@ -73,7 +78,7 @@ export class BlogsSAController {
 
     @Post()
     async createBlog(@Body() blogInputData: blogInput) {
-        const blog = await this.commandBus.execute(new CreateBlogCommand(blogInputData))
+        const blog = await this.commandBus.execute(new CreateBlogCommand(blogInputData, null))
         return blog
     }
 
@@ -86,10 +91,10 @@ export class BlogsSAController {
             content: inputData.content,
             blogId: blogId,
         }
-        
+
         const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
-        
-        const newPost = await this.postsService.createdPostBlogId(inputDataModel);
+
+        const newPost = await this.commandBus.execute(new CreatedPostByBlogIdCommand(inputDataModel));
 
         if (!newPost) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
@@ -102,7 +107,7 @@ export class BlogsSAController {
     @Put(':id')
     async updateBlog(@Param('id') blogId: string,
         @Body() blogInputData: blogInput) {
-            const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
 
         const blogUpdate = await this.commandBus.execute(new UpdateBlogCommand(blogId, blogInputData))
 
@@ -116,18 +121,26 @@ export class BlogsSAController {
     @Put(':blogId/posts/:postId')
     async updatePostByBlogId(@Param('blogId') blogId: string, @Param('postId') postId: string,
         @Body() postUpdateData: postInputModelSpecific) {
-            const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
-            const postResult = await this.postsService.updatePostId(postId, postUpdateData.title, 
-                                                                    postUpdateData.shortDescription, 
-                                                                    postUpdateData.content)
-   
+        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        if (!blog) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+        const postResult = await this.commandBus.execute(new UpdatePostCommand(postId, postUpdateData.title,
+            postUpdateData.shortDescription,
+            postUpdateData.content))
+        if (postResult) {
+            throw new HttpException('No content', HttpStatus.NO_CONTENT)
+        } else {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+
     }
 
 
     @Delete(':id')
     async deletBlog(@Param('id') blogId: string) {
         let result = await this.commandBus.execute(new DeleteBlogIdCommand(blogId))
-        if (result === HttpStatus.NOT_FOUND ) {
+        if (result === HttpStatus.NOT_FOUND) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
             throw new HttpException('No Content', HttpStatus.NO_CONTENT)
@@ -137,7 +150,7 @@ export class BlogsSAController {
     @Delete(':blogId/posts/:postId')
     async deletPost(@Param('blogId') blogId: string, @Param('postId') postId: string) {
         const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
-        const post = await this.postsService.deletePostId(postId);
+        const post = await this.commandBus.execute(new DeletePostIdCommand(postId));
         if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         } else {
