@@ -14,7 +14,7 @@ export class GetBlogIdUseCase implements ICommandHandler<GetBlogIdCommand> {
 constructor (private blogsQueryRepository: BlogsQueryRepoPSQL) {
 
 }
-    async execute(command: GetBlogIdCommand): Promise<blogOutput> {
+    async execute(command: GetBlogIdCommand): Promise<blogOutput | null> {
         return await this.blogsQueryRepository.getBlogId(command.id)
     }
 }

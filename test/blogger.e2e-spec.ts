@@ -1,3 +1,5 @@
+import jwt from 'jsonwebtoken';
+import { settings } from './../src/settings';
 import { userInputModel } from '../src/users/models/users-model';
 import request from 'supertest'
 import { log } from 'console';
@@ -52,7 +54,7 @@ describe('tests for blogger', () => {
                 email: 'userOne@mail.com',
             }
             const user = await createUser('admin', 'qwerty', userOneModel, httpServer)
-            expect.setState({ userOne: user.user })
+            expect.setState({ userOne: user })
             const { userOne } = expect.getState()
 
 
@@ -77,7 +79,7 @@ describe('tests for blogger', () => {
                     }
                 ])
             }
-            const firstRes = await createBlogByBlogger(userOne.id, {} as blogInput, httpServer)
+            const firstRes = await createBlogByBlogger(userOne.user.id, {} as blogInput, httpServer)
             expect(firstRes.status).toBe(400)
             expect(firstRes.body).toEqual(errors)
 
@@ -87,7 +89,7 @@ describe('tests for blogger', () => {
                 websiteUrl: '',
             }
 
-            const secondRes = await createBlogByBlogger(userOne.id, modelOne, httpServer)
+            const secondRes = await createBlogByBlogger(userOne.user.id, modelOne, httpServer)
             expect(secondRes.status).toBe(400)
             expect(secondRes.body).toEqual(errors)
 
@@ -95,27 +97,147 @@ describe('tests for blogger', () => {
 
         })
 
-            it('should return 201 status code and created blog', async () => {
-                const { userOne } = expect.getState()
-                const model: blogInput = {
-                    name: 'name',
-                    description: 'description',
-                    websiteUrl: 'https://samurai.it-incubator.com',
-                }
-                const res = await createBlogByBlogger(userOne.id, model, httpServer)
+        it('should return 201 status code and created blog', async () => {
+            const { userOne } = expect.getState()
+            const model: blogInput = {
+                name: 'name',
+                description: 'description',
+                websiteUrl: 'https://samurai.it-incubator.com',
+            }
+            const res = await createBlogByBlogger(userOne.user.id, model, httpServer)
 
-                expect(res.status).toBe(201)
-                expect(res.body ).toEqual({
-                    id: expect.any(String),
-                    name: model.name,
-                    description: model.description,
-                    websiteUrl: model.websiteUrl,
-                    createdAt: expect.any(String),
-                    isMembership: true
-                })
-
-                expect.setState({blog: res.body})
+            expect(res.status).toBe(201)
+            expect(res.body).toEqual({
+                id: expect.any(String),
+                name: model.name,
+                description: model.description,
+                websiteUrl: model.websiteUrl,
+                createdAt: expect.any(String),
+                isMembership: false
             })
+
+            expect.setState({ blog: res.body })
+        })
+
+
+        it('Возвращаем блог, который создали', async () => {
+            const { userOne } = expect.getState()
+            const { blog } = expect.getState()
+            const res = await request(httpServer).get(`/blogs/${blog.id}`)
+
+
+            expect(res.status).toBe(200)
+            expect(res.body).toEqual({
+                id: expect.any(String),
+                name: blog.name,
+                description: blog.description,
+                websiteUrl: blog.websiteUrl,
+                createdAt: expect.any(String),
+                isMembership: false
+            })
+
+        })
+
+
+
+        it('Возвращает блоги (владельцем которых является текущий пользователь)', async () => {
+            const { blog } = expect.getState()
+            const { userOne } = expect.getState()
+            const model: blogInput = {
+                name: 'name2',
+                description: 'description',
+                websiteUrl: 'https://samurai.it-incubator.com',
+            }
+            const blog2 = await createBlogByBlogger(userOne.user.id, model, httpServer)
+            expect.setState({ blog2: blog2.body })
+
+
+
+            const result = await request(httpServer).get(`/blogger/blogs`).set(userOne.headers)
+            expect(result.status).toBe(200)
+            expect(result.body).toEqual({
+                pagesCount: 1,
+                page: 1,
+                pageSize: 10,
+                totalCount: 2,
+                items: [blog2.body, blog]
+            })
+
+        })
+
+        it('Проверка на поиск своих блогов (владельцем которых является другой пользователь)', async () => {
+            const { blog } = expect.getState()
+            const userTwoModel: userInputModel = {
+                login: 'userTwo',
+                password: 'userTwo2023',
+                email: 'userTwo@mail.com',
+            }
+            const user = await createUser('admin', 'qwerty', userTwoModel, httpServer)
+            expect.setState({ userTwo: user })
+            const { userTwo } = expect.getState()
+
+            const res = await request(httpServer).get(`/blogger/blogs`).set(userTwo.headers)
+            expect(res.status).toBe(200)
+            expect(res.body).toEqual({
+                pagesCount: 0,
+                page: 1,
+                pageSize: 10,
+                totalCount: 0,
+                items: []
+            })
+
+        })
+
+        it('Удаление блога ', async () => {
+            const { userTwo } = expect.getState()
+            const { userOne } = expect.getState()
+
+            const { blog } = expect.getState()
+            const res = await request(httpServer).delete(`/blogger/blogs/${blog.id}`)
+            expect(res.status).toBe(401)// проверка удаление неавторизованным пользователем
+            const res1 = await request(httpServer).delete(`/blogger/blogs/${blog.id}`).set(userTwo.headers)
+            expect(res1.status).toBe(403)// проверка удаление другим пользователем
+            const res2 = await request(httpServer).delete(`/blogger/blogs/${1}`).set(userOne.headers)
+            expect(res2.status).toBe(404)// проверка удаление несуществующего блога
+            const res3 = await request(httpServer).delete(`/blogger/blogs/${blog.id}`).set(userOne.headers)
+            expect(res3.status).toBe(204)//удаление блога
+
+            const resusltDelete = await request(httpServer).get(`/blogs/${blog.id}`)
+            expect(resusltDelete.status).toBe(404)//проверка удаления блога, вызов блога с ДБ
+
+
+        })
+
+        it('Создание поста "/blogger/blogs/:blogId/posts":', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const postData = {
+                title: "postOne",
+                shortDescription: "postOne bu blog2",
+                content: "string"
+              }
+
+            const res = await request(httpServer).post(`/blogger/blogs/${blog2.id}/posts`).send(postData).set(userOne.headers)
+            expect(res.status).toBe(201)
+            expect(res.body).toEqual({
+                id: expect.any(String),
+                title: postData.title,
+                shortDescription: postData.shortDescription,
+                content: postData.content,
+                blogId: blog2.id,
+                blogName: blog2.name,
+                createdAt: expect.any(String),
+                extendedLikesInfo: {
+                  likesCount: 0,
+                  dislikesCount: 0,
+                  myStatus: "None",
+                  newestLikes: expect.any(Array)
+                }
+              })
+
+        })
+
+
 
         //     it('should return 200 status code and created blog', async () => {
         //         const {blog} = expect.getState()

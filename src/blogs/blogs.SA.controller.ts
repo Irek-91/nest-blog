@@ -1,3 +1,5 @@
+import { FindBlogsSACommand } from './application/use-case/find.blogs.SA.use.case copy';
+import { BindBlogWithUserCommand } from './application/use-case/bind.blog.with.user.use.case';
 import { UpdatePostCommand } from './../posts/application/use-case/update.post.use.case';
 import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/created.post.by.blog.id.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
@@ -39,7 +41,7 @@ export class BlogsSAController {
     }) {
         let userId = null//так как супер админ создает
         const queryFilter = this.pagination.getPaginationFromQuery(query);
-        return await this.commandBus.execute(new FindBlogsCommand(queryFilter, userId))
+        return await this.commandBus.execute(new FindBlogsSACommand(queryFilter))
     }
 
     @Get(':id')
@@ -118,6 +120,14 @@ export class BlogsSAController {
         }
     }
 
+    @Put(':id/bind-with-user/:userId')
+    async bindBlogWithUser(@Param('id') blogId: string, @Param('userId') userId: string,
+        @Body() postUpdateData: postInputModelSpecific) {
+        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        
+        const result = await this.commandBus.execute(new BindBlogWithUserCommand(blogId, userId)) 
+    }
+
     @Put(':blogId/posts/:postId')
     async updatePostByBlogId(@Param('blogId') blogId: string, @Param('postId') postId: string,
         @Body() postUpdateData: postInputModelSpecific) {
@@ -133,7 +143,6 @@ export class BlogsSAController {
         } else {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
-
     }
 
 

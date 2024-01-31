@@ -11,7 +11,8 @@ export class DeleteBlogIdCommand {
 export class DeleteBlogIdUseCase implements ICommandHandler<DeleteBlogIdCommand> {
     constructor (private blogsRepository: BlogsRepoPSQL) {
     }
-    async execute(command: DeleteBlogIdCommand): Promise<Number> {
+    async execute(command: DeleteBlogIdCommand): Promise<boolean | null> {
+        
         return await this.blogsRepository.deleteBlogId(command.id)
     }
 }

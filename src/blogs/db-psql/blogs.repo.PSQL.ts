@@ -20,7 +20,7 @@ import { CommandBus } from '@nestjs/cqrs';
 @Injectable()
 export class BlogsRepoPSQL {
   constructor(@InjectDataSource() private dataSource: DataSource,
-    @InjectRepository(Blog) private blogRepoTypeORM: Repository<Blog>,
+    //@InjectRepository(Blog) private blogRepoTypeORM: Repository<Blog>,
 
     protected postService: PostsService,
     private commandBus: CommandBus
@@ -33,21 +33,19 @@ export class BlogsRepoPSQL {
 
     await queryRunner.startTransaction()
     try {
-      const newBlog = this.dataSource.createQueryBuilder()
-        .insert()
-        .into(Blog)
-        .values({
-          _id: inputData._id,
-          name: inputData.name,
-          description: inputData.description,
-          websiteUrl: inputData.websiteUrl,
-          createdAt: inputData.createdAt,
-          isMembership: inputData.isMembership,
-          userId: inputData.userId,
-          userLogin: inputData.userLogin
-        })
-        .execute()
-      return newBlog
+      const newBlog = await manager.insert(Blog, {
+        _id: inputData._id.toString(),
+        name: inputData.name,
+        description: inputData.description,
+        websiteUrl: inputData.websiteUrl,
+        createdAt: inputData.createdAt,
+        isMembership: inputData.isMembership,
+        userId: inputData.userId,
+        userLogin: inputData.userLogin
+      })
+      //log(newBlog)
+      await queryRunner.commitTransaction()
+      return newBlog.generatedMaps
     } catch (e) {
       await queryRunner.rollbackTransaction()
       return null
@@ -57,9 +55,13 @@ export class BlogsRepoPSQL {
   }
 
   async updateBlog(blogId: string, bloginputData: blogInput): Promise<Number> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
     try {
 
-      const blog = await this.blogRepoTypeORM.update(
+      const blog = await manager.update(Blog,
         { _id: blogId },
         { name: bloginputData.name, description: bloginputData.description, websiteUrl: bloginputData.websiteUrl }
       )
@@ -68,18 +70,49 @@ export class BlogsRepoPSQL {
       // SET name=$2, description=$3, "websiteUrl"=$4
       // WHERE "_id" = $1`, [blogId, bloginputData.name,
       //                   bloginputData.description, bloginputData.websiteUrl])
+      await queryRunner.commitTransaction()
       return HttpStatus.NO_CONTENT
     }
     catch (e) {
+      await queryRunner.rollbackTransaction()
       return HttpStatus.NOT_FOUND
+    } finally {
+      await queryRunner.release()
     }
   }
 
-  async deleteBlogId(id: string): Promise<Number> {
+  async bindBlogWithUser(blogId: string, userId: string): Promise<true | null> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      const blog = await manager.update(Blog,
+        { _id: blogId },
+        { userId: userId }
+      )
+
+      await queryRunner.commitTransaction()
+      return true
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      await queryRunner.release()
+
+    }
+  }
+
+
+  async deleteBlogId(id: string): Promise<boolean | null> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
     try {
 
       const postsDeleted = await this.commandBus.execute(new DeletePostsByBlogIdCommand(id))
-      const blogDeleted = await this.blogRepoTypeORM.delete({
+      const blogDeleted = await manager.delete(Blog, {
         _id: id
       })
       // const blogDeleted = await this.blogModel.query(`
@@ -89,28 +122,43 @@ export class BlogsRepoPSQL {
       // DELETE FROM public."posts"
       // WHERE "blogId" = $1`, [id])
 
-
+      await queryRunner.commitTransaction()
       if (!blogDeleted.affected) {
-        return HttpStatus.NOT_FOUND
+        return null
       }
       else {
-        return HttpStatus.NO_CONTENT
+        return true
       }
     }
-    catch (e) { return HttpStatus.NOT_FOUND }
+    catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      await queryRunner.release()
+    }
 
   }
 
   async deleteBlogAll(): Promise<Number> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
     try {
 
-      const blogsDeleted = await this.blogRepoTypeORM.delete({
+      const blogsDeleted = await manager.delete(Blog, {
       })
       // const blogsDelete = await this.blogModel.query(`
       // DELETE FROM public."blogs"`)
+      await queryRunner.commitTransaction()
       if (!blogsDeleted.affected) return HttpStatus.NOT_FOUND
       return HttpStatus.NO_CONTENT
     }
-    catch (e) { return HttpStatus.NOT_FOUND }
+    catch (e) {
+      await queryRunner.rollbackTransaction()
+      return HttpStatus.NOT_FOUND
+    } finally {
+      await queryRunner.release()
+    }
   }
 }

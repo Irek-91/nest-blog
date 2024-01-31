@@ -1,3 +1,6 @@
+import { FindBlogsSAUseCase } from './blogs/application/use-case/find.blogs.SA.use.case copy';
+import { BindBlogWithUserUseCase } from './blogs/application/use-case/bind.blog.with.user.use.case';
+import { GetBlogDBUseCase } from './blogs/application/use-case/get.blog.DB.use.case';
 import { BloggerController } from './blogs/blogger.controller';
 import { DeletePostsAllUseCase } from './posts/application/use-case/delete.posts.all';
 import { updateLikeStatusPostUseCase } from './posts/application/use-case/update.like.status.post.use.case';
@@ -117,8 +120,8 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
   GetTopUsersUseCase, GetAllPairsByUserUseCase, GetPairByIdUseCase,
   CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
 
-const blogUseCase = [FindBlogsUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
-  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase]
+const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
+  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase]
 
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase]

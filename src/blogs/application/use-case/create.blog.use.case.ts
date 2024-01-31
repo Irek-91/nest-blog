@@ -26,7 +26,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
             const user = await this.usersRepo.findUserById(command.userId)
             userLogin = user.login, 
             userId = user._id
-            isMembership = true
+            isMembership = false
         }
 
         const blogInputData = command.blogInputData
@@ -44,7 +44,8 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
         }
 
         //const newBlogInstance = new Blog(newBlog)
-        await this.blogsRepository.createBlog(newBlog)
+        const res = await this.blogsRepository.createBlog(newBlog)
+        
         return {
             id: newBlog._id.toString(),
             name: newBlog.name,

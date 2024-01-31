@@ -45,7 +45,11 @@ export class BlogsController {
     @Get(':id')
     async getBlogId(@Param('id') blogId: string) {
         const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
-        return blog
+        if (!blog) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return blog
+        }
     }
 
     @UseGuards(GetUserIdByAuth)

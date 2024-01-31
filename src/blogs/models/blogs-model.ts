@@ -36,6 +36,19 @@ export type blogOutput = {
   isMembership: boolean
 }
 
+export type blogSAOutput = {
+  id: string,
+  name: string,
+  description: string,
+  websiteUrl: string,
+  createdAt: string,
+  isMembership: boolean,
+  blogOwnerInfo : {
+    userId :string,
+    userLogin: string
+  }
+}
+
 export class blogInput {
   //@IsDefined()
 
@@ -66,6 +79,13 @@ export type paginatorBlog = {
     items: blogOutput[]
 }
 
+export type paginatorBlogSA = {
+  pagesCount: number,
+  page: number,
+  pageSize: number,
+  totalCount: number,
+  items: blogSAOutput[]
+}
 
 
 // export class Model {
