@@ -8,7 +8,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { log } from 'node:console';
 import { v4 as uuidv4 } from 'uuid';
 import { Pair } from '../dv-psql/entity/pairs';
-import { UsersService } from '../../users/users.service';
+import { UsersService } from '../../users/application/users.service';
 import { PairGameQueryRepo } from '../dv-psql/pair.game.query.repo';
 
 

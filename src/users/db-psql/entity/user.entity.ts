@@ -23,6 +23,13 @@ export class User {
     @Column()
     hash: string
 
+    @Column({
+        nullable: true
+    })
+    status: boolean
+
+
+
     @OneToMany((type) => Device, (device) => device.userId)
     @JoinColumn({
         name: 'deviceId'
@@ -30,3 +37,4 @@ export class User {
     public deviceId: Device[]
 
 }
+

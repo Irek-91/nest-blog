@@ -6,7 +6,7 @@ import { LikesRepository } from './likes/likes.repo';
 import { CommentsService } from './comments/comments.service';
 import { Controller, Delete, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './app.service';
-import { UsersService } from './users/users.service';
+import { UsersService } from './users/application/users.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './users/models/users-schema';
 import { Model } from 'mongoose';

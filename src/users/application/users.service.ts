@@ -1,59 +1,32 @@
-import { CreatUserInputModel, MeViewModel, emailConfirmationPSQL, userModelPSQL } from './models/users-model';
-import { queryPaginationTypeUser } from './../helpers/query-filter';
+import { usersViewModel } from './../models/users-model';
+import { queryPaginationTypeUserSA } from './../../helpers/query-filter-users-SA';
+import { CreatUserInputModel, MeViewModel, emailConfirmationPSQL, userModelPSQL } from '../models/users-model';
+import { queryPaginationTypeUser } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { UsersRepository } from "./db-mongo/users.repo";
+import { UsersRepository } from "../db-mongo/users.repo";
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import mongoose, { ObjectId } from "mongoose";
 import bcrypt from 'bcrypt'
-import { UserDocument } from "./models/users-schema";
+import { UserDocument } from "../models/users-schema";
 import { log } from 'console';
-import { UsersRepositoryPSQL } from './db-psql/users.repo.PSQL';
-import { UsersQueryRepoPSQL } from './db-psql/users.qurey.repo.PSQL';
+import { UsersRepositoryPSQL } from '../db-psql/users.repo.PSQL';
+import { UsersQueryRepoPSQL } from '../db-psql/users.qurey.repo.PSQL';
+import { User } from '../db-psql/entity/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(protected usersRepository: UsersRepositoryPSQL,
     protected usersQueryRepository: UsersQueryRepoPSQL) { }
 
-  async findUsers(paginationQuery: queryPaginationTypeUser) {
+  async findUsers(paginationQuery: queryPaginationTypeUserSA): Promise<usersViewModel> {
+    
     return await this.usersQueryRepository.findUsers(paginationQuery)
+    
   }
 
-  async createUser(inputModel: CreatUserInputModel) {
 
-    const createdAt = new Date().toISOString();
-    const passwordSalt = await bcrypt.genSalt(10)
-    const passwordHash = await this._generateHash(inputModel.password, passwordSalt)
-    const confirmationCode = uuidv4()
-    const recoveryCode = uuidv4()
-    const isConfirmed = false
-    const expiritionDate = (add(new Date(), {
-      hours: 1,
-      minutes: 3
-    })).toISOString()
-
-    const newUser = {
-      _id: uuidv4(),
-      accountData: {
-        login: inputModel.login,
-        email: inputModel.email,
-        salt: passwordSalt,
-        hash: passwordHash,
-        createdAt
-      },
-      emailConfirmation: {
-        confirmationCode,
-        expiritionDate,
-        isConfirmed,
-        recoveryCode
-      }
-    }
-
-    return await this.usersRepository.createUser(newUser)
-  }
-
-  async deleteUserId(id: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+  async deleteUserId(id: string): Promise<true | null> {
     return await this.usersRepository.deleteUserId(id)
   }
 
@@ -66,16 +39,16 @@ export class UsersService {
     return hash;
   }
 
-  async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<userModelPSQL | HttpStatus.NOT_FOUND> {
+  async checkCredentials(loginOrEmail: string, passwordUser: string): Promise<User | null> {
     const user = await this.usersQueryRepository.findByLoginOrEmailL(loginOrEmail)
-    if (user === HttpStatus.NOT_FOUND) {
-      return HttpStatus.NOT_FOUND
+    if (!user) {
+      return null
     }
     
     const passwordHash = await this._generateHash(passwordUser, user!.salt)
     
     if (user.hash !== passwordHash) {
-      return HttpStatus.NOT_FOUND
+      return null
     }
     else {
       return user
@@ -91,11 +64,18 @@ export class UsersService {
 
     const result = await this.usersQueryRepository.findUserById(userId)
     const resultUserViewModel: MeViewModel = {
-      email: result.email,
-      login: result.login,
-      userId: result._id
+      email: result!.email,
+      login: result!.login,
+      userId: result!._id
     }
     return resultUserViewModel
+  }
+
+  async getUserById(userId: string): Promise<User| null> {
+
+    const result = await this.usersQueryRepository.getUserById(userId)
+    
+    return result
   }
 
   async findUserByCode(code: string): Promise<emailConfirmationPSQL | null> {

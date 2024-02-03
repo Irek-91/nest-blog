@@ -52,6 +52,11 @@ export class SecurityDeviceServicePSQL {
         return result        
     }
 
+    async deleteAllDevicesByUserId(userId: string): Promise<null | true> {
+        const result = await this.securityDeviceRepository.deleteAllDevicesByUserId(userId)
+        return result        
+    }
+
     async deleteAllDevicesExceptOne(refreshToken: string): Promise<Boolean | null> {
         const deviceId = await this.jwtService.getDeviceIdByRefreshToken(refreshToken)
         const userId = await this.jwtService.getUserIdByRefreshToken(refreshToken)

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 import mongoose from "mongoose";
 
 export class CreatUserInputModel {
@@ -21,12 +21,40 @@ export class CreatUserInputModel {
     email: string
 };
 
+export class UpdateStatusInputModel {
+    @IsBoolean()
+    @IsNotEmpty()
+    isBanned : boolean
+
+    @MaxLength(21)
+    @MinLength(6)
+    @IsString()
+    @IsNotEmpty()
+    banReason : string
+};
+
 export type userViewModel = {
     id: string,
     login: string,
     email: string,
-    createdAt: string
+    createdAt: string,
+    banInfo: banUserInfoViewModel
 }
+
+export type banUserInfoViewModel = {
+    isBanned: boolean,
+    banDate: string | null,
+    banReason: string | null
+}
+
+export type usersViewModel = {
+    pagesCount: number,
+    page: number,
+    pageSize: number,
+    totalCount: number,
+    items: userViewModel[] | []
+}
+
 export type userModelPSQL = {
     _id: string,
     login: string,
@@ -43,9 +71,6 @@ export type emailConfirmationPSQL = {
     isConfirmed: boolean,
     recoveryCode: string
 }
-
-
-
 
 export type userMongoModel = {
     _id: string,

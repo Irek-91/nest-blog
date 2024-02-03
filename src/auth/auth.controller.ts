@@ -1,4 +1,4 @@
-import { UsersService } from './../users/users.service';
+import { UsersService } from '../users/application/users.service';
 import { JwtService } from '../adapters/jwt-service';
 import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response, BadRequestException, HttpCode } from '@nestjs/common';
 import { log } from 'console';
@@ -36,8 +36,9 @@ export class AuthController {
         const title = req.headers['user-agent'] || 'custom-ua'
       
         const accessToken = await this.jwtService.createdJWTAccessToken(req.user._id)
+        const user = await this.usersService.getUserById(req.user._id)
         const refreshToken = await this.securityDeviceService.addDeviceIdRefreshToken(req.user._id, deviceId, IP, title)
-        if (accessToken !== null || refreshToken !== null) {
+        if (accessToken !== null || refreshToken !== null || user!.status !== true) {
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
             //res.status(200).send({ accessToken })
             res.status(200).send({ accessToken })

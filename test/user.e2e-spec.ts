@@ -72,14 +72,35 @@ describe('create user in the system ', () => {
             const secondRes = await createUser('any', 'any', model, httpServer)
             expect(secondRes.response.status).toBe(401)
 
+            
+        })
+        it ('создание первого пользователя', async () => {
+            const model: userInputModel = {
+                login: 'userOne',
+                password: 'userOne2023',
+                email: 'userOne@mail.com',
+            }
             const thirdRes = await createUser('admin', 'qwerty', model, httpServer)
             const getUser = thirdRes.user
             expect(thirdRes.response.status).not.toBe(401)
             expect(thirdRes.response.status).not.toBe(500)
+            expect(thirdRes.response.body).toEqual({
+                id: getUser.id,
+                login:model.login,
+                email: model.email,
+                createdAt: expect.any(String),
+                banInfo: {
+                  isBanned: false,
+                  banDate: null,
+                  banReason: null
+                }
+              })
             
 
-            expect.setState({user: getUser})
-        })
+            expect.setState({userOne: getUser})
+        }
+
+        )
 
         it('should return 400 status code with errors', async () => {
             const errorsUsers = {
@@ -144,9 +165,63 @@ describe('create user in the system ', () => {
 
         })
 
+        it('создание вторго пользователя', async () => {
+            const modelTwo: userInputModel = {
+                login: 'userTwo',
+                password: 'userTwo2023',
+                email: 'userTwo@mail.com',
+            }
+            const res = await createUser('admin', 'qwerty', modelTwo, httpServer)
+            const getUserTwo = res.user
+            expect(res.response.status).not.toBe(401)
+            expect(res.response.status).not.toBe(500)
+            expect(res.response.body).toEqual({
+                id: res.user.id,
+                login:modelTwo.login,
+                email: modelTwo.email,
+                createdAt: expect.any(String),
+                banInfo: {
+                  isBanned: false,
+                  banDate: null,
+                  banReason: null
+                }
+              })
+            
+            expect.setState({userTwo: getUserTwo})
+        })
 
-        it ('should return 200 status code and created user', async () => {
-            const {user} = expect.getState()
+        it('создание третьего пользователя', async () => {
+            const modelThree: userInputModel = {
+                login: 'userThree',
+                password: 'userThree2023',
+                email: 'userThree@mail.com',
+            }
+            const res = await createUser('admin', 'qwerty', modelThree, httpServer)
+            const getUserThree = res.user
+            expect(res.response.status).not.toBe(401)
+            expect(res.response.status).not.toBe(500)
+            expect(res.response.body).toEqual({
+                id: res.user.id,
+                login:modelThree.login,
+                email: modelThree.email,
+                createdAt: expect.any(String),
+                banInfo: {
+                  isBanned: false,
+                  banDate: null,
+                  banReason: null
+                }
+              })
+            
+            expect.setState({userThree: getUserThree})
+        })
+
+
+        it ('should return 200 status', async () => {
+            const {userOne} = expect.getState()
+            const {userTwo} = expect.getState()
+            const {userThree} = expect.getState()
+
+
             const res = await request(httpServer).get(`/sa/users`)
                                           .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
             expect(res.status).toBe(200)
@@ -154,14 +229,36 @@ describe('create user in the system ', () => {
                                       page: expect.any(Number),
                                       pageSize: expect.any(Number),
                                       totalCount: expect.any(Number),
-                                      items: [user]
+                                      items: [userThree, userTwo, userOne]
+            })
+        })
+
+        it ('фильтрация и пагинация', async () => {
+            const {userOne} = expect.getState()
+            const {userTwo} = expect.getState()
+            const {userThree} = expect.getState()
+
+
+            const res = await request(httpServer).get(`/sa/users?pageSize=15&pageNumber=1&searchLoginTerm=Th&searchEmailTerm=ee&sortDirection=asc&sortBy=login`)
+                                          .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
+            expect(res.status).toBe(200)
+            expect(res.body).toEqual({pagesCount: expect.any(Number),
+                                      page: expect.any(Number),
+                                      pageSize: expect.any(Number),
+                                      totalCount: expect.any(Number),
+                                      items: [userThree]
             })
         })
         
-        it ('delete userId ', async () => {
-        const {user} = expect.getState()
+        
 
-        const res = await request(httpServer).delete(`/sa/users/${user.id}`)
+        
+        it ('delete userId ', async () => {
+        const {userOne} = expect.getState()
+        const {userTwo} = expect.getState()
+        const {userThree} = expect.getState()
+
+        const res = await request(httpServer).delete(`/sa/users/${userOne.id}`)
                                       .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
         expect(res.status).toBe(204)
         const resTwo = await request(httpServer).get(`/sa/users`)
@@ -171,8 +268,10 @@ describe('create user in the system ', () => {
             page: expect.any(Number),
             pageSize: expect.any(Number),
             totalCount: expect.any(Number),
-            items: []
+            items: [userThree, userTwo]
         })                   
     })
+
+
 })
 })

@@ -1,11 +1,14 @@
+import { PaginationUsersSa } from './../helpers/query-filter-users-SA';
+import { UpdateStatusUserCommand } from './application/use-case/update.status.user.use.case';
+import { CreateUserCommand } from './application/use-case/create.user.use.case';
 import { EmailOrLoginGuard } from './../auth/guards/auth.guard';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
-import { Pagination } from './../helpers/query-filter';
 import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query, UseGuards } from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { CreatUserInputModel } from "./models/users-model";
+import { UsersService } from "./application/users.service";
+import { CreatUserInputModel, UpdateStatusInputModel } from "./models/users-model";
 import { Controller} from "@nestjs/common/decorators/core";
-import { HttpCode} from "@nestjs/common/decorators";
+import { HttpCode, Put} from "@nestjs/common/decorators";
+import { CommandBus } from '@nestjs/cqrs';
 
 
 
@@ -13,13 +16,15 @@ import { HttpCode} from "@nestjs/common/decorators";
 @Controller('sa/users')
 export class UsersSAController {
     constructor(protected usersService: UsersService,
-        private readonly pagination : Pagination
+        private readonly pagination : PaginationUsersSa,
+        private commandBus: CommandBus
     ) { }
     
     @HttpCode(HttpStatus.OK)
     @Get()
     async getUsers(@Query()
     query: {
+        banStatus: string;
         sortBy: string;
         sortDirection: string;
         pageNumber: string;
@@ -35,15 +40,27 @@ export class UsersSAController {
     @UseGuards(EmailOrLoginGuard)
     @Post()
     async createUser(@Body() inputModel: CreatUserInputModel) {
-        const result = await this.usersService.createUser(inputModel)
+        const result = await this.commandBus.execute(new CreateUserCommand(inputModel))
         return result
     }
+
+
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Put(':id/ban')
+    async updateStatusUser(@Param('id') userId: string,
+    @Body() inputModel: UpdateStatusInputModel) {
+        const result = await this.commandBus.execute(new UpdateStatusUserCommand(userId,inputModel.isBanned, inputModel.banReason))
+        return result
+    }  
+
+
+
     
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
     async deleteUser(@Param('id') userId: string): Promise<Number> {
         const userDelete = await this.usersService.deleteUserId(userId)
-        if (userDelete === HttpStatus.NOT_FOUND) {
+        if (!userDelete) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
         else {

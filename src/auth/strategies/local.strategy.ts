@@ -1,4 +1,4 @@
-import { UsersService } from './../../users/users.service';
+import { UsersService } from '../../users/application/users.service';
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException, HttpStatus, HttpException } from '@nestjs/common';
@@ -14,8 +14,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
     async validate(loginOrEmail: string, password: string): Promise<any> {
         const user = await this.usersService.checkCredentials(loginOrEmail, password);
-        if (user === HttpStatus.NOT_FOUND) {
-            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)}
+
+        if (!user) {
+            throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        }
+        // if (user.status === false) {
+        //     throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        // }
         return user
     }
 }

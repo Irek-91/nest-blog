@@ -1,7 +1,7 @@
 import { GetPairMyCurrentCommand } from '../../quiz.pair/application/use-case/get.pair.my.current.use.case';
 import { CommandBus } from '@nestjs/cqrs';
 import { PairGameService } from '../../quiz.pair/application/pair.game.service';
-import { UsersService } from './../../users/users.service';
+import { UsersService } from '../../users/application/users.service';
 import { HttpStatus, BadRequestException } from '@nestjs/common';
 import { Injectable, CanActivate, ExecutionContext, HttpException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -56,7 +56,8 @@ export class GetUserIdByAuth implements CanActivate {
 
 @Injectable()
 export class UserAuthGuard implements CanActivate {
-    constructor(protected jwtService: JwtService
+    constructor(protected jwtService: JwtService,
+        protected usersService: UsersService
     ) { }
     async canActivate(context: ExecutionContext): Promise<any> {
         const req = context.switchToHttp().getRequest();
@@ -68,6 +69,10 @@ export class UserAuthGuard implements CanActivate {
         if (!userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
+        const user = await this.usersService.getUserById(userId)
+        // if (user!.status === true) {
+        //     throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
+        // }
 
         req.userId = userId ? userId : null
         return true

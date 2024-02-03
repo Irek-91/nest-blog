@@ -273,6 +273,7 @@ export class PostQueryRepoPSQL {
                     .createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .where('u._id = :userId', { userId: userId })
+                    //.andWhere('u.status = :status', { status: false })
                     .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
                     .getOne()
                 if (status) {

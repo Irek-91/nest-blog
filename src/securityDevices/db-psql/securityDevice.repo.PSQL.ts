@@ -263,4 +263,20 @@ export class SecurityDeviceRepoPSQL {
         catch (e) { return null }
     }
 
+    async deleteAllDevicesByUserId(userId: string): Promise<true | null> {
+        //добавить фильтр по userId
+
+        try {
+            const res = await this.devicesMododel.getRepository(Device)
+                .createQueryBuilder()
+                .delete()
+                .where({ userId: userId })
+                .execute()
+   
+            if (!res.affected) { return null }
+            return true
+        }
+        catch (e) { return null }
+    }
+
 }

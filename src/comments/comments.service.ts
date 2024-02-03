@@ -3,13 +3,8 @@ import { UsersQueryRepoPSQL } from './../users/db-psql/users.qurey.repo.PSQL';
 import { CommentsRepoPSQL } from './db-psql/comments.repo.PSQL';
 import { CommentsQueryRepoPSQL } from './db-psql/comments.query.repo.PSQL';
 import { queryPaginationType } from './../helpers/query-filter';
-import { UsersRepository } from '../users/db-mongo/users.repo';
-import { UsersQueryRepository } from '../users/db-mongo/users.qurey.repo';
 import { Injectable, HttpStatus } from '@nestjs/common';
-import { CommentsRepository } from './db-mongo/comments.repo';
 import { commentViewModel, paginatorComments } from './model/comments-model';
-import { Filter, ObjectId } from "mongodb";
-import { CommentsQueryRepository } from './db-mongo/comments.query.repo';
 
 
 @Injectable()
@@ -24,7 +19,7 @@ export class CommentsService {
 
         const createdAt = new Date().toISOString();
         const user = await this.usersQueryRepository.findUserById(userId)
-        const userLogin = user.login
+        const userLogin = user!.login
         const creatComment = await this.commentsRepository.createdCommentPostId(postId, content, userId, userLogin, createdAt)
         return creatComment
     }

@@ -24,8 +24,8 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
         let isMembership: boolean = false
         if (command.userId) {
             const user = await this.usersRepo.findUserById(command.userId)
-            userLogin = user.login, 
-            userId = user._id
+            userLogin = user!.login, 
+            userId = user!._id
             isMembership = false
         }
 

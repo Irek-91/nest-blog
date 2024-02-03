@@ -1,3 +1,7 @@
+import { PaginationUsersSa } from './helpers/query-filter-users-SA';
+import { UpdateStatusUserUseCase } from './users/application/use-case/update.status.user.use.case';
+import { CreateUserUseCase } from './users/application/use-case/create.user.use.case';
+import { BannedUser } from './users/db-psql/entity/banned.user.entity';
 import { FindBlogsSAUseCase } from './blogs/application/use-case/find.blogs.SA.use.case copy';
 import { BindBlogWithUserUseCase } from './blogs/application/use-case/bind.blog.with.user.use.case';
 import { GetBlogDBUseCase } from './blogs/application/use-case/get.blog.DB.use.case';
@@ -53,7 +57,7 @@ import { Module} from '@nestjs/common';
 import { AppController, TestingController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
-import { UsersService } from './users/users.service';
+import { UsersService } from './users/application/users.service';
 import { UsersRepository } from './users/db-mongo/users.repo';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BlogsController } from './blogs/blogs.controller';
@@ -67,7 +71,6 @@ import { CommentSchema } from './comments/model/comments-schema';
 import { CommentsRepository } from './comments/db-mongo/comments.repo';
 import { CommentsController } from './comments/comments.controller';
 import { LikeSchema } from './likes/model/likes-schema';
-import { UsersQueryRepository } from './users/db-mongo/users.qurey.repo';
 import { AuthService } from './auth/auth.service';
 import { EmailAdapter } from './adapters/email-adapter';
 import { JwtService } from './adapters/jwt-service';
@@ -126,6 +129,10 @@ const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, Up
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase]
 
+const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase]
+
+export const entities = [User, EmailConfirmation, Device, Post, Blog, 
+  Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser]
 
 @Module({
   imports: [
@@ -183,14 +190,14 @@ const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCas
       database: process.env.PGDATABASELOCAL,
       autoLoadEntities: false,
       synchronize: false,
-      entities:[User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic],
+      entities:[...entities],
       migrations: [__dirname +'/db/migrations/*.ts'],
       migrationsTableName: "custom_migration_table",
       logging: true,
       namingStrategy: new CustomNaimingStrategy()
     }
     ),
-    TypeOrmModule.forFeature([User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic])    
+    TypeOrmModule.forFeature([...entities])    
     ,
     JwtModule.register({
       secret: env.JWT_SECRET,
@@ -214,11 +221,10 @@ const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCas
   providers: [ AppService,
     AuthService, 
     EmailAdapter,
-    Pagination,
+    Pagination, PaginationUsersSa,
     JwtService, JwtStrategy, LocalStrategy, 
     BasicStrategy,
-    UsersService, 
-    //UsersRepository, UsersQueryRepository,
+    UsersService, ...userUseCase,
     UsersQueryRepoPSQL,UsersRepositoryPSQL,  
     BlogsService, ...blogUseCase,
     //BlogsRepository, BlogsQueryRepository, 

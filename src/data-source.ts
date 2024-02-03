@@ -1,3 +1,4 @@
+import { entities } from './app.module';
 import { DataSource } from 'typeorm';
 
 import { Statistic } from './quiz.pair/dv-psql/entity/statistic';
@@ -25,7 +26,7 @@ export default new DataSource ({
     password: process.env.PGPASSWORDLOCAL,
     database: process.env.PGDATABASELOCAL,
     synchronize: false,
-    entities:[User, EmailConfirmation, Device, Post, Blog, Comment, Like, Question, Pair, Pairresult, Statistic],
+    entities:[...entities],
     migrations: [__dirname + '/db/migrations/*{.ts, .js}'],
 //     migrations:{
 // directory: 'src/db/migrations'

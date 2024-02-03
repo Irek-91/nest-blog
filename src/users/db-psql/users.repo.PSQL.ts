@@ -10,137 +10,130 @@ import { log } from "console";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { EmailConfirmation } from "./entity/email.confirm.entity";
+import { BannedUser } from './entity/banned.user.entity';
 
 
 
 @Injectable()
 
 export class UsersRepositoryPSQL {
-  constructor(@InjectDataSource() private userModel: DataSource) { }
+  constructor(@InjectDataSource() private dataSource: DataSource) { }
 
   async createUser(newUser: userMongoModel) {
     let userId = newUser._id.toString()
-    //const userInstance = newUser
-    //await userInstance.save()
-    // const query = `INSERT INTO public."users"(
-    //           login, email, salt, hash, "createdAt", _id)
-    //           VALUES ('${newUser.accountData.login}' , '${newUser.accountData.email}',
-    //                   '${newUser.accountData.salt}' , '${newUser.accountData.hash}',
-    //                   '${newUser.accountData.createdAt}','${newUser._id}');
 
-    //           INSERT INTO public."emailconfirmations"(
-    //           "confirmationCode", "expiritionDate", "isConfirmed", "recoveryCode", "userId")
-    //           VALUES ('${newUser.emailConfirmation.confirmationCode}' , '${newUser.emailConfirmation.expiritionDate}',
-    //                     '${newUser.emailConfirmation.isConfirmed}' , '${newUser.emailConfirmation.recoveryCode}',
-    //                     '${newUser._id}')
-    //           `
-    // const user = await this.userModel.query(query)
-    const createUser = await this.userModel.createQueryBuilder()
-                                            .insert()
-                                            .into(User)
-                                            .values({
-                                              login: newUser.accountData.login,
-                                              email: newUser.accountData.email,
-                                              salt: newUser.accountData.salt,
-                                              hash: newUser.accountData.hash,
-                                              createdAt: newUser.accountData.createdAt,
-                                              _id: newUser._id.toString()
-                                            })
-                                            .execute()
+    const createUser = await this.dataSource.createQueryBuilder()
+      .insert()
+      .into(User)
+      .values({
+        login: newUser.accountData.login,
+        email: newUser.accountData.email,
+        salt: newUser.accountData.salt,
+        hash: newUser.accountData.hash,
+        createdAt: newUser.accountData.createdAt,
+        _id: newUser._id.toString(),
+        status: false
+      })
+      .execute()
+    const createUserBanTable = await this.dataSource.createQueryBuilder()
+      .insert()
+      .into(BannedUser)
+      .values({
+        userId: { _id: newUser._id }
+      })
+      .execute()
 
-    const createEmailByUser = await this.userModel.createQueryBuilder()
-                                            .insert()
-                                            .into(EmailConfirmation)
-                                            .values({
-                                              confirmationCode: newUser.emailConfirmation.confirmationCode,
-                                              expiritionDate: newUser.emailConfirmation.expiritionDate,
-                                              isConfirmed: newUser.emailConfirmation.isConfirmed,
-                                              recoveryCode: newUser.emailConfirmation.recoveryCode,
-                                              userId: {_id: newUser._id}
-                                            })
-                                            .execute()
-
-
-
-    
-    
-    const userViewVodel = {
+    const createEmailByUser = await this.dataSource.createQueryBuilder()
+      .insert()
+      .into(EmailConfirmation)
+      .values({
+        confirmationCode: newUser.emailConfirmation.confirmationCode,
+        expiritionDate: newUser.emailConfirmation.expiritionDate,
+        isConfirmed: newUser.emailConfirmation.isConfirmed,
+        recoveryCode: newUser.emailConfirmation.recoveryCode,
+        userId: { _id: newUser._id }
+      })
+      .execute()
+    const user: userViewModel = {
       id: newUser._id.toString(),
       login: newUser.accountData!.login,
       email: newUser.accountData!.email,
-      createdAt: newUser.accountData!.createdAt
+      createdAt: newUser.accountData!.createdAt,
+      banInfo: {
+        isBanned: false,
+        banDate: null,
+        banReason: null
+      }
     }
-    return userViewVodel
+    return user
   }
 
 
-  async deleteUserId(userId: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+  async deleteUserId(userId: string): Promise<true | null> {
     try {
-      //let user = await this.userModel.deleteOne({ _id: new mongoose.Types.ObjectId(userId) })
-      const deletedUserEmail = await this.userModel.createQueryBuilder()
-                                                  .delete()
-                                                  .from(EmailConfirmation)
-                                                  .where({userId: userId})
-                                                  .execute()
-      const deletedUserDevice = await this.userModel.createQueryBuilder()
-                                                  .delete()
-                                                  .from(Device)
-                                                  .where({userId: userId})
-                                                  .execute()
-      const deletedUserLikes = await this.userModel.createQueryBuilder()
-                                                  .delete()
-                                                  .from(Like)
-                                                  .where({userId: userId})
-                                                  .execute()
-      const deletedUser = await this.userModel.createQueryBuilder()
-                                                  .delete()
-                                                  .from(User)
-                                                  .where({_id: userId})
-                                                  .execute()
+      const deletedUserEmail = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(EmailConfirmation)
+        .where({ userId: userId })
+        .execute()
+      const deletedUserBan = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(BannedUser)
+        .where({ userId: userId })
+        .execute()
+
+      const deletedUserDevice = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(Device)
+        .where({ userId: userId })
+        .execute()
+      const deletedUserLikes = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(Like)
+        .where({ userId: userId })
+        .execute()
+      const deletedUser = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(User)
+        .where({ _id: userId })
+        .execute()
       if (deletedUserEmail.affected === 0 || deletedUser.affected === 0) {
-        return HttpStatus.NOT_FOUND
+        return null
       }
       else {
-        return HttpStatus.NO_CONTENT
+        return true
       }
-      // let userEmail = await this.userModel.query(`
-      //   DELETE FROM public."emailconfirmations" as e WHERE e."userId" = $1  
-      // `, [userId])
 
-      // let user = await this.userModel.query(`
-      //   DELETE FROM public."users" as u WHERE u."_id" = $1  
-      // `, [userId])
-
-
-      // if (user[1] > 0) {
-      //   return HttpStatus.NO_CONTENT
-      // } else { return HttpStatus.NOT_FOUND }
     }
-    catch (e) { return HttpStatus.NOT_FOUND }
+    catch (e) { return null }
   }
 
   async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
     try {
 
-      const deletedUsersEmail = await this.userModel.createQueryBuilder()
-                                                  .delete()
-                                                  .from(EmailConfirmation)
-                                                  .execute()
-      
-      const deletedDevices = await this.userModel.createQueryBuilder()
-                                                .delete()
-                                                .from(Device)
-                                                .execute()
-      const deletedLikes = await this.userModel.createQueryBuilder()
-                                                .delete()
-                                                .from(Like)
-                                                .execute()
+      const deletedUsersEmail = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(EmailConfirmation)
+        .execute()
+      const deletedUsersBan = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(BannedUser)
+        .execute()
 
-      const deletedUsers = await this.userModel.createQueryBuilder()
-                                                .delete()
-                                                .from(User)
-                                                .execute()
-      
+      const deletedDevices = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(Device)
+        .execute()
+      const deletedLikes = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(Like)
+        .execute()
+
+      const deletedUsers = await this.dataSource.createQueryBuilder()
+        .delete()
+        .from(User)
+        .execute()
+
 
       if (deletedUsersEmail.affected === 0 || deletedUsers.affected === 0) {
         return HttpStatus.NOT_FOUND
@@ -148,27 +141,14 @@ export class UsersRepositoryPSQL {
       else {
         return HttpStatus.NO_CONTENT
       }
-    //   //let user = await this.userModel.deleteMany()
-
-    //   let emailUsers = await this.userModel.query(`
-    //   DELETE FROM public."emailconfirmations"
-    // `)
-
-    //   let user = await this.userModel.query(`
-    //     DELETE FROM public."users"
-    //   `)
-
-    //   if (user[1] > 0) {
-    //     return HttpStatus.NO_CONTENT
-    //   } else { return HttpStatus.NOT_FOUND }
     }
     catch (e) { return HttpStatus.NOT_FOUND }
   }
 
   async updateConfirmation(_id: string): Promise<true | null> {
-    let resultUpdateConfirmation = await this.userModel.createQueryBuilder()
+    let resultUpdateConfirmation = await this.dataSource.createQueryBuilder()
       .update(EmailConfirmation)
-      .set({ confirmationCode: null, expiritionDate: null, isConfirmed: true})
+      .set({ confirmationCode: null, expiritionDate: null, isConfirmed: true })
       .where({ userId: _id })
       .execute()
     if (!resultUpdateConfirmation) {
@@ -176,23 +156,13 @@ export class UsersRepositoryPSQL {
     } else {
       return true
     }
-    
-    // let result = await this.userModel.query(`
-    // UPDATE public."emailconfirmations"
-	  // SET "isConfirmed"= true, "confirmationCode" = null, "expiritionDate" = null
-	  // WHERE "userId" = $1;
-    // `, [_id])
-    // let result = await this.userModel.updateOne({ _id }, { $set: { 
-    //     "emailConfirmation.isConfirmed": true,
-    //     "emailConfirmation.confirmationCode": null,
-    //     "emailConfirmation.expiritionDate": null,
-    // } })
+
 
     return true
   }
 
   async updateCode(_id: string, code: string, expiritionDate: Date): Promise<true | null> {
-    let resultUpdateCode = await this.userModel.createQueryBuilder()
+    let resultUpdateCode = await this.dataSource.createQueryBuilder()
       .update(EmailConfirmation)
       .set({ confirmationCode: code, expiritionDate: expiritionDate })
       .where({ userId: _id })
@@ -202,19 +172,11 @@ export class UsersRepositoryPSQL {
     } else {
       return true
     }
-    //   let result = await this.userModel.query(`
-    //   UPDATE public."emailconfirmations" 
-    //   SET "confirmationCode" = $1,"expiritionDate" = $2
-    //   WHERE "userId" = $3;
-    //   `, [code, expiritionDate, _id])
 
-    //  // let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.confirmationCode": code, "emailConfirmation.expiritionDate": expiritionDate } })
-    //   //return result.matchedCount === 1
-    //   return true
   }
 
   async updatePassword(_id: string, salt: string, hash: string): Promise<true | null> {
-    let resultUpdatePassword = await this.userModel.createQueryBuilder()
+    let resultUpdatePassword = await this.dataSource.createQueryBuilder()
       .update(User)
       .set({ salt: salt, hash: hash })
       .where({ _id: _id })
@@ -223,19 +185,10 @@ export class UsersRepositoryPSQL {
       return null
     } else { return true }
 
-
-    // let result = await this.userModel.query(`
-    // UPDATE public."users" as u
-    // SET "salt" = $1, "hash" =$2
-    // WHERE "userId" = $3
-    // `, [salt, hash, _id])
-    // return true
-    //let result = await this.userModel.updateOne({ _id }, { $set: { "accountData.salt": salt, "accountData.hash": hash } })
-    //return result.modifiedCount === 1
   }
 
   async updateRecoveryCode(_id: string, recoveryCode: string): Promise<true | null> {
-    let resultUpdateCode = await this.userModel.createQueryBuilder()
+    let resultUpdateCode = await this.dataSource.createQueryBuilder()
       .update(EmailConfirmation)
       .set({ recoveryCode: recoveryCode })
       .where({ userId: _id })
@@ -245,14 +198,35 @@ export class UsersRepositoryPSQL {
     } else {
       return true
     }
-    // let result = await this.userModel.query(`
-    // UPDATE public."emailconfirmations"
-    // SET "recoveryCode" = $1
-    // WHERE "userId" = $2
-    // `, [recoveryCode, _id])
-    // return true
-    //let result = await this.userModel.updateOne({ _id }, { $set: { "emailConfirmation.recoveryCode": recoveryCode } })
-    //return result.modifiedCount === 1
+
+  }
+
+
+  async updateStatusUser(userId: string, isBanned: boolean, banReason: string | null, banDate: string | null): Promise<true | null> {
+
+    let resultUpdateUser = await this.dataSource.createQueryBuilder()
+      .update(User)
+      .set({ status: isBanned })
+      .where({ _id: userId })
+      .execute()
+
+
+    let resultUpdateReason = await this.dataSource.createQueryBuilder()
+      .update(BannedUser)
+      .set({
+        banReason: banReason,
+        banDate: banDate
+      })
+      .where({ userId: userId })
+      .execute()
+
+
+    if (!resultUpdateUser) {
+      return null
+    } else {
+      return true
+    }
+
   }
 
 }
