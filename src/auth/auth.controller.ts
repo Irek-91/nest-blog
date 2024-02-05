@@ -38,7 +38,7 @@ export class AuthController {
         const accessToken = await this.jwtService.createdJWTAccessToken(req.user._id)
         const user = await this.usersService.getUserById(req.user._id)
         const refreshToken = await this.securityDeviceService.addDeviceIdRefreshToken(req.user._id, deviceId, IP, title)
-        if (accessToken !== null || refreshToken !== null || user!.status !== true) {
+        if ((accessToken !== null || refreshToken !== null) && user!.status === false) {
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })
             //res.status(200).send({ accessToken })
             res.status(200).send({ accessToken })

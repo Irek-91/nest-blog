@@ -35,7 +35,7 @@ export class PaginationUsersSa {
     }
 
     if (query.banStatus === banStatusEnum.all || query.banStatus === banStatusEnum.banned
-      || query.banStatus === banStatusEnum.notBanned) { defaultValuesUsers.sortBy = query.banStatus } else {
+      || query.banStatus === banStatusEnum.notBanned) { defaultValuesUsers.banStatus = query.banStatus } else {
       defaultValuesUsers.banStatus = banStatusEnum.all
     }
 

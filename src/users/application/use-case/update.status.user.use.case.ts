@@ -1,3 +1,4 @@
+import { User } from './../../db-psql/entity/user.entity';
 import { SecurityDeviceRepoPSQL } from './../../../securityDevices/db-psql/securityDevice.repo.PSQL';
 import { UsersRepositoryPSQL } from './../../db-psql/users.repo.PSQL';
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
@@ -15,21 +16,21 @@ export class UpdateStatusUserUseCase implements ICommandHandler<UpdateStatusUser
         ) {
 
     }
-    async execute(command: UpdateStatusUserCommand): Promise<boolean| null> {
+    async execute(command: UpdateStatusUserCommand): Promise<User| null> {
         let banDate: string | null = new Date().toISOString()
         let banReason: string | null = command.banReason
         if (command.isBanned === false) {
             banDate = null
             banReason = null
         }
-        const result = await this.usersRepo.updateStatusUser(command.userId, command.isBanned, banReason, banDate)
+        const resultUser = await this.usersRepo.updateStatusUser(command.userId, command.isBanned, banReason, banDate)
         if (command.isBanned === true) {
             const result = await this.securityDeviceRepoP.deleteAllDevicesByUserId(command.userId)
         }
-        if (!result) {
+        if (!resultUser) {
             return null
         }
-        return true
+        return resultUser
     }
 
 }

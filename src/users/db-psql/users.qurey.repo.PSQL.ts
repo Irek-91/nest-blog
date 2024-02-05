@@ -10,7 +10,7 @@ import mongoose, { ObjectId } from "mongoose";
 import { emailConfirmationPSQL, userModelPSQL, userMongoModel, userViewModel, usersViewModel } from "../models/users-model";
 import { log } from "console";
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, ILike, In, IsNull, Not } from 'typeorm';
+import { DataSource, Equal, ILike, In, IsNull, Like, Not } from 'typeorm';
 import { IsBoolean } from 'class-validator';
 
 
@@ -23,49 +23,46 @@ export class UsersQueryRepoPSQL {
   async findUsers(paginatorUser: queryPaginationTypeUserSA): Promise<usersViewModel> {
     let usersOutput: userViewModel[] = []
     try {
-      const filter: FilterQuery<userMongoModel> = {};
-      let statusUserFilte= { status: In([false, true]) }
+      let statusFilter: null | boolean = null
+      let searchLoginTerm = paginatorUser.searchLoginTerm
+      let searchEmailTerm = paginatorUser.searchEmailTerm
+
       if (paginatorUser.banStatus === banStatusEnum.banned) {
-        statusUserFilte = { status: In([true]) }
+        statusFilter = true
       }
       if (paginatorUser.banStatus === banStatusEnum.notBanned) {
-        statusUserFilte = { status: In([false]) }
+        statusFilter = false
       }
 
       let users: any = []
-      let queryLogin = {}
-      let queryEmail = {}
+      let filterLoginOrEmail = {}
+      let filterEmail = {}
+      let totalCount = 0
 
-
-      if (paginatorUser.searchLoginTerm !== null && paginatorUser.searchEmailTerm !== null) {
-
-        queryLogin = { login: ILike(`%${paginatorUser.searchLoginTerm}%`) }
-        queryEmail = { email: ILike(`%${paginatorUser.searchEmailTerm}%`) }
-      }
-      if (paginatorUser.searchLoginTerm !== null && paginatorUser.searchEmailTerm === null) {
-        queryLogin = { login: ILike(`%${paginatorUser.searchLoginTerm}%`) }
-
-      }
-      if (paginatorUser.searchLoginTerm === null && paginatorUser.searchEmailTerm !== null) {
-        queryEmail = { email: ILike(`%${paginatorUser.searchEmailTerm}%`) }
-      }
       users = await this.userModel
         .createQueryBuilder(User, 'u')
         .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
-        .where(queryLogin)
-        .orWhere(queryEmail)
-        .andWhere(statusUserFilte)
+        .where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : 'u.login is not null'} 
+          OR ${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : 'u.email is not null'}`)
+        .andWhere(`${statusFilter !== null ? `u.status = ${statusFilter}` : 'u.status is not null'}`)
         .orderBy(`u.${paginatorUser.sortBy}`, paginatorUser.sortDirection)
         .offset(paginatorUser.skip)
         .limit(paginatorUser.pageSize)
         .getRawMany()
 
-      let totalCount = await this.userModel.getRepository(User)
-        .createQueryBuilder()
-        .where(queryLogin)
-        .orWhere(queryEmail)
-        //.orWhere(statusUserFilte)
+
+
+      totalCount = await this.userModel
+        .createQueryBuilder(User, 'u')
+        .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
+        .where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : 'u.login is not null'} 
+          OR ${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : 'u.email is not null'}`)
+        .andWhere(`${statusFilter !== null ? `u.status = ${statusFilter}` : 'u.status is not null'}`)
+        .orderBy(`u.${paginatorUser.sortBy}`, paginatorUser.sortDirection)
         .getCount()
+
+
+
 
       usersOutput = users.map((b) => {
         return {

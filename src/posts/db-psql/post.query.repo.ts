@@ -31,7 +31,7 @@ export class PostQueryRepoPSQL {
             .skip(paginationQuery.skip)
             .take(paginationQuery.pageSize)
             .getMany()
-        
+
         if (!posts) {
             return null
         }
@@ -44,29 +44,42 @@ export class PostQueryRepoPSQL {
 
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
-            
+
             const postId = b._id.toString()
             if (userId) {
                 const status = await this.postModel.getRepository(Like)
                     .createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .where('u._id = :userId', { userId: userId })
+                    .andWhere('u.status = :status', { status: false })
                     .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
                     .getOne()
                 if (status) {
                     myStatus = status.status
                 }
             }
-            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({ postIdOrCommentId: postId })
-                .andWhere({ status: 'Like' })
+                .where({
+                    postIdOrCommentId: postId
+                })
+                .andWhere('u.status = :status', { status: false })
+                .andWhere({
+                    status: 'Like'
+                })
                 .getCount()
 
-            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({ postIdOrCommentId: postId })
-                .andWhere({ status: 'Dislike' })
+                .where({
+                    postIdOrCommentId: postId
+                })
+                .andWhere('u.status = :status', { status: false })
+                .andWhere({
+                    status: 'Dislike'
+                })
                 .getCount()
 
 
@@ -74,6 +87,7 @@ export class PostQueryRepoPSQL {
                 .createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .where('l.status = :status', { status: 'Like' })
+                .andWhere('u.status = :status', { status: false })
                 .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
                 .orderBy('l.createdAt', 'DESC')
                 .take(3)
@@ -148,6 +162,7 @@ export class PostQueryRepoPSQL {
                         .createQueryBuilder('l')
                         .leftJoinAndSelect('l.userId', 'u')
                         .where('u._id = :userId', { userId: userId })
+                        .andWhere('u.status = :status', { status: false })
                         .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
                         .getOne()
                     if (status) {
@@ -160,6 +175,7 @@ export class PostQueryRepoPSQL {
                     .leftJoinAndSelect('l.userId', 'u')
                     .where('l.status = :status', { status: 'Like' })
                     .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
+                    .andWhere('u.status = :status', { status: false })
                     .orderBy('l.createdAt', 'DESC')
                     .take(3)
                     .getMany()
@@ -172,16 +188,28 @@ export class PostQueryRepoPSQL {
                     }
                 })
 
-                const likesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+                const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                    .leftJoinAndSelect('l.userId', 'u')
                     .select()
-                    .where({ postIdOrCommentId: postId })
-                    .andWhere({ status: 'Like' })
+                    .where({
+                        postIdOrCommentId: postId
+                    })
+                    .andWhere('u.status = :status', { status: false })
+                    .andWhere({
+                        status: 'Like'
+                    })
                     .getCount()
 
-                const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+                const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                    .leftJoinAndSelect('l.userId', 'u')
                     .select()
-                    .where({ postIdOrCommentId: postId })
-                    .andWhere({ status: 'Dislike' })
+                    .where({
+                        postIdOrCommentId: postId
+                    })
+                    .andWhere('u.status = :status', { status: false })
+                    .andWhere({
+                        status: 'Dislike'
+                    })
                     .getCount()
 
 
@@ -224,16 +252,28 @@ export class PostQueryRepoPSQL {
                 return null
             }
 
-            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({ postIdOrCommentId: id })
-                .andWhere({ status: 'Like' })
+                .where({
+                    postIdOrCommentId: id
+                })
+                .andWhere('u.status = :status', { status: false })
+                .andWhere({
+                    status: 'Like'
+                })
                 .getCount()
 
-            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({ postIdOrCommentId: id })
-                .andWhere({ status: 'Dislike' })
+                .where({
+                    postIdOrCommentId: id
+                })
+                .andWhere('u.status = :status', { status: false })
+                .andWhere({
+                    status: 'Dislike'
+                })
                 .getCount()
 
             const resultPost = {
@@ -273,7 +313,7 @@ export class PostQueryRepoPSQL {
                     .createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .where('u._id = :userId', { userId: userId })
-                    //.andWhere('u.status = :status', { status: false })
+                    .andWhere('u.status = :status', { status: false })
                     .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
                     .getOne()
                 if (status) {
@@ -285,6 +325,7 @@ export class PostQueryRepoPSQL {
                 .createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .where('l.status = :status', { status: 'Like' })
+                .andWhere('u.status = :status', { status: false })
                 .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
                 .orderBy('l.createdAt', 'DESC')
                 .take(3)
@@ -297,16 +338,28 @@ export class PostQueryRepoPSQL {
                     login: like.userId.login
                 }
             })
-            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({ postIdOrCommentId: postId })
-                .andWhere({ status: 'Like' })
+                .where({
+                    postIdOrCommentId: postId
+                })
+                .andWhere('u.status = :status', { status: false })
+                .andWhere({
+                    status: 'Like'
+                })
                 .getCount()
 
-            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder()
+            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({ postIdOrCommentId: postId })
-                .andWhere({ status: 'Dislike' })
+                .where({
+                    postIdOrCommentId: postId
+                })
+                .andWhere('u.status = :status', { status: false })
+                .andWhere({
+                    status: 'Dislike'
+                })
                 .getCount()
 
             return {

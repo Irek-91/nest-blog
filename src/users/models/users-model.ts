@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 import mongoose from "mongoose";
 
 export class CreatUserInputModel {
@@ -20,6 +20,7 @@ export class CreatUserInputModel {
     @IsNotEmpty()
     email: string
 };
+
 
 export class UpdateStatusInputModel {
     @IsBoolean()

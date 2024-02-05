@@ -202,13 +202,18 @@ export class UsersRepositoryPSQL {
   }
 
 
-  async updateStatusUser(userId: string, isBanned: boolean, banReason: string | null, banDate: string | null): Promise<true | null> {
+  async updateStatusUser(userId: string, isBanned: boolean, 
+    banReason: string | null, banDate: string | null): Promise<User | null> {
 
     let resultUpdateUser = await this.dataSource.createQueryBuilder()
       .update(User)
       .set({ status: isBanned })
       .where({ _id: userId })
       .execute()
+    let user = await this.dataSource.getRepository(User)
+      .createQueryBuilder('u')
+      .where('u._id = :id', { id: userId })
+      .getOne()
 
 
     let resultUpdateReason = await this.dataSource.createQueryBuilder()
@@ -224,7 +229,7 @@ export class UsersRepositoryPSQL {
     if (!resultUpdateUser) {
       return null
     } else {
-      return true
+      return user
     }
 
   }
