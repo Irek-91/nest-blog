@@ -37,8 +37,8 @@ export class PairGameService {
             const firstPlayerProgress = {
                 answers: answersOne,
                 player: {
-                    id: userOne.userId,
-                    login: userOne.login
+                    id: userOne!.userId,
+                    login: userOne!.login
                 },
                 score: resultOnePlayer!.score,
             }
@@ -65,8 +65,8 @@ export class PairGameService {
             const firstPlayerProgress = {
                 answers: answersOne!,
                 player: {
-                    id: userOne.userId,
-                    login: userOne.login
+                    id: userOne!.userId,
+                    login: userOne!.login
                 },
                 score: resultPlayerOne!.score,
             }
@@ -77,8 +77,8 @@ export class PairGameService {
             const secondPlayerProgress = {
                 answers: answersTwo!,
                 player: {
-                    id: userTwo.userId,
-                    login: userTwo.login
+                    id: userTwo!.userId,
+                    login: userTwo!.login
                 },
                 score: resultPlayerTwo!.score,
             }

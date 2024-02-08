@@ -1,3 +1,5 @@
+import { User } from './../users/db-psql/entity/user.entity';
+import { GetUserByIdCommand } from './../users/application/use-case/get.user.by.id.use.case';
 import { UsersService } from '../users/application/users.service';
 import { JwtService } from '../adapters/jwt-service';
 import { Controller, Get, Query, Param, HttpException, HttpStatus, Post, Body, Request, Put, Delete, UseGuards, Response, BadRequestException, HttpCode } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { ChekRefreshToken, EmailOrLoginGuard, FilterCountIPAndURL } from './guar
 import { Cookies } from './guards/cookies.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { SecurityDeviceServicePSQL } from './../securityDevices/db-psql/securityDevice.service.PSQL';
+import { CommandBus } from '@nestjs/cqrs';
 
 @Controller('auth')
 
@@ -22,7 +25,8 @@ export class AuthController {
     constructor(protected usersService: UsersService,
         protected jwtService: JwtService,
         protected securityDeviceService: SecurityDeviceServicePSQL,
-        protected authService: AuthService) { }
+        protected authService: AuthService,
+        protected commandBus: CommandBus) { }
 
     @HttpCode(HttpStatus.OK)
     @UseGuards(ThrottlerGuard,
@@ -36,7 +40,7 @@ export class AuthController {
         const title = req.headers['user-agent'] || 'custom-ua'
       
         const accessToken = await this.jwtService.createdJWTAccessToken(req.user._id)
-        const user = await this.usersService.getUserById(req.user._id)
+        const user: User| null = await this.commandBus.execute(new GetUserByIdCommand(req.user._id))
         const refreshToken = await this.securityDeviceService.addDeviceIdRefreshToken(req.user._id, deviceId, IP, title)
         if ((accessToken !== null || refreshToken !== null) && user!.status === false) {
             res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true })

@@ -49,10 +49,7 @@ export class GetUserIdByAuth implements CanActivate {
         }
         const token = req.headers.authorization.split(' ')[1]
         const userId: any = await this.jwtService.getPayloadByRefreshToken(token)
-        // const user = await this.usersService.getUserById(userId)
-        // if (user!.status === false && userId !== null) {
-        //     req.userId = userId
-        // }
+       
         req.userId = userId ? userId : null
         return true
     }
@@ -73,10 +70,7 @@ export class UserAuthGuard implements CanActivate {
         if (!userId) {
             throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
         }
-        //const user = await this.usersService.getUserById(userId)
-        // if (user!.status === true) {
-        //     throw new HttpException('UNAUTHORIZED', HttpStatus.UNAUTHORIZED)
-        // }
+       
 
         req.userId = userId ? userId : null
         return true

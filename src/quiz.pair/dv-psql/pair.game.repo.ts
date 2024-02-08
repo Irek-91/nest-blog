@@ -345,16 +345,7 @@ export class PairGameRepo {
                 }, {
                     score: playerOne.score
                 })
-            // .set({
-            //     score: playerOne.score
-            // })
-            // .where({
-            //     pairId: pairId
-            // })
-            // .andWhere({
-            //     playerId: playerOne.id
-            // })
-            // .execute()
+
 
             const addAndUpdateStatisticPlayerOne = await manager.createQueryBuilder()
                 .update(Statistic)

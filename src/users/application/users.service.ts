@@ -26,15 +26,11 @@ export class UsersService {
   }
 
 
-  async deleteUserId(id: string): Promise<true | null> {
-    return await this.usersRepository.deleteUserId(id)
-  }
+  // async deleteUserId(id: string): Promise<true | null> {
+  //   return await this.usersRepository.deleteUserId(id)
+  // }
 
-  async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
-    return await this.usersRepository.deleteUsers()
-  }
-
-  async _generateHash(password: string, salt: string) {
+   async _generateHash(password: string, salt: string): Promise<string> {
     const hash = await bcrypt.hash(password, salt)
     return hash;
   }
@@ -56,11 +52,11 @@ export class UsersService {
   }
 
 
-  async deleteUserAll(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+  async deleteUserAll(): Promise<true | null> {
     return await this.usersRepository.deleteUsers()
   }
 
-  async findByUserId(userId: string): Promise<MeViewModel> {
+  async findByUserId(userId: string): Promise<MeViewModel | null> {
 
     const result = await this.usersQueryRepository.findUserById(userId)
     const resultUserViewModel: MeViewModel = {
@@ -69,13 +65,6 @@ export class UsersService {
       userId: result!._id
     }
     return resultUserViewModel
-  }
-
-  async getUserById(userId: string): Promise<User| null> {
-
-    const result = await this.usersQueryRepository.getUserById(userId)
-    
-    return result
   }
 
   async findUserByCode(code: string): Promise<emailConfirmationPSQL | null> {

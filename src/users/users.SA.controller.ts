@@ -9,6 +9,7 @@ import { CreatUserInputModel, UpdateStatusInputModel } from "./models/users-mode
 import { Controller} from "@nestjs/common/decorators/core";
 import { HttpCode, Put} from "@nestjs/common/decorators";
 import { CommandBus } from '@nestjs/cqrs';
+import { DeleteUserIdCommand } from './application/use-case/delete.user.id.use.case';
 
 
 
@@ -59,7 +60,7 @@ export class UsersSAController {
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
     async deleteUser(@Param('id') userId: string): Promise<Number> {
-        const userDelete = await this.usersService.deleteUserId(userId)
+        const userDelete = await this.commandBus.execute(new DeleteUserIdCommand(userId))
         if (!userDelete) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }

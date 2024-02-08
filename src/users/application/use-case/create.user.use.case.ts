@@ -1,3 +1,4 @@
+import { userViewModel } from './../../models/users-model';
 import { UsersRepositoryPSQL } from '../../db-psql/users.repo.PSQL';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreatUserInputModel } from '../../models/users-model';
@@ -21,7 +22,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
         protected usersService: UsersService) {
     }
 
-    async execute(command: CreateUserCommand) {
+    async execute(command: CreateUserCommand): Promise<userViewModel | null> {
         const password = command.inputModel.password
         const createdAt = new Date().toISOString();
         const passwordSalt = await bcrypt.genSalt(10)
@@ -50,7 +51,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
             recoveryCode
           }
         }
-    
-        return await this.usersRepository.createUser(newUser)
+        const user = await this.usersRepository.createUser(newUser)
+        return user
       }
 }

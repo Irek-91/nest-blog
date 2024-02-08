@@ -18,7 +18,7 @@ import { IsBoolean } from 'class-validator';
 @Injectable()
 
 export class UsersQueryRepoPSQL {
-  constructor(@InjectDataSource() private userModel: DataSource) { }
+  constructor(@InjectDataSource() private dataSource: DataSource) { }
 
   async findUsers(paginatorUser: queryPaginationTypeUserSA): Promise<usersViewModel> {
     let usersOutput: userViewModel[] = []
@@ -39,11 +39,9 @@ export class UsersQueryRepoPSQL {
       let filterEmail = {}
       let totalCount = 0
 
-      users = await this.userModel
+      users = await this.dataSource
         .createQueryBuilder(User, 'u')
         .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
-        //.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
-        //.orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`)
         .where(new Brackets(qb => {
           qb.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
             .orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`);
@@ -58,11 +56,9 @@ export class UsersQueryRepoPSQL {
         
 
 
-      totalCount = await this.userModel
+      totalCount = await this.dataSource
         .createQueryBuilder(User, 'u')
         .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
-        //.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
-        //.orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`)
         .where(new Brackets(qb => {
           qb.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
             .orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`);
@@ -108,7 +104,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserById(userId: string): Promise<userModelPSQL | null> {
     try {
-      let user = await this.userModel.getRepository(User)
+      let user = await this.dataSource.getRepository(User)
         .createQueryBuilder('u')
         .where('u._id = :id', { id: userId })
         .getOne()
@@ -137,7 +133,7 @@ export class UsersQueryRepoPSQL {
 
   async getUserById(userId: string): Promise<User | null> {
     try {
-      let user = await this.userModel.getRepository(User)
+      let user = await this.dataSource.getRepository(User)
         .createQueryBuilder('u')
         .where('u._id = :id', { id: userId })
         .getOne()
@@ -157,7 +153,7 @@ export class UsersQueryRepoPSQL {
 
   async findByLoginOrEmailL(loginOrEmail: string): Promise<User | null> {
     try {
-      const user = await this.userModel.getRepository(User).createQueryBuilder('u')
+      const user = await this.dataSource.getRepository(User).createQueryBuilder('u')
         .select()
         .where('u.login = :login', { login: loginOrEmail })
         .orWhere('u.email = :email', { email: loginOrEmail })
@@ -179,7 +175,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByCode(code: string): Promise<emailConfirmationPSQL | null> {
     try {
-      const result = await this.userModel.getRepository(EmailConfirmation).createQueryBuilder('e')
+      const result = await this.dataSource.getRepository(EmailConfirmation).createQueryBuilder('e')
         .select()
         .where('e.confirmationCode = :confirmationCode', { confirmationCode: code })
         .getOne()
@@ -202,7 +198,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByEmail(email: string): Promise<userModelPSQL | null> {
     try {
-      const result = await this.userModel.getRepository(User).createQueryBuilder('u')
+      const result = await this.dataSource.getRepository(User).createQueryBuilder('u')
         //.select()
         .where("u.email= :email", { email: email })
         .getOne()
@@ -226,7 +222,7 @@ export class UsersQueryRepoPSQL {
   async findUserByLogin(login: string): Promise<userModelPSQL | null> {
     try {
 
-      let result = await this.userModel.getRepository(User).createQueryBuilder('u')
+      let result = await this.dataSource.getRepository(User).createQueryBuilder('u')
         //.select()
         .where('u.login = :login', { login: login })
         .getOne()
@@ -249,7 +245,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByRecoveryCode(recoveryCode: string): Promise<emailConfirmationPSQL | null> {
     try {
-      let user = await this.userModel.getRepository(EmailConfirmation).createQueryBuilder('e')
+      let user = await this.dataSource.getRepository(EmailConfirmation).createQueryBuilder('e')
         .select()
         .where('e.recoveryCode = :recoveryCode', { recoveryCode: recoveryCode })
         .getOne()
@@ -274,7 +270,7 @@ export class UsersQueryRepoPSQL {
 
   async findUserByEmailConfirmation(userId: string): Promise<emailConfirmationPSQL | null> {
     try {
-      let user = await this.userModel.getRepository(EmailConfirmation).createQueryBuilder('e')
+      let user = await this.dataSource.getRepository(EmailConfirmation).createQueryBuilder('e')
         .select()
         .where('e.userId = :userId', { userId: userId })
         .getOne()

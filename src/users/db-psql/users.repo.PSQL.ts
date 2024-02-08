@@ -19,219 +19,294 @@ import { BannedUser } from './entity/banned.user.entity';
 export class UsersRepositoryPSQL {
   constructor(@InjectDataSource() private dataSource: DataSource) { }
 
-  async createUser(newUser: userMongoModel) {
-    let userId = newUser._id.toString()
+  async createUser(newUser: userMongoModel): Promise<userViewModel | null> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      let userId = newUser._id.toString()
 
-    const createUser = await this.dataSource.createQueryBuilder()
-      .insert()
-      .into(User)
-      .values({
-        login: newUser.accountData.login,
-        email: newUser.accountData.email,
-        salt: newUser.accountData.salt,
-        hash: newUser.accountData.hash,
-        createdAt: newUser.accountData.createdAt,
-        _id: newUser._id.toString(),
-        status: false
-      })
-      .execute()
-    const createUserBanTable = await this.dataSource.createQueryBuilder()
-      .insert()
-      .into(BannedUser)
-      .values({
-        userId: { _id: newUser._id }
-      })
-      .execute()
+      const createUser = await manager
+        .insert(User, {
+          login: newUser.accountData.login,
+          email: newUser.accountData.email,
+          salt: newUser.accountData.salt,
+          hash: newUser.accountData.hash,
+          createdAt: newUser.accountData.createdAt,
+          _id: newUser._id.toString(),
+          status: false
+        })
 
-    const createEmailByUser = await this.dataSource.createQueryBuilder()
-      .insert()
-      .into(EmailConfirmation)
-      .values({
-        confirmationCode: newUser.emailConfirmation.confirmationCode,
-        expiritionDate: newUser.emailConfirmation.expiritionDate,
-        isConfirmed: newUser.emailConfirmation.isConfirmed,
-        recoveryCode: newUser.emailConfirmation.recoveryCode,
-        userId: { _id: newUser._id }
-      })
-      .execute()
-    const user: userViewModel = {
-      id: newUser._id.toString(),
-      login: newUser.accountData!.login,
-      email: newUser.accountData!.email,
-      createdAt: newUser.accountData!.createdAt,
-      banInfo: {
-        isBanned: false,
-        banDate: null,
-        banReason: null
+      const createUserBanTable = await manager
+        .insert(BannedUser, {
+          userId: { _id: newUser._id }
+        })
+
+
+      const createEmailByUser = await manager
+        .insert(EmailConfirmation, {
+          confirmationCode: newUser.emailConfirmation.confirmationCode,
+          expiritionDate: newUser.emailConfirmation.expiritionDate,
+          isConfirmed: newUser.emailConfirmation.isConfirmed,
+          recoveryCode: newUser.emailConfirmation.recoveryCode,
+          userId: { _id: newUser._id }
+        })
+
+      const user: userViewModel = {
+        id: newUser._id.toString(),
+        login: newUser.accountData!.login,
+        email: newUser.accountData!.email,
+        createdAt: newUser.accountData!.createdAt,
+        banInfo: {
+          isBanned: false,
+          banDate: null,
+          banReason: null
+        }
       }
+      await queryRunner.commitTransaction()
+      return user
     }
-    return user
+    catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      queryRunner.release()
+    }
   }
 
 
   async deleteUserId(userId: string): Promise<true | null> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
     try {
-      const deletedUserEmail = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(EmailConfirmation)
-        .where({ userId: userId })
-        .execute()
-      const deletedUserBan = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(BannedUser)
-        .where({ userId: userId })
-        .execute()
+      const deletedUserEmail = await manager
+        .delete(EmailConfirmation, { userId: userId })
 
-      const deletedUserDevice = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(Device)
-        .where({ userId: userId })
-        .execute()
-      const deletedUserLikes = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(Like)
-        .where({ userId: userId })
-        .execute()
-      const deletedUser = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(User)
-        .where({ _id: userId })
-        .execute()
+      const deletedUserBan = await manager
+        .delete(BannedUser, { userId: userId })
+
+      const deletedUserDevice = await manager
+        .delete(Device, { userId: userId })
+
+      const deletedUserLikes = await manager
+        .delete(Like, { userId: userId })
+
+      const deletedUser = await manager
+        .delete(User, { _id: userId })
+
       if (deletedUserEmail.affected === 0 || deletedUser.affected === 0) {
+        await queryRunner.commitTransaction()
         return null
       }
       else {
+        await queryRunner.commitTransaction()
         return true
       }
 
     }
-    catch (e) { return null }
+    catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    }
+    finally {
+      await queryRunner.release()
+
+    }
   }
 
-  async deleteUsers(): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+  async deleteUsers(): Promise<true | null> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
     try {
 
-      const deletedUsersEmail = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(EmailConfirmation)
-        .execute()
-      const deletedUsersBan = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(BannedUser)
-        .execute()
+      const deletedUsersEmail = await manager
+        .delete(EmailConfirmation, {})
 
-      const deletedDevices = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(Device)
-        .execute()
-      const deletedLikes = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(Like)
-        .execute()
+      const deletedUsersBan = await manager
+        .delete(BannedUser, {})
 
-      const deletedUsers = await this.dataSource.createQueryBuilder()
-        .delete()
-        .from(User)
-        .execute()
+      const deletedDevices = await manager
+        .delete(Device, {})
 
+      const deletedLikes = await manager
+        .delete(Like, {})
+
+      const deletedUsers = await manager
+        .delete(User, {})
 
       if (deletedUsersEmail.affected === 0 || deletedUsers.affected === 0) {
-        return HttpStatus.NOT_FOUND
+        await queryRunner.commitTransaction()
+        return null
       }
       else {
-        return HttpStatus.NO_CONTENT
+        await queryRunner.commitTransaction()
+        return true
       }
     }
-    catch (e) { return HttpStatus.NOT_FOUND }
+    catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    }
+    finally {
+      await queryRunner.release()
+
+    }
   }
 
   async updateConfirmation(_id: string): Promise<true | null> {
-    let resultUpdateConfirmation = await this.dataSource.createQueryBuilder()
-      .update(EmailConfirmation)
-      .set({ confirmationCode: null, expiritionDate: null, isConfirmed: true })
-      .where({ userId: _id })
-      .execute()
-    if (!resultUpdateConfirmation) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+
+      let resultUpdateConfirmation = await manager.createQueryBuilder()
+        .update(EmailConfirmation)
+        .set({ confirmationCode: null, expiritionDate: null, isConfirmed: true })
+        .where({ userId: _id })
+        .execute()
+      if (!resultUpdateConfirmation) {
+        await queryRunner.commitTransaction()
+        return null
+      } else {
+        await queryRunner.commitTransaction()
+        return true
+      }
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
       return null
-    } else {
-      return true
+    } finally {
+      await queryRunner.release()
     }
-
-
-    return true
   }
 
   async updateCode(_id: string, code: string, expiritionDate: Date): Promise<true | null> {
-    let resultUpdateCode = await this.dataSource.createQueryBuilder()
-      .update(EmailConfirmation)
-      .set({ confirmationCode: code, expiritionDate: expiritionDate })
-      .where({ userId: _id })
-      .execute()
-    if (!resultUpdateCode) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      let resultUpdateCode = await manager.createQueryBuilder()
+        .update(EmailConfirmation)
+        .set({ confirmationCode: code, expiritionDate: expiritionDate })
+        .where({ userId: _id })
+        .execute()
+      if (!resultUpdateCode) {
+        await queryRunner.commitTransaction()
+        return null
+      } else {
+        await queryRunner.commitTransaction()
+        return true
+      }
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
       return null
-    } else {
-      return true
+    } finally {
+      await queryRunner.release()
     }
-
   }
 
   async updatePassword(_id: string, salt: string, hash: string): Promise<true | null> {
-    let resultUpdatePassword = await this.dataSource.createQueryBuilder()
-      .update(User)
-      .set({ salt: salt, hash: hash })
-      .where({ _id: _id })
-      .execute()
-    if (!resultUpdatePassword) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      let resultUpdatePassword = await manager.createQueryBuilder()
+        .update(User)
+        .set({ salt: salt, hash: hash })
+        .where({ _id: _id })
+        .execute()
+      if (!resultUpdatePassword) {
+        await queryRunner.commitTransaction()
+        return null
+      } else {
+        await queryRunner.commitTransaction()
+        return true
+      }
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
       return null
-    } else { return true }
-
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   async updateRecoveryCode(_id: string, recoveryCode: string): Promise<true | null> {
-    let resultUpdateCode = await this.dataSource.createQueryBuilder()
-      .update(EmailConfirmation)
-      .set({ recoveryCode: recoveryCode })
-      .where({ userId: _id })
-      .execute()
-    if (!resultUpdateCode) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      let resultUpdateCode = await manager.createQueryBuilder()
+        .update(EmailConfirmation)
+        .set({ recoveryCode: recoveryCode })
+        .where({ userId: _id })
+        .execute()
+      if (!resultUpdateCode) {
+        await queryRunner.commitTransaction()
+        return null
+      } else {
+        await queryRunner.commitTransaction()
+        return true
+      }
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
       return null
-    } else {
-      return true
+    } finally {
+      await queryRunner.release()
     }
 
   }
 
 
-  async updateStatusUser(userId: string, isBanned: boolean, 
+  async updateStatusUser(userId: string, isBanned: boolean,
     banReason: string | null, banDate: string | null): Promise<User | null> {
-
-    let resultUpdateUser = await this.dataSource.createQueryBuilder()
-      .update(User)
-      .set({ status: isBanned })
-      .where({ _id: userId })
-      .execute()
-    let user = await this.dataSource.getRepository(User)
-      .createQueryBuilder('u')
-      .where('u._id = :id', { id: userId })
-      .getOne()
-
-
-    let resultUpdateReason = await this.dataSource.createQueryBuilder()
-      .update(BannedUser)
-      .set({
-        banReason: banReason,
-        banDate: banDate
-      })
-      .where({ userId: userId })
-      .execute()
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      let resultUpdateUser = await manager.createQueryBuilder()
+        .update(User)
+        .set({ status: isBanned })
+        .where({ _id: userId })
+        .execute()
+      let user = await manager.getRepository(User)
+        .createQueryBuilder('u')
+        .where('u._id = :id', { id: userId })
+        .getOne()
 
 
-    if (!resultUpdateUser) {
+      let resultUpdateReason = await manager.createQueryBuilder()
+        .update(BannedUser)
+        .set({
+          banReason: banReason,
+          banDate: banDate
+        })
+        .where({ userId: userId })
+        .execute()
+
+
+      if (!resultUpdateUser) {
+        await queryRunner.commitTransaction()
+        return null
+      } else {
+        await queryRunner.commitTransaction()
+        return user
+      }
+
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
       return null
-    } else {
-      return user
+    } finally {
+      await queryRunner.release()
     }
-
   }
 
 }
