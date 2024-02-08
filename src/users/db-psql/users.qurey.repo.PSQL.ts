@@ -10,7 +10,7 @@ import mongoose, { ObjectId } from "mongoose";
 import { emailConfirmationPSQL, userModelPSQL, userMongoModel, userViewModel, usersViewModel } from "../models/users-model";
 import { log } from "console";
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, Equal, ILike, In, IsNull, Like, Not } from 'typeorm';
+import { Brackets, DataSource, Equal, ILike, In, IsNull, Like, Not } from 'typeorm';
 import { IsBoolean } from 'class-validator';
 
 
@@ -42,21 +42,32 @@ export class UsersQueryRepoPSQL {
       users = await this.userModel
         .createQueryBuilder(User, 'u')
         .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
-        .where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : 'u.login is not null'} 
-          OR ${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : 'u.email is not null'}`)
+        //.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
+        //.orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`)
+        .where(new Brackets(qb => {
+          qb.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
+            .orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`);
+        })
+        )
         .andWhere(`${statusFilter !== null ? `u.status = ${statusFilter}` : 'u.status is not null'}`)
         .orderBy(`u.${paginatorUser.sortBy}`, paginatorUser.sortDirection)
         .offset(paginatorUser.skip)
         .limit(paginatorUser.pageSize)
         .getRawMany()
 
+        
 
 
       totalCount = await this.userModel
         .createQueryBuilder(User, 'u')
         .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
-        .where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : 'u.login is not null'} 
-          OR ${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : 'u.email is not null'}`)
+        //.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
+        //.orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`)
+        .where(new Brackets(qb => {
+          qb.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
+            .orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`);
+        })
+        )
         .andWhere(`${statusFilter !== null ? `u.status = ${statusFilter}` : 'u.status is not null'}`)
         .orderBy(`u.${paginatorUser.sortBy}`, paginatorUser.sortDirection)
         .getCount()

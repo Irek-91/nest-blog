@@ -10,7 +10,7 @@ import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.c
 import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
 import { blogInput } from './models/blogs-model';
 import { CreateBlogCommand } from './application/use-case/create.blog.use.case';
-import { UserAuthGuard, GetUserIdByAuth } from './../auth/guards/auth.guard';
+import { UserAuthGuard } from './../auth/guards/auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { Pagination } from './../helpers/query-filter';
 import { PostsService } from './../posts/application/posts.service';
@@ -18,6 +18,7 @@ import { BlogsService } from './application/blogs.service';
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
 import { paginatorPost, postInputModel, postOutput } from '../posts/model/post-model';
 import { DeletePostIdCommand } from './../posts/application/use-case/delete.post.id.use.case';
+import { Blog } from './db-psql/entity/blog.entity';
 
 
 @UseGuards(UserAuthGuard)
@@ -97,11 +98,11 @@ export class BloggerController {
             content: inputData.content,
             blogId: blogId,
         }
-        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        const blog: Blog| null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
-        if (blog.userId !== userId) {
+        if (blog.user._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         const newPost = await this.commandBus.execute(new CreatedPostByBlogIdCommand(inputDataModel));
@@ -119,11 +120,11 @@ export class BloggerController {
         @Body() blogInputData: blogInput,
         @Request() req: any) {
         const userId = req.userId//исправить после авторизации
-        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        if (blog.userId !== userId) {
+        if (blog.user._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
 
@@ -143,11 +144,11 @@ export class BloggerController {
         @Request() req: any) {
         const userId = req.userId//исправить после авторизации
 
-        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
-        if (blog.userId !== userId) {
+        if (blog.user._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         const postResult = await this.commandBus.execute(new UpdatePostCommand(postId, postUpdateData.title,
@@ -165,11 +166,11 @@ export class BloggerController {
     async deletePostByBlogId(@Param('blogId') blogId: string, @Param('postId') postId: string,
         @Request() req: any) {
         let userId = req.userId//исправить после авторизации
-        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        if (blog.userId !== userId) {
+        if (blog.user._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         let result = await this.commandBus.execute(new DeletePostIdCommand(postId))
@@ -186,11 +187,11 @@ export class BloggerController {
     async deletBlog(@Param('id') blogId: string,
         @Request() req: any) {
         let userId = req.userId//исправить после авторизации
-        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        if (blog.userId !== userId) {
+        if (blog.user._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         let result = await this.commandBus.execute(new DeleteBlogIdCommand(blogId))

@@ -15,7 +15,8 @@ export class updateLikeStatusPostUseCase implements ICommandHandler<UpdateLikeSt
 
     }
     async execute(command: UpdateLikeStatusPostCommand): Promise<true | null> {
-        const result = await this.postQueryRepo.getPostById(command.postId)
+        const result = await this.postQueryRepo.getPostId(command.postId, null)
+        
         if (!result) { return null }
         const resultUpdate = await this.postRepository.updateLikeStatusPostId(command.postId, command.userId, command.likeStatus)
         if (!resultUpdate) {

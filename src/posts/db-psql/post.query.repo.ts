@@ -3,7 +3,7 @@ import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { newestLikes, paginatorPost, postMongoDb, postOutput } from "../model/post-model"
 import { log } from 'console';
-import { DataSource } from 'typeorm';
+import { Brackets, DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Post } from './entity/post.entity';
 import { Like } from '../../likes/entity/likes.entity';
@@ -61,13 +61,9 @@ export class PostQueryRepoPSQL {
             const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({
-                    postIdOrCommentId: postId
-                })
+                .where({ postIdOrCommentId: postId })
+                .andWhere('l.status = :status', { status: 'Like' })
                 .andWhere('u.status = :status', { status: false })
-                .andWhere({
-                    status: 'Like'
-                })
                 .getCount()
 
             const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
@@ -76,10 +72,8 @@ export class PostQueryRepoPSQL {
                 .where({
                     postIdOrCommentId: postId
                 })
+                .andWhere('l.status = :status', { status: 'Dislike' })
                 .andWhere('u.status = :status', { status: false })
-                .andWhere({
-                    status: 'Dislike'
-                })
                 .getCount()
 
 
@@ -191,13 +185,9 @@ export class PostQueryRepoPSQL {
                 const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .select()
-                    .where({
-                        postIdOrCommentId: postId
-                    })
+                    .where({ postIdOrCommentId: postId })
+                    .andWhere('l.status = :status', { status: 'Like' })
                     .andWhere('u.status = :status', { status: false })
-                    .andWhere({
-                        status: 'Like'
-                    })
                     .getCount()
 
                 const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
@@ -206,10 +196,8 @@ export class PostQueryRepoPSQL {
                     .where({
                         postIdOrCommentId: postId
                     })
+                    .andWhere('l.status = :status', { status: 'Dislike' })
                     .andWhere('u.status = :status', { status: false })
-                    .andWhere({
-                        status: 'Dislike'
-                    })
                     .getCount()
 
 
@@ -241,59 +229,61 @@ export class PostQueryRepoPSQL {
 
     }
 
-    async getPostById(id: string): Promise<postMongoDb | null> {
-        try {
-            const post: Post | null = await this.postModel.getRepository(Post)
-                .createQueryBuilder('p')
-                .leftJoinAndSelect('p.blogId', 'b')
-                .where('p._id = :id', { id: id })
-                .getOne()
-            if (!post) {
-                return null
-            }
+    // async getPostById(id: string): Promise<postMongoDb | null> {
+    //     try {
+    //         const post: Post | null = await this.postModel.getRepository(Post)
+    //             .createQueryBuilder('p')
+    //             .leftJoinAndSelect('p.blogId', 'b')
+    //             .leftJoinAndSelect('b.user', 'u')
+    //             .where('p._id = :id', { id: id })
+    //             .andWhere('u.status = :status', {status: false})
+    //             .getOne()
+    //         if (!post) {
+    //             return null
+    //         }
 
-            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
-                .leftJoinAndSelect('l.userId', 'u')
-                .select()
-                .where({
-                    postIdOrCommentId: id
-                })
-                .andWhere('u.status = :status', { status: false })
-                .andWhere({
-                    status: 'Like'
-                })
-                .getCount()
+    //         const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+    //             .leftJoinAndSelect('l.userId', 'u')
+    //             .select()
+    //             .where({
+    //                 postIdOrCommentId: id
+    //             })
+    //             .andWhere('u.status = :status', { status: false })
+    //             .andWhere({
+    //                 status: 'Like'
+    //             })
+    //             .getCount()
 
-            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
-                .leftJoinAndSelect('l.userId', 'u')
-                .select()
-                .where({
-                    postIdOrCommentId: id
-                })
-                .andWhere('u.status = :status', { status: false })
-                .andWhere({
-                    status: 'Dislike'
-                })
-                .getCount()
+    //         const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+    //             .leftJoinAndSelect('l.userId', 'u')
+    //             .select()
+    //             .where({
+    //                 postIdOrCommentId: id
+    //             })
+    //             .andWhere('u.status = :status', { status: false })
+    //             .andWhere({
+    //                 status: 'Dislike'
+    //             })
+    //             .getCount()
 
-            const resultPost = {
-                _id: post._id,
-                title: post.title,
-                shortDescription: post.shortDescription,
-                content: post.content,
-                blogId: post.blogId._id,
-                blogName: post.blogId.name,
-                createdAt: post.createdAt,
-                extendedLikesInfo: {
-                    likesCount: likesCount,
-                    dislikesCount: dislikesCount,
-                    myStatus: 'None',
-                    newestLikes: []
-                }
-            }
-            return resultPost
-        } catch (e) { return null }
-    }
+    //         const resultPost = {
+    //             _id: post._id,
+    //             title: post.title,
+    //             shortDescription: post.shortDescription,
+    //             content: post.content,
+    //             blogId: post.blogId._id,
+    //             blogName: post.blogId.name,
+    //             createdAt: post.createdAt,
+    //             extendedLikesInfo: {
+    //                 likesCount: likesCount,
+    //                 dislikesCount: dislikesCount,
+    //                 myStatus: 'None',
+    //                 newestLikes: []
+    //             }
+    //         }
+    //         return resultPost
+    //     } catch (e) { return null }
+    // }
 
 
     async getPostId(postId: string, userId: string | null): Promise<postOutput | null> {
@@ -301,7 +291,14 @@ export class PostQueryRepoPSQL {
             const post: Post | null = await this.postModel.getRepository(Post)
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
+                .leftJoinAndSelect('b.user', 'u')
                 .where('p._id = :id', { id: postId })
+                .andWhere(new Brackets(qb => {
+                    qb.where('u.status = false')
+                        .orWhere('b.user is null');
+                })
+                )
+                //.andWhere('u.status = :status', { status: false })
                 .getOne()
             if (!post) {
                 return null
@@ -324,7 +321,9 @@ export class PostQueryRepoPSQL {
             const newestLikes = await this.postModel.getRepository(Like)
                 .createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
-                .where('l.status = :status', { status: 'Like' })
+                .where({
+                    status: 'Like'
+                })
                 .andWhere('u.status = :status', { status: false })
                 .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: postId })
                 .orderBy('l.createdAt', 'DESC')
@@ -341,13 +340,11 @@ export class PostQueryRepoPSQL {
             const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .select()
-                .where({
-                    postIdOrCommentId: postId
-                })
-                .andWhere('u.status = :status', { status: false })
+                .where({ postIdOrCommentId: postId })
                 .andWhere({
                     status: 'Like'
                 })
+                .andWhere('u.status = :status', { status: false })
                 .getCount()
 
             const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
@@ -356,10 +353,10 @@ export class PostQueryRepoPSQL {
                 .where({
                     postIdOrCommentId: postId
                 })
-                .andWhere('u.status = :status', { status: false })
                 .andWhere({
                     status: 'Dislike'
                 })
+                .andWhere('u.status = :status', { status: false })
                 .getCount()
 
             return {
@@ -377,6 +374,6 @@ export class PostQueryRepoPSQL {
                     newestLikes: newestLikesMaped
                 }
             }
-        } catch (e) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
+        } catch (e) { return null }
     }
 }

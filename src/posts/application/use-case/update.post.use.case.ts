@@ -18,7 +18,7 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand>{
         const shortDescription: string = command.shortDescription
         const content: string = command.content
 
-        const post = await this.postQueryRepo.getPostById(postId)
+        const post = await this.postQueryRepo.getPostId(postId, null)
         if (!post) {
             return null
         }

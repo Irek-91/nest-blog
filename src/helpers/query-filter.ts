@@ -10,7 +10,7 @@ export type queryPaginationTypeUser = {
   skip: number
 }
 export type queryPaginationType = {
-  searchNameTerm: string
+  searchNameTerm: string | null
   sortBy: string
   sortDirection: 'ASC' | 'DESC'
   pageNumber: number
@@ -73,7 +73,7 @@ export class Pagination {
 
   getPaginationFromQuery = (query: any): queryPaginationType => {
     const defaultValues: queryPaginationType = {
-      searchNameTerm: '',
+      searchNameTerm: null,
       sortBy: 'createdAt',
       sortDirection: 'DESC',
       pageNumber: 1,

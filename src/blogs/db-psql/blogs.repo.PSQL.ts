@@ -33,19 +33,30 @@ export class BlogsRepoPSQL {
 
     await queryRunner.startTransaction()
     try {
-      const newBlog = await manager.insert(Blog, {
-        _id: inputData._id.toString(),
-        name: inputData.name,
-        description: inputData.description,
-        websiteUrl: inputData.websiteUrl,
-        createdAt: inputData.createdAt,
-        isMembership: inputData.isMembership,
-        userId: inputData.userId,
-        userLogin: inputData.userLogin
-      })
-      //log(newBlog)
-      await queryRunner.commitTransaction()
-      return newBlog.generatedMaps
+      if (inputData.userId === null) {
+        const newBlog = await manager.insert(Blog, {
+          _id: inputData._id.toString(),
+          name: inputData.name,
+          description: inputData.description,
+          websiteUrl: inputData.websiteUrl,
+          createdAt: inputData.createdAt,
+          isMembership: inputData.isMembership,
+        })
+        await queryRunner.commitTransaction()
+        return newBlog.generatedMaps
+      } else {
+        const newBlog = await manager.insert(Blog, {
+          _id: inputData._id.toString(),
+          name: inputData.name,
+          description: inputData.description,
+          websiteUrl: inputData.websiteUrl,
+          createdAt: inputData.createdAt,
+          isMembership: inputData.isMembership,
+          user: {_id : inputData.userId},
+        })
+        await queryRunner.commitTransaction()
+        return newBlog.generatedMaps
+      }
     } catch (e) {
       await queryRunner.rollbackTransaction()
       return null
@@ -89,7 +100,7 @@ export class BlogsRepoPSQL {
     try {
       const blog = await manager.update(Blog,
         { _id: blogId },
-        { userId: userId }
+        { user: { _id: userId } }
       )
 
       await queryRunner.commitTransaction()

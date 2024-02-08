@@ -1,3 +1,4 @@
+import { GetUserByIdUseCase } from './users/application/use-case/get.user.by.id.use.case';
 import { PaginationUsersSa } from './helpers/query-filter-users-SA';
 import { UpdateStatusUserUseCase } from './users/application/use-case/update.status.user.use.case';
 import { CreateUserUseCase } from './users/application/use-case/create.user.use.case';
@@ -129,7 +130,7 @@ const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, Up
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase]
 
-const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase]
+const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase]
 
 export const entities = [User, EmailConfirmation, Device, Post, Blog, 
   Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser]
@@ -189,7 +190,7 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
       password: process.env.PGPASSWORDLOCAL,
       database: process.env.PGDATABASELOCAL,
       autoLoadEntities: false,
-      synchronize: false,
+      synchronize: true,
       entities:[...entities],
       migrations: [__dirname +'/db/migrations/*.ts'],
       migrationsTableName: "custom_migration_table",

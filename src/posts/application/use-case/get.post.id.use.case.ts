@@ -17,6 +17,8 @@ export class GetPostIdUseCase implements ICommandHandler<GetPostIdCommand> {
     async execute(command: GetPostIdCommand): Promise<postOutput | null> {
         const id: string = command.id
         const userId: string | null = command.userId
+        
+
         return this.postQueryRepo.getPostId(id, userId)
     }
 }

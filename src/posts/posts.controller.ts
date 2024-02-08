@@ -1,3 +1,5 @@
+import { User } from './../users/db-psql/entity/user.entity';
+import { GetUserByIdCommand } from './../users/application/use-case/get.user.by.id.use.case';
 import { CreatedPostByBlogIdCommand } from './application/use-case/created.post.by.blog.id.use.case';
 import { DeletePostIdCommand } from './application/use-case/delete.post.id.use.case';
 import { FindPostsCommand } from './application/use-case/find.post.use.case';
@@ -90,7 +92,9 @@ export class PostsController {
         const pagination = this.pagination.getPaginationFromQueryPosts(query)
 
         const resultPostId = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
-
+        if (!resultPostId) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
         const commentsPostId = await this.commentsService.findCommentsByPostId(postId, userId, pagination)
         return commentsPostId
     }
@@ -114,7 +118,7 @@ export class PostsController {
         @Param('postId') postId: string) {
 
         const userId = req.userId
-        let post: postOutput = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
+        let post: postOutput | null = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
         if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
@@ -143,6 +147,10 @@ export class PostsController {
         @Body() likeStatus: likeStatus) {
 
         const userId = req.userId
+        // const userBanned : User | null = await this.commandBus.execute(new GetUserByIdCommand(userId))
+        // if (userBanned!.status === true) {
+        //     throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        // }
         const resultUpdateLikeStatusPost = await this.commandBus.
                                                 execute(new UpdateLikeStatusPostCommand(postId, userId, likeStatus.likeStatus))
         if (resultUpdateLikeStatusPost) {

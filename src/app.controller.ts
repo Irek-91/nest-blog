@@ -57,10 +57,9 @@ export class TestingController {
   async deleteAll() {
     await this.commentModel.deleteCommentsAll();
     await this.pairModel.deleteAll()
-
-    await this.userModel.deleteUserAll();
     await this.commandBus.execute(new DeletePostsAllCommand());
     await this.commandBus.execute(new DeleteBlogsAllCommand());
+    await this.userModel.deleteUserAll();
     await this.questionModel.deleteAllQuestions()
     //await this.deviceModel.deleteMany();
     //await this.ipAndURIModel.deleteMany()

@@ -1,3 +1,4 @@
+import { User } from './../../users/db-psql/entity/user.entity';
 import { blogSAOutput, paginatorBlogSA } from './../models/blogs-model';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
@@ -19,9 +20,7 @@ export class BlogsQueryRepoPSQL {
   ) { }
 
   async findBlogs(pagination: queryPaginationType, userId: string | null): Promise<paginatorBlog> {
-    // let query = `SELECT * FROM public."blogs"
-    //                 ORDER BY "${pagination.sortBy}" ${pagination.sortDirection}                 
-    //          `
+
     const sortDirection = pagination.sortDirection
 
     let sortBy = {
@@ -38,26 +37,12 @@ export class BlogsQueryRepoPSQL {
     }
 
     const sortByWithCollate = pagination.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
-    // if (pagination.searchNameTerm !== '') {
-    //     // query = `SELECT * FROM public."blogs"
-    //     //         WHERE "name" ILIKE '%${pagination.searchNameTerm}%'
-    //     //         ORDER BY "${pagination.sortBy}" ${sortByWithCollate} ${pagination.sortDirection}
-    //     //         `
-    //     query = {
-    //       where:{name: ILike(`%${pagination.searchNameTerm}%`)},
-    //       // order: {
-    //       //   sortBy: pagination.sortDirection
-    //       // }
-    //     }
-    // }
-    // const queryResult = `${query} ` + ` LIMIT $1 OFFSET $2`
-    // const blogs = await this.blogModel.query(queryResult,
-    //     [pagination.pageSize, pagination.skip])
 
-    let blogsOne = await this.dataSource.getRepository(Blog)
-      .createQueryBuilder('b')
-      .where({ name: ILike(`%${pagination.searchNameTerm}%`) })
-      .andWhere('b.userId = :userId', {
+    let blogsOne = await this.dataSource
+      .createQueryBuilder(Blog, 'b')
+      .leftJoinAndSelect('b.user', 'u')
+      .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+      .andWhere('u._id = :userId', {
         userId: userId
       })
       .orderBy(`b.${pagination.sortBy}`, pagination.sortDirection)
@@ -66,10 +51,11 @@ export class BlogsQueryRepoPSQL {
       .getMany()
 
 
-    const totalCount = await this.dataSource.getRepository(Blog)
-      .createQueryBuilder('b')
-      .where({ name: ILike(`%${pagination.searchNameTerm}%`) })
-      .andWhere('b.userId = :userId', {
+    const totalCount = await this.dataSource
+      .createQueryBuilder(Blog, 'b')
+      .leftJoinAndSelect(User, "u", "u._id = b.user")
+      .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+      .andWhere('u._id = :userId', {
         userId: userId
       })
       .getMany()
@@ -94,7 +80,7 @@ export class BlogsQueryRepoPSQL {
   }
 
   async findBlogsSA(pagination: queryPaginationType): Promise<paginatorBlogSA> {
-            
+
     const sortDirection = pagination.sortDirection
     let sortBy = {
     }
@@ -108,18 +94,25 @@ export class BlogsQueryRepoPSQL {
       }
     }
 
-    let blogsOne = await this.dataSource.getRepository(Blog)
-      .createQueryBuilder('b')
-      .where({ name: ILike(`%${pagination.searchNameTerm}%`) })
+    let blogsOne = await this.dataSource
+      .createQueryBuilder(Blog, 'b')
+      .leftJoinAndSelect('b.user', 'u')
+      .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+      // .andWhere('u._id = :userId', {
+      //   userId: userId
+      // })
       .orderBy(`b.${pagination.sortBy}`, pagination.sortDirection)
       .skip(pagination.skip)
       .take(pagination.pageSize)
       .getMany()
 
 
+
+
     const totalCount = await this.dataSource.getRepository(Blog)
       .createQueryBuilder('b')
-      .where({ name: ILike(`%${pagination.searchNameTerm}%`) })
+      .leftJoinAndSelect('b.user', 'u')
+      .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
       .getMany()
 
     const blogsOutput: blogSAOutput[] = blogsOne.map((b) => {
@@ -130,9 +123,9 @@ export class BlogsQueryRepoPSQL {
         websiteUrl: b.websiteUrl,
         createdAt: b.createdAt,
         isMembership: b.isMembership,
-        blogOwnerInfo : {
-          userId :b.userId!,
-          userLogin: b.userLogin!
+        blogOwnerInfo: {
+          userId: b.user._id,
+          userLogin: b.user.login
         }
       }
     })
@@ -187,16 +180,13 @@ export class BlogsQueryRepoPSQL {
 
   async getBlogDBById(id: string): Promise<Blog | null> {
     try {
-      const blog = await this.dataSource.getRepository(Blog).createQueryBuilder().where({ _id: id }).getOne()
+      const blog = await this.dataSource
+        .createQueryBuilder(Blog, 'b')
+        .leftJoinAndSelect('b.user', 'u')
+        .where({ _id: id })
+        .getOne()
       if (!blog) { return null }
       return blog
-
-      //   const blog = await this.blogModel.query(`
-      //   SELECT * FROM public."blogs" as b
-      //   WHERE b."_id" = $1
-      //   `, [id])
-      // if (blog.length === 0) return null
-      // return blog
     }
     catch (e) {
       return null
