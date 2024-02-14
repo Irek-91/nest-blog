@@ -51,7 +51,7 @@ export class UsersSAController {
     async updateStatusUser(@Param('id') userId: string,
     @Body() inputModel: UpdateStatusInputModel) {
         const result = await this.commandBus.execute(new UpdateStatusUserCommand(userId,inputModel.isBanned, inputModel.banReason))
-        return result
+        //return result
     }  
 
 

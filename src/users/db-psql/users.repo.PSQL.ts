@@ -1,16 +1,17 @@
+import { Blog } from './../../blogs/db-psql/entity/blog.entity';
 import { Like } from './../../likes/entity/likes.entity';
 import { Device } from './../../securityDevices/db-psql/entity/devices.entity';
 import { User } from './entity/user.entity';
 import { HttpCode, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose, { FilterQuery, Model } from "mongoose";
-import { UserDocument } from "../models/users-schema";
 import { userMongoModel, userViewModel } from "../models/users-model";
 import { log } from "console";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { EmailConfirmation } from "./entity/email.confirm.entity";
 import { BannedUser } from './entity/banned.user.entity';
+import { UsersBannedByBlogger } from './entity/users.banned.by.blogger.entity';
 
 
 
@@ -82,6 +83,11 @@ export class UsersRepositoryPSQL {
     await queryRunner.connect()
     await queryRunner.startTransaction()
     try {
+      const deletedUsersBannedByBlogger = await manager
+        .delete(UsersBannedByBlogger, { userId: userId })
+      const deletedUsersBan = await manager
+        .delete(BannedUser, { userId: userId })
+
       const deletedUserEmail = await manager
         .delete(EmailConfirmation, { userId: userId })
 
@@ -123,6 +129,10 @@ export class UsersRepositoryPSQL {
     await queryRunner.connect()
     await queryRunner.startTransaction()
     try {
+
+      const deletedUsersBannedByBlogger = await manager
+        .delete(UsersBannedByBlogger, {})
+
 
       const deletedUsersEmail = await manager
         .delete(EmailConfirmation, {})
@@ -277,6 +287,7 @@ export class UsersRepositoryPSQL {
         .set({ status: isBanned })
         .where({ _id: userId })
         .execute()
+
       let user = await manager.getRepository(User)
         .createQueryBuilder('u')
         .where('u._id = :id', { id: userId })
@@ -307,6 +318,71 @@ export class UsersRepositoryPSQL {
     } finally {
       await queryRunner.release()
     }
+  }
+
+  async banUserByBlog(banUserId: string, blogId: string, isBanned: boolean,
+    banReason: string, banDate: string): Promise<null | boolean> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      const banUser = await manager.getRepository(UsersBannedByBlogger).findOne({
+        relations: {
+          userId: true,
+          blogId: true
+        },
+        where: {
+          userId: { _id: banUserId },
+          blogId: { _id: blogId }
+        }
+      })
+
+      if (!banUser) {
+        const resultUpdate = await manager.createQueryBuilder()
+          .insert()
+          .into(UsersBannedByBlogger)
+          .values({
+            userId: { _id: banUserId },
+            blogId: { _id: blogId },
+            banDate: banDate,
+            banReason: banReason,
+            banStatus: isBanned
+          })
+          .execute()
+      } else {
+        if (isBanned === false) {
+          const resultUpdate = await manager.getRepository(UsersBannedByBlogger)
+          .delete(
+            {
+              userId: { _id: banUserId },
+              blogId: { _id: blogId },
+            }
+          )
+        }
+        const resultUpdate = await manager.getRepository(UsersBannedByBlogger)
+          .update(
+            {
+              userId: { _id: banUserId },
+              blogId: { _id: blogId },
+            },
+            {
+              banDate: banDate,
+              banReason: banReason,
+              banStatus: isBanned
+            }
+          )
+      }
+
+      await queryRunner.commitTransaction()
+      return true
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      await queryRunner.release()
+    }
+
   }
 
 }

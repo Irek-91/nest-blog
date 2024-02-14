@@ -5,7 +5,6 @@ import { PostsService } from '../../posts/application/posts.service';
 import { Blog } from './entity/blog.entity';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { BlogDocument } from "../models/blogs-schema"
 import { Filter, ObjectId } from "mongodb";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -52,7 +51,7 @@ export class BlogsRepoPSQL {
           websiteUrl: inputData.websiteUrl,
           createdAt: inputData.createdAt,
           isMembership: inputData.isMembership,
-          user: {_id : inputData.userId},
+          blogger: {_id : inputData.userId},
         })
         await queryRunner.commitTransaction()
         return newBlog.generatedMaps
@@ -100,7 +99,7 @@ export class BlogsRepoPSQL {
     try {
       const blog = await manager.update(Blog,
         { _id: blogId },
-        { user: { _id: userId } }
+        { blogger: { _id: userId } }
       )
 
       await queryRunner.commitTransaction()

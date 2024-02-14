@@ -3,7 +3,6 @@ import { DeviceViewModel, devicesMongo } from "../model/device-model"
 import mongoose, { ObjectId } from "mongoose"
 import { log } from "console"
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
-import { SecurityDeviceRepository } from '../db-mongo/securityDevice.repo';
 import { SecurityDeviceRepoPSQL } from './securityDevice.repo.PSQL';
 
 

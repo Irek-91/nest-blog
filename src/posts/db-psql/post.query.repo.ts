@@ -291,11 +291,11 @@ export class PostQueryRepoPSQL {
             const post: Post | null = await this.postModel.getRepository(Post)
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
-                .leftJoinAndSelect('b.user', 'u')
+                .leftJoinAndSelect('b.blogger', 'u')
                 .where('p._id = :id', { id: postId })
                 .andWhere(new Brackets(qb => {
                     qb.where('u.status = false')
-                        .orWhere('b.user is null');
+                        .orWhere('b.blogger is null');
                 })
                 )
                 //.andWhere('u.status = :status', { status: false })

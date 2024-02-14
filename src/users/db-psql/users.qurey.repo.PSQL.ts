@@ -1,17 +1,17 @@
+import { Blog } from './../../blogs/db-psql/entity/blog.entity';
+import { banUserBlogViewModel, bannedUsersViewModel } from './../models/users-model';
 import { BannedUser } from './entity/banned.user.entity';
 import { banStatusEnum, queryPaginationTypeUserSA } from './../../helpers/query-filter-users-SA';
 import { User } from './entity/user.entity';
 import { EmailConfirmation } from './entity/email.confirm.entity';
 import { HttpCode, HttpStatus, Injectable, HttpException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { FilterQuery, Model } from "mongoose";
-import { UserDocument } from "../models/users-schema";
 import mongoose, { ObjectId } from "mongoose";
 import { emailConfirmationPSQL, userModelPSQL, userMongoModel, userViewModel, usersViewModel } from "../models/users-model";
 import { log } from "console";
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Brackets, DataSource, Equal, ILike, In, IsNull, Like, Not } from 'typeorm';
 import { IsBoolean } from 'class-validator';
+import { UsersBannedByBlogger } from './entity/users.banned.by.blogger.entity';
 
 
 
@@ -53,7 +53,7 @@ export class UsersQueryRepoPSQL {
         .limit(paginatorUser.pageSize)
         .getRawMany()
 
-        
+
 
 
       totalCount = await this.dataSource
@@ -218,6 +218,96 @@ export class UsersQueryRepoPSQL {
     }
     catch (e) { return null }
   }
+
+  async getUserBannedByBlogger(userId: string): Promise<UsersBannedByBlogger | null> {
+    try {
+      const result = await this.dataSource.getRepository(UsersBannedByBlogger)
+        .findOne({
+            relations: {
+              blogId: true,
+              userId: true
+            },
+            where: {
+              userId: { _id: userId }
+            }
+          })
+
+      if (!result) { return null }
+      else {
+        return result
+      }
+    }
+    catch (e) { return null }
+  }
+
+
+  async getUsersBannedByBlogId(blogId: string, paginator: queryPaginationTypeUserSA): Promise<bannedUsersViewModel> {
+    try {
+      const searchLoginTerm = paginator.searchLoginTerm
+      const result = await this.dataSource.createQueryBuilder(UsersBannedByBlogger, 'b')
+        .leftJoinAndSelect(User, "u", "b.userId = u._id")
+        .leftJoinAndSelect(Blog, "blog", "b.blogId = blog._id")
+        .where('blog._id = :blogId', { blogId: blogId })
+        .andWhere('b.banStatus = :banStatus', { banStatus: true })
+        .andWhere(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
+        .orderBy(`u.${paginator.sortBy}`, paginator.sortDirection)
+        .offset(paginator.skip)
+        .limit(paginator.pageSize)
+        .getRawMany()
+
+      const totalCount = await this.dataSource.createQueryBuilder(UsersBannedByBlogger, 'b')
+        .leftJoinAndSelect(User, "u", "b.userId = u._id")
+        .leftJoinAndSelect(Blog, "blog", "b.blogId = blog._id")
+        .where('blog._id = :blogId', { blogId: blogId })
+        .andWhere(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
+        .getCount()
+
+
+
+      if (!result) {
+        return {
+          pagesCount: 0,
+          page: 1,
+          pageSize: 10,
+          totalCount: 0,
+          items: []
+        }
+
+      }
+      const usersOutput = result.map((b) => {
+        return {
+          id: b.u__id.toString(),
+          login: b.u_login,
+          banInfo: {
+            isBanned: b.b_banStatus,
+            banDate: b.b_banDate,
+            banReason: b.b_banReason
+          }
+        }
+      })
+
+      return {
+        pagesCount: Math.ceil(totalCount / paginator.pageSize),
+        page: paginator.pageNumber,
+        pageSize: paginator.pageSize,
+        totalCount: totalCount,
+        items: usersOutput
+      }
+
+
+    }
+    catch (e) {
+      return {
+        pagesCount: 0,
+        page: 1,
+        pageSize: 10,
+        totalCount: 0,
+        items: []
+      }
+    }
+  }
+
+
 
   async findUserByLogin(login: string): Promise<userModelPSQL | null> {
     try {

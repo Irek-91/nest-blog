@@ -56,6 +56,16 @@ describe('tests for blogger', () => {
             const user = await createUser('admin', 'qwerty', userOneModel, httpServer)
             expect.setState({ userOne: user })
             const { userOne } = expect.getState()
+            
+            const userThreeModel: userInputModel = {
+                login: 'userThree',
+                password: 'userThree2023',
+                email: 'userThree@mail.com',
+            }
+            const user3 = await createUser('admin', 'qwerty', userThreeModel, httpServer)
+            expect.setState({ userThree: user3 })
+            const { userThree } = expect.getState()
+            
 
 
             const model: blogInput = {
@@ -215,7 +225,7 @@ describe('tests for blogger', () => {
                 title: "postOne",
                 shortDescription: "postOne bu blog2",
                 content: "string"
-              }
+            }
 
             const res = await request(httpServer).post(`/blogger/blogs/${blog2.id}/posts`).send(postData).set(userOne.headers)
             expect(res.status).toBe(201)
@@ -228,61 +238,129 @@ describe('tests for blogger', () => {
                 blogName: blog2.name,
                 createdAt: expect.any(String),
                 extendedLikesInfo: {
-                  likesCount: 0,
-                  dislikesCount: 0,
-                  myStatus: "None",
-                  newestLikes: expect.any(Array)
+                    likesCount: 0,
+                    dislikesCount: 0,
+                    myStatus: "None",
+                    newestLikes: expect.any(Array)
                 }
-              })
+            })
+            expect.setState({ postByUserOneBlog2: res.body })
+
+            
+
+        })
+
+        it('Забанить блог 2 для userTwo":', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const updateData = {
+                isBanned: true,
+                banReason: (Math.random() * 1e50).toString(36),
+                blogId: blog2.id
+            }
+            const res = await request(httpServer).put(`/blogger/users/${userTwo.user.id}/ban`)
+                .send(updateData).set(userOne.headers)
+            expect(res.status).toBe(204)
+        })
+
+        it('Написать комментарий, забаненным пользователем userTwo для поста к блогу 2":', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const { postByUserOneBlog2 } = expect.getState()
+
+            const inputData = {
+                content: "stringstringstringst"
+              }
+            const res = await request(httpServer).post(`/posts/${postByUserOneBlog2.id}/comments`)
+                .send(inputData).set(userTwo.headers)
+            expect(res.status).toBe(403)
 
         })
 
 
 
-        //     it('should return 200 status code and created blog', async () => {
-        //         const {blog} = expect.getState()
-        //         const res = await request(httpServer).get(`/sa/blogs/${blog.id}`).auth('admin', 'qwerty')
-        //         expect(res.status).toBe(200)
-        //         expect(res.body).toEqual(blog)
-        //     })
 
 
-        //     it('обновление блога',async () => {
-        //         const {blog} = expect.getState()
-        //         const data: blogInput = {
-        //             name: "UpdateBlog",
-        //             description: "string",
-        //             websiteUrl: 'https://samurai.it-incubator.com',
-        //         }
-        //         const res = await request(httpServer).put(`/sa/blogs/${blog.id}`)
-        //                                       .auth('admin', 'qwerty')
-        //                                       .send(data)
-        //                                       .expect(204)
-        //         const result = await request(httpServer).get(`/sa/blogs/${blog.id}`).auth('admin', 'qwerty')
-        //         expect(result.body).toEqual({
-        //             id: blog.id,
-        //             name: data.name,
-        //             description: data.description,
-        //             websiteUrl: data.websiteUrl,
-        //             createdAt: expect.any(String),
-        //             isMembership: false})
-        //         })
+        it('Ошибка 403, попытка забанить блог 2 для userTwo, который не прнодлежит юзеру', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const { userThree } = expect.getState()
+            const updateData = {
+                isBanned: true,
+                banReason: (Math.random() * 1e50).toString(36),
+                blogId: blog2.id
+            }
+            const res = await request(httpServer).put(`/blogger/users/${userTwo.user.id}/ban`)
+                .send(updateData).set(userThree.headers)
+            expect(res.status).toBe(403)
+        })
 
-        //         it('удаление блога',async () => {
-        //             const {blog} = expect.getState()
-        //             const res = await request(httpServer).delete(`/sa/blogs/${blog.id}`)
-        //                                           .set({Authorization: 'Basic YWRtaW46cXdlcnR5'})
-        //                                           .expect(204)
-        //             const result = await request(httpServer).get(`/blogs`)
+        it('Получить всех забаненных пользователей для блог 2":', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const res = await request(httpServer).get(`/blogger/users/blog/${blog2.id}`)
+                .set(userOne.headers)
+            expect(res.status).toBe(200)
+            expect(res.body).toEqual({
+                pagesCount: 1,
+                page: 1,
+                pageSize: 10,
+                totalCount: 1,
+                items: [
+                    {
+                        id: userTwo.user.id,
+                        login: userTwo.user.login,
+                        banInfo: {
+                            isBanned: true,
+                            banDate: expect.any(String),
+                            banReason: expect.any(String)
+                        }
+                    }
+                ]
+            })
 
-        //             expect(result.status).toBe(200)
-        //             expect(result.body).toEqual(({pagesCount: 0,
-        //                 page: 1,
-        //                 pageSize: 10,
-        //                 totalCount: 0,
-        //                 items: []
-        //                }))
-        //         })
+
+        })
+
+
+
+        it('Разбанить блог 2 для userTwo":', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+
+
+            const updateDataTwo = {
+                isBanned: false,
+                banReason: (Math.random() * 1e50).toString(36),
+                blogId: blog2.id
+            }
+
+            const res2 = await request(httpServer).put(`/blogger/users/${userTwo.user.id}/ban`)
+                .send(updateDataTwo).set(userOne.headers)
+            expect(res2.status).toBe(204)
+
+
+        })
+
+        it('Написать комментарий, разбаненным пользователем userTwo для поста к блогу 2":', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const { postByUserOneBlog2 } = expect.getState()
+
+            const inputData = {
+                content: "stringstringstringst"
+              }
+            const res = await request(httpServer).post(`/posts/${postByUserOneBlog2.id}/comments`)
+                .send(inputData).set(userTwo.headers)
+            expect(res.status).toBe(201)
+            
+        })
 
     })
 

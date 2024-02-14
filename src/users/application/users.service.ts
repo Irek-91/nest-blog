@@ -3,12 +3,10 @@ import { queryPaginationTypeUserSA } from './../../helpers/query-filter-users-SA
 import { CreatUserInputModel, MeViewModel, emailConfirmationPSQL, userModelPSQL } from '../models/users-model';
 import { queryPaginationTypeUser } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { UsersRepository } from "../db-mongo/users.repo";
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import mongoose, { ObjectId } from "mongoose";
 import bcrypt from 'bcrypt'
-import { UserDocument } from "../models/users-schema";
 import { log } from 'console';
 import { UsersRepositoryPSQL } from '../db-psql/users.repo.PSQL';
 import { UsersQueryRepoPSQL } from '../db-psql/users.qurey.repo.PSQL';

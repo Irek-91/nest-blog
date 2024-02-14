@@ -8,13 +8,7 @@ import { Controller, Delete, Get, HttpException, HttpStatus } from '@nestjs/comm
 import { AppService } from './app.service';
 import { UsersService } from './users/application/users.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './users/models/users-schema';
 import { Model } from 'mongoose';
-import { Blog, BlogDocument } from './blogs/models/blogs-schema';
-import { Post, PostDocument } from './posts/model/post-schema';
-import { Comment, CommentDocument } from './comments/model/comments-schema';
-import { Like, LikeDocument } from './likes/model/likes-schema';
-import { DevicesModel, DevicesModelDocument } from './securityDevices/model/device-schema';
 import { IPAndURIModel } from './securityDevices/model/IPAndURIModel';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -58,8 +52,8 @@ export class TestingController {
     await this.commentModel.deleteCommentsAll();
     await this.pairModel.deleteAll()
     await this.commandBus.execute(new DeletePostsAllCommand());
-    await this.commandBus.execute(new DeleteBlogsAllCommand());
     await this.userModel.deleteUserAll();
+    await this.commandBus.execute(new DeleteBlogsAllCommand());
     await this.questionModel.deleteAllQuestions()
     //await this.deviceModel.deleteMany();
     //await this.ipAndURIModel.deleteMany()

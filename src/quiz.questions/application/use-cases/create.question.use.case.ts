@@ -1,3 +1,4 @@
+import { DataSource } from 'typeorm';
 import { QuestionInputModel, questionDBModel, questionViewModel } from '../../model/questionModel';
 import { QuestionsRepository } from '../../db-psql/questions.repo';
 import { Injectable } from '@nestjs/common';
@@ -13,10 +14,13 @@ export class CreateQuestionComand {
 
 @CommandHandler(CreateQuestionComand)
 export class CreateQuestionUseCase implements ICommandHandler<CreateQuestionComand>{
-    constructor(protected questionsRepository: QuestionsRepository
+    constructor(protected questionsRepository: QuestionsRepository,
+        private dataSource: DataSource
     ) { }
 
     async execute(comand: CreateQuestionComand): Promise<questionViewModel> {
+        const queryRunner = this.dataSource.createQueryRunner()
+        await queryRunner.connect()
 
         const newQuestion: questionDBModel = {
             id: uuidv4(),
@@ -26,7 +30,11 @@ export class CreateQuestionUseCase implements ICommandHandler<CreateQuestionComa
             createdAt: new Date().toISOString(),
             updatedAt: null
         }
+        await queryRunner.startTransaction()
 
+        // try {
+
+        // }
         return await this.questionsRepository.createQuestion(newQuestion)
     }
 

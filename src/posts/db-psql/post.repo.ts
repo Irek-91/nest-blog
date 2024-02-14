@@ -1,6 +1,5 @@
 import { Like } from './../../likes/entity/likes.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { PostDocument } from "../model/post-schema"
 import mongoose, { HydratedDocument, Model } from "mongoose"
 import { newestLikes, paginatorPost, postMongoDb, postOutput } from "../model/post-model"
 import { Filter, ObjectId } from "mongodb";
@@ -38,12 +37,7 @@ export class PostRepoPSQL {
                     createdAt: newPost.createdAt
                 })
                 .execute()
-            // query(`
-            //     INSERT INTO public."posts"(
-            //     _id, title, "shortDescription", content, "blogId", "blogName", "createdAt")
-            //     VALUES ('${newPost._id}', '${newPost.title}', '${newPost.shortDescription}',
-            //             '${newPost.content}', '${newPost.blogId}', '${newPost.blogName}', '${newPost.createdAt}')
-            // `)
+          
             if (postCreated.identifiers.length > 0) {
                 return true
             } else {
@@ -71,12 +65,6 @@ export class PostRepoPSQL {
                 })
                 .execute()
 
-            //     query(`
-            // UPDATE public."posts"
-            // SET title=$2, "shortDescription"=$3, content=$4
-            // WHERE "_id" = $1
-            // `, [id, title, shortDescription, content])
-
             return true
         } catch (e) { return false }
     }
@@ -102,11 +90,7 @@ export class PostRepoPSQL {
                     .where({ userId: userId })
                     .andWhere({ postIdOrCommentId: postId })
                     .execute()
-                // query(`UPDATE public."likes"
-                // SET "userLogin"=$3, status=$4, "createdAt"=$5
-                // WHERE "userId" = $1 AND "postIdOrCommentId" = $2
-                // `, [userId, commentId, login, likeStatus, createdAt])
-                
+   
                 if (!likeResult) { return null }
                 return true
             } else {

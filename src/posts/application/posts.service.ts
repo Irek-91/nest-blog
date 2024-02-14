@@ -1,12 +1,7 @@
-import { BlogsQueryRepository } from '../../blogs/db-mongo/blogs.query.repo';
-import { BlogsRepository } from '../../blogs/db-mongo/blogs.repo';
 import { queryPaginationType } from '../../helpers/query-filter';
-import { Post, PostSchema } from '../model/post-schema';
 import {HttpStatus, Injectable , HttpException} from "@nestjs/common"
 import { paginatorPost, postInputModel, postMongoDb, postOutput } from "../model/post-model"
 import { Filter, ObjectId } from "mongodb";
-import { PostQueryRepository } from '../db-mongo/post.query.repo';
-import { PostRepository } from '../db-mongo/post.repo';
 import { PostQueryRepoPSQL } from '../db-psql/post.query.repo';
 import { BlogsQueryRepoPSQL } from '../../blogs/db-psql/blogs.query.repo.PSQL';
 import { PostRepoPSQL } from '../db-psql/post.repo';

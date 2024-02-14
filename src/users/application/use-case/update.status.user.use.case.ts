@@ -25,7 +25,7 @@ export class UpdateStatusUserUseCase implements ICommandHandler<UpdateStatusUser
         }
         const resultUser = await this.usersRepo.updateStatusUser(command.userId, command.isBanned, banReason, banDate)
         if (command.isBanned === true) {
-            const result = await this.securityDeviceRepoP.deleteAllDevicesByUserId(command.userId)
+            const deleteAllDevicesByUser = await this.securityDeviceRepoP.deleteAllDevicesByUserId(command.userId)
         }
         if (!resultUser) {
             return null

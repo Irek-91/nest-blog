@@ -1,9 +1,7 @@
 import { queryPaginationType } from '../../helpers/query-filter';
-import { BlogsRepository } from "../db-mongo/blogs.repo"
 import { blogInput, blogMongoDB, blogOutput } from "../models/blogs-model"
 import mongoose from "mongoose"
 import { Injectable } from "@nestjs/common"
-import { BlogsQueryRepository } from '../db-mongo/blogs.query.repo';
 import { BlogsRepoPSQL } from '../db-psql/blogs.repo.PSQL';
 import { BlogsQueryRepoPSQL } from '../db-psql/blogs.query.repo.PSQL';
 import { v4 as uuidv4 } from 'uuid';

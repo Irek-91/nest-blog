@@ -2,7 +2,6 @@ import { User } from './../../users/db-psql/entity/user.entity';
 import { blogSAOutput, paginatorBlogSA } from './../models/blogs-model';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
-import { BlogDocument } from "../models/blogs-schema"
 import { Filter, ObjectId } from "mongodb";
 
 import { Model } from "mongoose"
@@ -40,7 +39,7 @@ export class BlogsQueryRepoPSQL {
 
     let blogsOne = await this.dataSource
       .createQueryBuilder(Blog, 'b')
-      .leftJoinAndSelect('b.user', 'u')
+      .leftJoinAndSelect('b.blogger', 'u')
       .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
       .andWhere('u._id = :userId', {
         userId: userId
@@ -53,7 +52,7 @@ export class BlogsQueryRepoPSQL {
 
     const totalCount = await this.dataSource
       .createQueryBuilder(Blog, 'b')
-      .leftJoinAndSelect(User, "u", "u._id = b.user")
+      .leftJoinAndSelect(User, "u", "u._id = b.blogger")
       .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
       .andWhere('u._id = :userId', {
         userId: userId
@@ -96,7 +95,7 @@ export class BlogsQueryRepoPSQL {
 
     let blogsOne = await this.dataSource
       .createQueryBuilder(Blog, 'b')
-      .leftJoinAndSelect('b.user', 'u')
+      .leftJoinAndSelect('b.blogger', 'u')
       .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
       // .andWhere('u._id = :userId', {
       //   userId: userId
@@ -111,7 +110,7 @@ export class BlogsQueryRepoPSQL {
 
     const totalCount = await this.dataSource.getRepository(Blog)
       .createQueryBuilder('b')
-      .leftJoinAndSelect('b.user', 'u')
+      .leftJoinAndSelect('b.blogger', 'u')
       .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
       .getMany()
 
@@ -124,8 +123,8 @@ export class BlogsQueryRepoPSQL {
         createdAt: b.createdAt,
         isMembership: b.isMembership,
         blogOwnerInfo: {
-          userId: b.user._id,
-          userLogin: b.user.login
+          userId: b.blogger._id,
+          userLogin: b.blogger.login
         }
       }
     })
@@ -182,9 +181,31 @@ export class BlogsQueryRepoPSQL {
     try {
       const blog = await this.dataSource
         .createQueryBuilder(Blog, 'b')
-        .leftJoinAndSelect('b.user', 'u')
+        .leftJoinAndSelect('b.blogger', 'u')
         .where({ _id: id })
         .getOne()
+      if (!blog) { return null }
+      return blog
+    }
+    catch (e) {
+      return null
+    }
+  }
+
+  async getBlogsByBlogger(bloggerId: string): Promise<Blog | null> {
+    try {
+      const blog = await this.dataSource.getRepository(Blog)
+        .findOne({
+          relations: {
+            blogger: true
+          },
+          where : {
+            blogger : {
+              _id: bloggerId
+            }
+          }
+        })
+       
       if (!blog) { return null }
       return blog
     }

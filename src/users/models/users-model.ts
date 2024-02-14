@@ -34,6 +34,22 @@ export class UpdateStatusInputModel {
     banReason : string
 };
 
+export class BanUserByBloggerInputModel {
+    @IsBoolean()
+    @IsNotEmpty()
+    isBanned : boolean
+
+    @MinLength(20)
+    @IsString()
+    @IsNotEmpty()
+    banReason : string
+
+    @IsString()
+    @IsNotEmpty()
+    blogId : string
+
+
+};
 export type userViewModel = {
     id: string,
     login: string,
@@ -41,6 +57,20 @@ export type userViewModel = {
     createdAt: string,
     banInfo: banUserInfoViewModel
 }
+export type banUserBlogViewModel = {
+    id: string,
+    login: string,
+    banInfo: banUserInfoViewModel
+}
+
+export type bannedUsersViewModel = {
+    pagesCount: number,
+    page: number,
+    pageSize: number,
+    totalCount: number,
+    items: banUserBlogViewModel[] | []
+}
+
 
 export type banUserInfoViewModel = {
     isBanned: boolean,

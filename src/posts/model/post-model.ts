@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 import mongoose from "mongoose";
 import { Transform } from "class-transformer";
-import { BlogsQueryRepository } from '../../blogs/db-mongo/blogs.query.repo';
 import { IsBLogIdExist } from "../../blogs/models/blog.decorator";
 
 

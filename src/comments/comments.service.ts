@@ -15,13 +15,18 @@ export class CommentsService {
         protected commentsRepository: CommentsRepoPSQL,
         protected commentsQueryRepository: CommentsQueryRepoPSQL) { }
 
-    async createdCommentPostId(postId: string, userId: string, content: string): Promise<commentViewModel> {
+    async createdCommentPostId(blogId: string, postId: string, userId: string, content: string): Promise<commentViewModel | false> {
 
         const createdAt = new Date().toISOString();
         const user = await this.usersQueryRepository.findUserById(userId)
         const userLogin = user!.login
-        const creatComment = await this.commentsRepository.createdCommentPostId(postId, content, userId, userLogin, createdAt)
-        return creatComment
+        const bannedBlog = await this.usersQueryRepository.getUserBannedByBlogger(userId)
+        if (!bannedBlog || bannedBlog.blogId._id !== blogId) {
+            const creatComment = await this.commentsRepository.createdCommentPostId(postId, content, userId, userLogin, createdAt)
+            return creatComment
+        } else {
+            return false
+        }
     }
 
     async findCommentById(commentId: string, userId: string | null): Promise<commentViewModel | null> {

@@ -1,3 +1,5 @@
+import { BanUserByBloggerCommand } from './../users/application/use-case/ban.user.by.blogger.use.case';
+import { BanUserByBloggerInputModel } from './../users/models/users-model';
 import { CustomPipe } from './../adapters/pipe';
 import { UpdatePostCommand } from './../posts/application/use-case/update.post.use.case';
 import { FindPostsByBlogIdCommand } from './../posts/application/use-case/find.posts.by.blog.id.use.case';
@@ -15,14 +17,14 @@ import { CommandBus } from '@nestjs/cqrs';
 import { Pagination } from './../helpers/query-filter';
 import { PostsService } from './../posts/application/posts.service';
 import { BlogsService } from './application/blogs.service';
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
 import { paginatorPost, postInputModel, postOutput } from '../posts/model/post-model';
 import { DeletePostIdCommand } from './../posts/application/use-case/delete.post.id.use.case';
 import { Blog } from './db-psql/entity/blog.entity';
 
 
 @UseGuards(UserAuthGuard)
-@Controller('blogger/blogs')
+@Controller('blogger')
 export class BloggerController {
     constructor(protected blogsService: BlogsService,
         protected postsService: PostsService,
@@ -32,7 +34,7 @@ export class BloggerController {
     }
 
 
-    @Get()
+    @Get('blogs')
     async getBlogs(@Query()
     query: {
         searchNameTerm?: string;
@@ -49,7 +51,7 @@ export class BloggerController {
 
 
 
-    @Get(':blogId/posts')
+    @Get('blogs/:blogId/posts')
     async getPostsByBlogId(@Query()
     query: {
         searchNameTerm?: string;
@@ -78,7 +80,7 @@ export class BloggerController {
         }
     }
 
-    @Post()
+    @Post('blogs')
     async createBlogByBlogger(@Body() blogInputData: blogInput,
         @Request() req: any) {
         const userId = req.userId//исправить после авторизации
@@ -87,7 +89,7 @@ export class BloggerController {
     }
 
 
-    @Post(':blogId/posts')
+    @Post('blogs/:blogId/posts')
     async createPostByBlog(@Param('blogId', new CustomPipe()) blogId: string,
         @Body() inputData: postInputModelSpecific,
         @Request() req: any) {
@@ -102,7 +104,7 @@ export class BloggerController {
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
-        if (blog.user._id !== userId) {
+        if (blog.blogger._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         const newPost = await this.commandBus.execute(new CreatedPostByBlogIdCommand(inputDataModel));
@@ -115,7 +117,7 @@ export class BloggerController {
     }
 
 
-    @Put(':id')
+    @Put('blogs/:id')
     async updateBlog(@Param('id') blogId: string,
         @Body() blogInputData: blogInput,
         @Request() req: any) {
@@ -124,7 +126,7 @@ export class BloggerController {
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        if (blog.user._id !== userId) {
+        if (blog.blogger._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
 
@@ -137,8 +139,10 @@ export class BloggerController {
         }
     }
 
+    
 
-    @Put(':blogId/posts/:postId')
+
+    @Put('blogs/:blogId/posts/:postId')
     async updatePostByBlogId(@Param('blogId') blogId: string, @Param('postId') postId: string,
         @Body() postUpdateData: postInputModelSpecific,
         @Request() req: any) {
@@ -148,7 +152,7 @@ export class BloggerController {
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
-        if (blog.user._id !== userId) {
+        if (blog.blogger._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         const postResult = await this.commandBus.execute(new UpdatePostCommand(postId, postUpdateData.title,
@@ -162,7 +166,7 @@ export class BloggerController {
 
     }
 
-    @Delete(':blogId/posts/:postId')
+    @Delete('blogs/:blogId/posts/:postId')
     async deletePostByBlogId(@Param('blogId') blogId: string, @Param('postId') postId: string,
         @Request() req: any) {
         let userId = req.userId//исправить после авторизации
@@ -170,7 +174,7 @@ export class BloggerController {
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        if (blog.user._id !== userId) {
+        if (blog.blogger._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         let result = await this.commandBus.execute(new DeletePostIdCommand(postId))
@@ -183,7 +187,7 @@ export class BloggerController {
     }
 
 
-    @Delete(':id')
+    @Delete('blogs/:id')
     async deletBlog(@Param('id') blogId: string,
         @Request() req: any) {
         let userId = req.userId//исправить после авторизации
@@ -191,7 +195,7 @@ export class BloggerController {
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        if (blog.user._id !== userId) {
+        if (blog.blogger._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
         let result = await this.commandBus.execute(new DeleteBlogIdCommand(blogId))

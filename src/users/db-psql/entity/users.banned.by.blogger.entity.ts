@@ -1,14 +1,14 @@
-import { Blog } from './../../../blogs/db-psql/entity/blog.entity';
+import { Blog } from '../../../blogs/db-psql/entity/blog.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm"
 import { User } from "./user.entity"
 
 @Entity()
-export class BannedUser {
-  
+export class UsersBannedByBlogger {
+
     @PrimaryGeneratedColumn()
     id: number
-    // @PrimaryColumn()
-    @OneToOne(() => User, (user) => user._id)
+
+    @ManyToOne(() => User, (user) => user._id)
     @JoinColumn({
         name: 'userId'
     })
@@ -24,5 +24,18 @@ export class BannedUser {
         default: null,
         nullable: true
     })
+    banStatus: boolean
+
+    @Column({
+        default: null,
+        nullable: true
+    })
     banReason: string
+
+    @ManyToOne((type) => Blog, (b) => b._id)
+    @JoinColumn({
+        name: 'blogId'
+    })
+    public blogId: Blog
 }
+

@@ -118,11 +118,15 @@ export class PostsController {
         @Param('postId') postId: string) {
 
         const userId = req.userId
-        let post: postOutput | null = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
+        const post: postOutput | null = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
+
         if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        let comment = await this.commentsService.createdCommentPostId(postId, userId, commentInputData.content)
+        const comment = await this.commentsService.createdCommentPostId(post.blogId, postId, userId, commentInputData.content)
+        if (!comment) {
+            throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
+        }
         return comment
     }
 

@@ -2,7 +2,6 @@ import { User } from './../../users/db-psql/entity/user.entity';
 import { Device } from './entity/devices.entity';
 import { InjectModel } from "@nestjs/mongoose";
 import { devicesMongo, devicesPSQL } from "../model/device-model";
-import { DevicesModel, DevicesModelDocument } from "../model/device-schema";
 import mongoose, { Model, ObjectId } from "mongoose";
 import { Injectable } from "@nestjs/common"
 import { JwtService } from "../../adapters/jwt-service";

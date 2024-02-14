@@ -1,3 +1,7 @@
+import { GetBannedUsersForBlogUseCase } from './users/application/use-case/get.banned.users.for.blog.use.case';
+import { UsersBannedByBlogger } from './users/db-psql/entity/users.banned.by.blogger.entity';
+import { BanUserByBloggerUseCase } from './users/application/use-case/ban.user.by.blogger.use.case';
+import { GetBlogsByBloggerUseCase } from './blogs/application/use-case/get.blogs.by.blogger.use.case';
 import { DeleteUserIdUseCase } from './users/application/use-case/delete.user.id.use.case';
 import { GetUserByIdUseCase } from './users/application/use-case/get.user.by.id.use.case';
 import { PaginationUsersSa } from './helpers/query-filter-users-SA';
@@ -60,23 +64,17 @@ import { AppController, TestingController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/application/users.service';
-import { UsersRepository } from './users/db-mongo/users.repo';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BlogsController } from './blogs/blogs.controller';
 import { BlogsService } from './blogs/application/blogs.service';
-import { BlogsRepository } from './blogs/db-mongo/blogs.repo';
 import { env } from 'process';
 import { Pagination } from './helpers/query-filter';
 import { PostsController } from './posts/posts.controller';
 import { PostsService } from './posts/application/posts.service';
-import { CommentSchema } from './comments/model/comments-schema';
-import { CommentsRepository } from './comments/db-mongo/comments.repo';
 import { CommentsController } from './comments/comments.controller';
-import { LikeSchema } from './likes/model/likes-schema';
 import { AuthService } from './auth/auth.service';
 import { EmailAdapter } from './adapters/email-adapter';
 import { JwtService } from './adapters/jwt-service';
-import { DevicesModel, DevicesModelSchema } from './securityDevices/model/device-schema';
 import { SecurityDeviceServicePSQL } from './securityDevices/db-psql/securityDevice.service.PSQL';
 import { AuthController } from './auth/auth.controller';
 import { LocalStrategy } from './auth/strategies/local.strategy';
@@ -84,8 +82,6 @@ import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
-import { CommentsQueryRepository } from './comments/db-mongo/comments.query.repo';
-import { BlogsQueryRepository } from './blogs/db-mongo/blogs.query.repo';
 import { IsBlogIdAlreadyExistConstraint } from './blogs/models/blog.decorator';
 import { IPAndURIModel, IPAndURISchema } from './securityDevices/model/IPAndURIModel';
 import { SecurityDeviceController } from './securityDevices/securityDevice-controller';
@@ -95,13 +91,9 @@ import { UsersQueryRepoPSQL } from './users/db-psql/users.qurey.repo.PSQL';
 import { UsersRepositoryPSQL } from './users/db-psql/users.repo.PSQL';
 import { UsersSAController } from './users/users.SA.controller';
 import { log } from 'console';
-import { SecurityDeviceRepository } from './securityDevices/db-mongo/securityDevice.repo';
 import { SecurityDeviceRepoPSQL } from './securityDevices/db-psql/securityDevice.repo.PSQL';
-import { SecurityDeviceService } from './securityDevices/db-mongo/securityDevice.service';
 import { BlogsQueryRepoPSQL } from './blogs/db-psql/blogs.query.repo.PSQL';
 import { BlogsRepoPSQL } from './blogs/db-psql/blogs.repo.PSQL';
-import { PostQueryRepository } from './posts/db-mongo/post.query.repo';
-import { PostRepository } from './posts/db-mongo/post.repo';
 import { PostQueryRepoPSQL } from './posts/db-psql/post.query.repo';
 import { PostRepoPSQL } from './posts/db-psql/post.repo';
 import { BlogsSAController } from './blogs/blogs.SA.controller';
@@ -126,15 +118,16 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
   CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
 
 const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
-  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase]
+  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase]
 
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase]
 
-const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase, DeleteUserIdUseCase]
+const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase, DeleteUserIdUseCase, 
+  BanUserByBloggerUseCase, GetBannedUsersForBlogUseCase]
 
 export const entities = [User, EmailConfirmation, Device, Post, Blog, 
-  Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser]
+  Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser, UsersBannedByBlogger]
 
 @Module({
   imports: [

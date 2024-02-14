@@ -6,9 +6,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
-import { BlogsQueryRepository } from '../db-mongo/blogs.query.repo';
 import { log } from 'console';
-import { BlogDocument } from './blogs-schema';
 import { BlogsQueryRepoPSQL } from '../db-psql/blogs.query.repo.PSQL';
 import { Blog } from '../db-psql/entity/blog.entity';
 

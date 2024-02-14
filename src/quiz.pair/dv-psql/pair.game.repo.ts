@@ -207,41 +207,13 @@ export class PairGameRepo {
         await queryRunner.startTransaction()
 
         try {
-            // const updateStatus = await manager
-            //     .update(Pair, {
-            //         id: pairId
-            //     }, {
-            //         finishGameDate: new Date().toISOString(),
-            //         status: "Finished"
-            //     })
-
-
-            // .set({
-            //     finishGameDate: new Date().toISOString(),
-            //     status: "Finished"
-            // })
-            // .where({
-            //     pairId: pairId
-            // })
-            // .execute()
-
-
             const updatePairResultLoserPlayer = await manager
                 .update(Pairresult, {
                     pairId: pairId, playerId: loserPlayer.id
                 }, {
                     score: loserPlayer.score
                 })
-            // .set({
-            //     score: loserPlayer.score
-            // })
-            // .where({
-            //     pairId: pairId
-            // })
-            // .andWhere({
-            //     playerId: loserPlayer.id
-            // })
-            // .execute()
+
 
             const updatePairResultWinnerPlayer = await manager
                 .update(Pairresult, {
@@ -249,16 +221,7 @@ export class PairGameRepo {
                 }, {
                     score: winnerPlayer.score
                 })
-            // .set({
-            //     score: winnerPlayer.score
-            // })
-            // .where({
-            //     pairId: pairId
-            // })
-            // .andWhere({
-            //     playerId: winnerPlayer.id
-            // })
-            // .execute()
+     
 
             const addAndUpdateStatisticWinner = await manager
                 .update(Statistic, {
@@ -267,12 +230,7 @@ export class PairGameRepo {
                     sumScore: () => `sumScore + ${winnerPlayer.score}`,
                     winsCount: () => `winsCount + 1`
                 })
-            // .set({
-            //     sumScore: () => `sumScore + ${winnerPlayer.score}`,
-            //     winsCount: () => `winsCount + 1`,
-            // })
-            // .where({ userId: winnerPlayer.id })
-            // .execute()
+     
 
             const addAndUpdateStatisticLoser = await manager
                 .update(Statistic, {
@@ -281,12 +239,7 @@ export class PairGameRepo {
                     sumScore: () => `sumScore + ${loserPlayer.score}`,
                     lossesCount: () => `lossesCount + 1`
                 })
-            // .set({
-            //     sumScore: () => `sumScore + ${loserPlayer.score}`,
-            //     lossesCount: () => `lossesCount + 1`,
-            // })
-            // .where({ userId: loserPlayer.id })
-            // .execute()
+     
 
             await queryRunner.commitTransaction()
             return true
