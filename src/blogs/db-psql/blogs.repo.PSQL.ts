@@ -64,7 +64,7 @@ export class BlogsRepoPSQL {
     }
   }
 
-  async updateBlog(blogId: string, bloginputData: blogInput): Promise<Number> {
+  async updateBlog(blogId: string, bloginputData: blogInput): Promise<true| null> {
     const queryRunner = this.dataSource.createQueryRunner()
     const manager = queryRunner.manager
     await queryRunner.connect()
@@ -81,11 +81,34 @@ export class BlogsRepoPSQL {
       // WHERE "_id" = $1`, [blogId, bloginputData.name,
       //                   bloginputData.description, bloginputData.websiteUrl])
       await queryRunner.commitTransaction()
-      return HttpStatus.NO_CONTENT
+      return true
     }
     catch (e) {
       await queryRunner.rollbackTransaction()
-      return HttpStatus.NOT_FOUND
+      return null
+    } finally {
+      await queryRunner.release()
+    }
+  }
+
+  async updateBanStatusByBlogId(blogId: string, banStatus: boolean): Promise<true| null> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      const banDate = new Date().toISOString()
+      const blog = await manager.update(Blog,
+        { _id: blogId },
+        {banStatus: banStatus, banDate: banDate}
+      )
+ 
+      await queryRunner.commitTransaction()
+      return true
+    }
+    catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
     } finally {
       await queryRunner.release()
     }

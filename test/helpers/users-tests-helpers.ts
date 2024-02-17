@@ -18,7 +18,7 @@ export const createUser = async ( saLogin: string, saPwd: string, model: userInp
     user: userViewModel, headers: headers}> => {
     const response = await request(httpServer).post('/sa/users').auth(saLogin, saPwd).send(model)
     const user = response.body
-    const AccessToken = jwt.sign({userId : user.id}, settings.JWT_SECRET, {expiresIn: 2000})
+    const AccessToken = jwt.sign({userId : user.id}, settings.JWT_SECRET, {expiresIn: 200})
     const headers = {Authorization: `Bearer ${AccessToken}`}
     return { response, user, headers}
 }

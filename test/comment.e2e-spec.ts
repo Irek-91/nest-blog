@@ -84,7 +84,7 @@ describe ('tests for comments', () => {
 
             expect.setState({comment: comment})      
 
-            const AccessToken = jwt.sign({userId : userOne.id}, settings.JWT_SECRET, {expiresIn: 100})
+            const AccessToken = jwt.sign({userId : userOne.id}, settings.JWT_SECRET, {expiresIn: 200})
             const headersJWT = {Authorization: `Bearer ${AccessToken}`}
             
             const updateCommentData = {
@@ -122,14 +122,14 @@ describe ('tests for comments', () => {
             const userModelTwo: userInputModel = {
                 login: 'medved',
                 password: 'panda2023',
-                email: 'panda@mail.com',
+                email: 'panda2023@mail.com',
             }
             const user = await createUser('admin', 'qwerty', userModelTwo, httpServer)
             const userTwo = user.user
             expect.setState({userTwo: userTwo})
 
             expect.setState({userTwo: userTwo})
-            const AccessTokenTwo = jwt.sign({userId : userTwo.id}, settings.JWT_SECRET, {expiresIn: 100})
+            const AccessTokenTwo = jwt.sign({userId : userTwo.id}, settings.JWT_SECRET, {expiresIn: 2000})
             const headersJWTTwo = {Authorization: `Bearer ${AccessTokenTwo}`}
             const updateCommentData = {
                 content: "coments of post!!!!!!!!!!!!!!!"    
@@ -148,9 +148,9 @@ describe ('tests for comments', () => {
             const {comment} = expect.getState()
             const {userOne} = expect.getState()
             const {userTwo} = expect.getState()
-            const AccessToken = jwt.sign({userId : userOne.id}, settings.JWT_SECRET, {expiresIn: 100})
+            const AccessToken = jwt.sign({userId : userOne.id}, settings.JWT_SECRET, {expiresIn: 2000})
             const headersJWTOne = {Authorization: `Bearer ${AccessToken}`}
-            const AccessTokenTwo = jwt.sign({userId : userTwo.id}, settings.JWT_SECRET, {expiresIn: 100})
+            const AccessTokenTwo = jwt.sign({userId : userTwo.id}, settings.JWT_SECRET, {expiresIn: 2000})
             const headersJWTTwo = {Authorization: `Bearer ${AccessTokenTwo}`}
 
             const likeStatusDataOne = {

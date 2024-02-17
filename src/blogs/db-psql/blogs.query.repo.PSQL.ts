@@ -36,28 +36,55 @@ export class BlogsQueryRepoPSQL {
     }
 
     const sortByWithCollate = pagination.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
-
+    
     let blogsOne = await this.dataSource
       .createQueryBuilder(Blog, 'b')
       .leftJoinAndSelect('b.blogger', 'u')
-      .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
-      .andWhere('u._id = :userId', {
-        userId: userId
-      })
+      .where('b.banStatus = :banStatus', { banStatus: false })
+      .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+      // .andWhere('u._id = :userId', {
+      //   userId: userId
+      // })
       .orderBy(`b.${pagination.sortBy}`, pagination.sortDirection)
       .skip(pagination.skip)
       .take(pagination.pageSize)
       .getMany()
 
-
-    const totalCount = await this.dataSource
+    let totalCount = await this.dataSource
       .createQueryBuilder(Blog, 'b')
       .leftJoinAndSelect(User, "u", "u._id = b.blogger")
-      .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
-      .andWhere('u._id = :userId', {
-        userId: userId
-      })
+      .where('b.banStatus = :banStatus', { banStatus: false })
+      .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+      // .andWhere('u._id = :userId', {
+      //   userId: userId
+      // })
       .getMany()
+
+    if (userId !== null) {
+      blogsOne = await this.dataSource
+        .createQueryBuilder(Blog, 'b')
+        .leftJoinAndSelect('b.blogger', 'u')
+        .where('b.banStatus = :banStatus', { banStatus: false })
+        .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+        .andWhere('u._id = :userId', {
+          userId: userId
+        })
+        .orderBy(`b.${pagination.sortBy}`, pagination.sortDirection)
+        .skip(pagination.skip)
+        .take(pagination.pageSize)
+        .getMany()
+
+      totalCount = await this.dataSource
+        .createQueryBuilder(Blog, 'b')
+        .leftJoinAndSelect(User, "u", "u._id = b.blogger")
+        .where('b.banStatus = :banStatus', { banStatus: false })
+        .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+        .andWhere('u._id = :userId', {
+          userId: userId
+        })
+        .getMany()
+    }
+
 
     const blogsOutput: blogOutput[] = blogsOne.map((b) => {
       return {
@@ -97,9 +124,6 @@ export class BlogsQueryRepoPSQL {
       .createQueryBuilder(Blog, 'b')
       .leftJoinAndSelect('b.blogger', 'u')
       .where(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
-      // .andWhere('u._id = :userId', {
-      //   userId: userId
-      // })
       .orderBy(`b.${pagination.sortBy}`, pagination.sortDirection)
       .skip(pagination.skip)
       .take(pagination.pageSize)
@@ -125,6 +149,10 @@ export class BlogsQueryRepoPSQL {
         blogOwnerInfo: {
           userId: b.blogger._id,
           userLogin: b.blogger.login
+        },
+        banInfo: {
+          banDate: b.banDate,
+          isBanned: b.banStatus
         }
       }
     })
@@ -139,7 +167,12 @@ export class BlogsQueryRepoPSQL {
   async getBlogId(id: string): Promise<blogOutput | null> {
     try {
 
-      const blog = await this.dataSource.getRepository(Blog).createQueryBuilder().where({ _id: id }).getOne()
+      let blog = await this.dataSource
+      .createQueryBuilder(Blog, 'b')
+      .leftJoinAndSelect('b.blogger', 'u')
+      .where('b.banStatus = :banStatus', { banStatus: false })
+      .andWhere({ _id: id })
+      .getOne()
 
       if (!blog) { return null }
       else {
@@ -158,18 +191,39 @@ export class BlogsQueryRepoPSQL {
       return null
     }
   }
+
+  async getSABlogId(id: string): Promise<blogOutput | null> {
+    try {
+      let blog = await this.dataSource
+      .createQueryBuilder(Blog, 'b')
+      .leftJoinAndSelect('b.blogger', 'u')
+      .andWhere({ _id: id })
+      .getOne()
+
+      if (!blog) { return null }
+      else {
+        return {
+          id: blog._id.toString(),
+          name: blog.name,
+          description: blog.description,
+          websiteUrl: blog.websiteUrl,
+          createdAt: blog.createdAt,
+          isMembership: false,
+        }
+
+      }
+    }
+    catch (e) {
+      return null
+    }
+  }
+
+
   async getBlogNameById(id: string): Promise<string | null> {
     try {
       const blog = await this.dataSource.getRepository(Blog).createQueryBuilder().where({ _id: id }).getOne()
       if (!blog) { return null }
       return blog.name
-
-      // const blog = await this.blogModel.query(`
-      //   SELECT * FROM public."blogs" as b
-      //   WHERE b."_id" = $1
-      //   `, [id])
-      // if (blog.length === 0) return null
-      // return blog[0].name
     }
     catch (e) {
       return null
@@ -199,13 +253,13 @@ export class BlogsQueryRepoPSQL {
           relations: {
             blogger: true
           },
-          where : {
-            blogger : {
+          where: {
+            blogger: {
               _id: bloggerId
             }
           }
         })
-       
+
       if (!blog) { return null }
       return blog
     }

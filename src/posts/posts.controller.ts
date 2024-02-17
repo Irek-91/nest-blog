@@ -1,3 +1,5 @@
+import { FindCommentsByPostCommand } from './../comments/application/use-case/find.comments.by.post.use.case';
+import { CreatedCommentPostCommand } from './../comments/application/use-case/created.comment.by.post.use.case';
 import { User } from './../users/db-psql/entity/user.entity';
 import { GetUserByIdCommand } from './../users/application/use-case/get.user.by.id.use.case';
 import { CreatedPostByBlogIdCommand } from './application/use-case/created.post.by.blog.id.use.case';
@@ -5,8 +7,8 @@ import { DeletePostIdCommand } from './application/use-case/delete.post.id.use.c
 import { FindPostsCommand } from './application/use-case/find.post.use.case';
 import { likeStatus } from './../likes/model/likes-model';
 import { AuthGuard } from './../auth.guard';
-import { commentInput } from './../comments/model/comments-model';
-import { CommentsService } from './../comments/comments.service';
+import { commentInput, paginatorComments } from './../comments/model/comments-model';
+import { CommentsService } from '../comments/application/comments.service';
 import { Pagination } from './../helpers/query-filter';
 import { BlogsService } from '../blogs/application/blogs.service';
 import { Controller, Get, Query, HttpException, HttpStatus, Param, Post, Body, Put, Delete, UseGuards, Request } from '@nestjs/common';
@@ -95,7 +97,10 @@ export class PostsController {
         if (!resultPostId) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        const commentsPostId = await this.commentsService.findCommentsByPostId(postId, userId, pagination)
+        const commentsPostId: paginatorComments | null = await this.commandBus.execute(new FindCommentsByPostCommand(postId, userId, pagination))
+        if (!commentsPostId) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
+        }
         return commentsPostId
     }
 
@@ -123,7 +128,7 @@ export class PostsController {
         if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
-        const comment = await this.commentsService.createdCommentPostId(post.blogId, postId, userId, commentInputData.content)
+        const comment = await this.commandBus.execute( new CreatedCommentPostCommand(post.blogId, postId, userId, commentInputData.content))
         if (!comment) {
             throw new HttpException('FORBIDDEN', HttpStatus.FORBIDDEN);
         }

@@ -29,12 +29,12 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
 
         if (!pair || !pair.startGameDate) {
             return 403//ошибка..
-        }
+        }  //27-32
 
         const resultPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, playerId)
         if (resultPlayer!.answersStatus.length >= 5) {
             return 403
-        }
+        } 
         const numberQusetion = resultPlayer!.answersAddedAt.length
         const questionId = pair.questionsId[numberQusetion]
 
@@ -49,7 +49,7 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
 
         const resultUpdateFirstPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.firstPlayerId)
         const resultUpdateSecondPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
-
+//38-51
 
         // if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
         //     let scoreOne = resultUpdateFirstPlayer!.score

@@ -1,3 +1,12 @@
+import { GetCommentsByBlogUseCase } from './comments/application/use-case/get.comments.by.blog.use.cae';
+import { UpdateLikeStatusCommentUseCase } from './comments/application/use-case/update.like.status.commet.use.case';
+import { FindCommentsByPostUseCase } from './comments/application/use-case/find.comments.by.post.use.case';
+import { DeleteCommentByIdUseCase } from './comments/application/use-case/delete.comment.by.id.use.case';
+import { GetCommentByIdUseCase } from './comments/application/use-case/get.comment.by.id.use.case';
+import { UpdateCommentByPostUseCase } from './comments/application/use-case/update.comment.py.post.use.case';
+import { CreatedCommentPostUseCase } from './comments/application/use-case/created.comment.by.post.use.case';
+import { GetSABlogIdUseCase } from './blogs/application/use-case/get.SA.blog.id.use.';
+import { UpdateBanStatusByBlogUseCase } from './blogs/application/use-case/update.ban.status.by.blog.use.case';
 import { GetBannedUsersForBlogUseCase } from './users/application/use-case/get.banned.users.for.blog.use.case';
 import { UsersBannedByBlogger } from './users/db-psql/entity/users.banned.by.blogger.entity';
 import { BanUserByBloggerUseCase } from './users/application/use-case/ban.user.by.blogger.use.case';
@@ -57,7 +66,7 @@ import { Blog } from './blogs/db-psql/entity/blog.entity';
 import { Device } from './securityDevices/db-psql/entity/devices.entity';
 import { LikesRepository } from './likes/likes.repo';
 import { CommentsRepoPSQL } from './comments/db-psql/comments.repo.PSQL';
-import { CommentsService } from './comments/comments.service';
+import { CommentsService } from './comments/application/comments.service';
 import { ConfigModule } from '@nestjs/config';
 import { Module} from '@nestjs/common';
 import { AppController, TestingController } from './app.controller';
@@ -118,7 +127,8 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
   CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
 
 const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
-  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase]
+  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase,
+  UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase]
 
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase]
@@ -126,8 +136,12 @@ const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCas
 const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase, DeleteUserIdUseCase, 
   BanUserByBloggerUseCase, GetBannedUsersForBlogUseCase]
 
+const commentUseCase = [CreatedCommentPostUseCase, UpdateCommentByPostUseCase, GetCommentByIdUseCase,
+  DeleteCommentByIdUseCase, FindCommentsByPostUseCase, UpdateLikeStatusCommentUseCase, GetCommentsByBlogUseCase]
+
 export const entities = [User, EmailConfirmation, Device, Post, Blog, 
   Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser, UsersBannedByBlogger]
+
 
 @Module({
   imports: [
@@ -226,7 +240,7 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
     IsBlogIdAlreadyExistConstraint, BlogsQueryRepoPSQL, BlogsRepoPSQL,
     PostsService, ...postUseCase,
     PostQueryRepoPSQL, PostRepoPSQL,
-    CommentsService, 
+    CommentsService, ...commentUseCase,
     //CommentsRepository,CommentsQueryRepository,
     CommentsQueryRepoPSQL, CommentsRepoPSQL,
     //SecurityDeviceService, SecurityDeviceRepository,

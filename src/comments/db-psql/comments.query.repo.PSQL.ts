@@ -1,3 +1,5 @@
+import { Blog } from './../../blogs/db-psql/entity/blog.entity';
+import { paginationGetCommentsByBlog, getCommentsByBlog } from './../model/comments-model';
 import { Like } from './../../likes/entity/likes.entity';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
@@ -91,7 +93,7 @@ export class CommentsQueryRepoPSQL {
     }
   }
 
-  async findCommentsByPostId(postId: string, userId: string | null, pagination: queryPaginationType): Promise<paginatorComments> {
+  async findCommentsByPostId(postId: string, userId: string | null, pagination: queryPaginationType): Promise<paginatorComments | null> {
     try {
       // const filter = `SELECT * FROM public."comments"
       //                 WHERE "postId" = $1
@@ -190,7 +192,118 @@ export class CommentsQueryRepoPSQL {
         totalCount: totalCount,
         items: mappedComments
       }
-    } catch (e) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
+    } catch (e) { return null }
+  }
+
+  async findCommentsByBlog(blogId: string, userId: string, pagination: queryPaginationType): Promise<paginationGetCommentsByBlog | null> {
+    try {
+   
+
+      const totalCount = await this.commetsModel.getRepository(Comment)
+      .createQueryBuilder('c')
+      //.leftJoinAndSelect('c.postId', 'p')
+      .leftJoinAndSelect('c.userId', 'u')
+      .leftJoinAndSelect('c.postId', 'p')
+      .leftJoinAndSelect('p.blogId', 'b')
+      .where('u.status = :status', { status: false })
+      .andWhere('b._id = :blogId', { blogId: blogId })
+      .getCount()
+      
+
+
+      const comments = await this.commetsModel.getRepository(Comment)
+        .createQueryBuilder('c')
+        //.leftJoinAndSelect('c.postId', 'p')
+        .leftJoinAndSelect('c.userId', 'u')
+        .leftJoinAndSelect('c.postId', 'p')
+        .leftJoinAndSelect('p.blogId', 'b')
+        .where('u.status = :status', { status: false })
+        //.andWhere('c.postId = :postId', { postId: postId })
+        .orderBy(`c.${pagination.sortBy}`, pagination.sortDirection)
+        .skip(pagination.skip)
+        .take(pagination.pageSize)
+        .getMany()
+
+
+      const pagesCount = Math.ceil(totalCount / pagination.pageSize)
+
+
+
+      const mappedComments: getCommentsByBlog[] = await Promise.all(comments.map(async c => {
+
+        let myStatus = 'None'
+        const commentId = c._id.toString()
+
+        if (userId) {
+          const status = await this.commetsModel.getRepository(Like)
+            .createQueryBuilder('l')
+            .leftJoinAndSelect('l.userId', 'u')
+            .where('u._id = :userId', { userId: userId })
+            .andWhere('u.status = :status', { status: false })
+            .andWhere('l.postIdOrCommentId = :postIdOrCommentId', { postIdOrCommentId: commentId })
+            .getOne()
+          if (status) {
+            myStatus = status.status
+          }
+        }
+        const likesCount = await this.commetsModel.getRepository(Like).createQueryBuilder('l')
+          .leftJoinAndSelect('l.userId', 'u')
+          .select()
+          .where({
+            postIdOrCommentId: commentId
+          })
+          .andWhere('u.status = :status', { status: false })
+          .andWhere({
+            status: 'Like'
+          })
+          .getCount()
+
+        const dislikesCount = await this.commetsModel.getRepository(Like).createQueryBuilder('l')
+          .leftJoinAndSelect('l.userId', 'u')
+          .select()
+          .where({
+            postIdOrCommentId: commentId
+          })
+          .andWhere('u.status = :status', { status: false })
+          .andWhere({
+            status: 'Dislike'
+          })
+          .getCount()
+
+
+        return {
+          id: commentId,
+          content: c.content,
+          commentatorInfo: {
+            userId: c.userId._id,
+            userLogin: c.userId.login
+          },
+          createdAt: c.createdAt,
+          likesInfo: {
+            likesCount: likesCount,
+            dislikesCount: dislikesCount,
+            myStatus: myStatus
+          },
+          postInfo: {
+            id: c.postId._id,
+            title: c.postId.title,
+            blogId: c.postId.blogId._id,
+            blogName: c.postId.blogId.name
+          }
+        }
+      }
+      ))
+
+      return {
+        pagesCount: pagesCount,
+        page: pagination.pageNumber,
+        pageSize: pagination.pageSize,
+        totalCount: totalCount,
+        items: mappedComments
+      }
+    } catch (e) {
+      return null
+    }
   }
 }
 

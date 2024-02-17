@@ -16,6 +16,7 @@ export class CreateNewStatisticByPalyerUseCase
     }
 
     async execute(command: CreateNewStatisticByPalyerCommand): Promise<boolean> {
+        
         const userId = command.userId
         const statistic = await this.pairGameQueryRepo.getStatisticByUser(userId)
             if (statistic !== null) {

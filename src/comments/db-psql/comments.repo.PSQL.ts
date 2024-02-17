@@ -64,7 +64,7 @@ export class CommentsRepoPSQL {
     }
   }
 
-  async updateCommentId(commentsId: string, content: string): Promise<Number> {
+  async updateCommentId(commentsId: string, content: string): Promise<true | null> {
     try {
       const post = await this.commentsModel.createQueryBuilder()
                                             .update(Comment)
@@ -75,23 +75,17 @@ export class CommentsRepoPSQL {
                                               _id: commentsId
                                             })
                                             .execute()
-      // query(`
-      // UPDATE public."comments"
-      // SET content= $2
-      // WHERE _id= $1
-      // `, [commentsId, content])
-
       if (!post) {
-        return HttpStatus.NOT_FOUND
+        return null
       }
       else {
-        return HttpStatus.NO_CONTENT
+        return true
       }
     }
-    catch (e) { return HttpStatus.NOT_FOUND }
+    catch (e) { return null }
   }
 
-  async deletCommentById(id: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+  async deletCommentById(id: string): Promise<true| null> {
     try {
       const result = await this.commentsModel.createQueryBuilder()
                                               .delete()
@@ -105,16 +99,16 @@ export class CommentsRepoPSQL {
       // `, [id])
       //deleteOne({ _id: new ObjectId(id) })
       if (!result) {
-        return HttpStatus.NOT_FOUND
+        return null
       }
       else {
-        return HttpStatus.NO_CONTENT
+        return true
       }
-    } catch (e) { return HttpStatus.NOT_FOUND }
+    } catch (e) { return null }
   }
 
 
-  async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
+  async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<true | null> {
     try {
       const createdAt = (new Date()).toISOString()
       
@@ -143,8 +137,8 @@ export class CommentsRepoPSQL {
           // `, [userId, commentId, login, likeStatus, createdAt])
 
 
-          if (!likeResult) {return HttpStatus.NOT_FOUND} 
-          return HttpStatus.NO_CONTENT
+          if (!likeResult) {return null} 
+          return true
       } else {
         const likeId = uuidv4()
         
@@ -167,10 +161,10 @@ export class CommentsRepoPSQL {
         // `, [likeId,userId, login, commentId, likeStatus, createdAt])
 
 
-        return HttpStatus.NO_CONTENT
+        return true
       }
     } catch (e) {
-      return HttpStatus.NOT_FOUND
+      return null
     }
   }
 

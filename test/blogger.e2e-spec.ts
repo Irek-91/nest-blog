@@ -1,3 +1,4 @@
+import { postOutput } from './../dist/posts/model/post-model.d';
 import jwt from 'jsonwebtoken';
 import { settings } from './../src/settings';
 import { userInputModel } from '../src/users/models/users-model';
@@ -5,7 +6,7 @@ import request from 'supertest'
 import { log } from 'console';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NestFactory } from '@nestjs/core'
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Body } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { appSettings } from '../src/app.settings';
 import { blogInput } from '../src/blogs/models/blogs-model';
@@ -56,7 +57,7 @@ describe('tests for blogger', () => {
             const user = await createUser('admin', 'qwerty', userOneModel, httpServer)
             expect.setState({ userOne: user })
             const { userOne } = expect.getState()
-            
+
             const userThreeModel: userInputModel = {
                 login: 'userThree',
                 password: 'userThree2023',
@@ -65,7 +66,7 @@ describe('tests for blogger', () => {
             const user3 = await createUser('admin', 'qwerty', userThreeModel, httpServer)
             expect.setState({ userThree: user3 })
             const { userThree } = expect.getState()
-            
+
 
 
             const model: blogInput = {
@@ -223,7 +224,7 @@ describe('tests for blogger', () => {
             const { userOne } = expect.getState()
             const postData = {
                 title: "postOne",
-                shortDescription: "postOne bu blog2",
+                shortDescription: "postOne by blog2",
                 content: "string"
             }
 
@@ -246,7 +247,7 @@ describe('tests for blogger', () => {
             })
             expect.setState({ postByUserOneBlog2: res.body })
 
-            
+
 
         })
 
@@ -272,7 +273,7 @@ describe('tests for blogger', () => {
 
             const inputData = {
                 content: "stringstringstringst"
-              }
+            }
             const res = await request(httpServer).post(`/posts/${postByUserOneBlog2.id}/comments`)
                 .send(inputData).set(userTwo.headers)
             expect(res.status).toBe(403)
@@ -347,20 +348,101 @@ describe('tests for blogger', () => {
 
         })
 
-        it('Написать комментарий, разбаненным пользователем userTwo для поста к блогу 2":', async () => {
+        it('Написать комментарий, разбаненным пользователем userTwo для поста к блогу 2', async () => {
             const { blog2 } = expect.getState()
             const { userOne } = expect.getState()
             const { userTwo } = expect.getState()
             const { postByUserOneBlog2 } = expect.getState()
 
             const inputData = {
-                content: "stringstringstringst"
-              }
+                content: "комментарий к первому посту"
+            }
             const res = await request(httpServer).post(`/posts/${postByUserOneBlog2.id}/comments`)
                 .send(inputData).set(userTwo.headers)
             expect(res.status).toBe(201)
-            
+
         })
+
+        it('Возвращает все комментарии ко всем сообщениям во всех текущих блогах пользователей', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const { postByUserOneBlog2} = expect.getState()
+
+            const postData = {
+                title: "postTwo",
+                shortDescription: "postTwo by blog2",
+                content: "string"
+            }
+
+            const postTwo = await request(httpServer).post(`/blogger/blogs/${blog2.id}/posts`).send(postData).set(userOne.headers)
+            expect(postTwo.status).toBe(201) //создали второй пост для блога
+
+
+            const inputData = {
+                content: "комментарий ко второму посту"
+            }
+            const commentByPostTwo = await request(httpServer).post(`/posts/${postTwo.body.id}/comments`)
+                .send(inputData).set(userTwo.headers)
+            expect(commentByPostTwo.status).toBe(201)
+
+
+            const getCommentsPostsByBlogger = await request(httpServer).get(`/blogger/blogs/comments`).set(userOne.headers)
+            expect(getCommentsPostsByBlogger.status).toBe(200)
+            expect(getCommentsPostsByBlogger.body).toEqual({
+                pagesCount: 1,
+                page: 1,
+                pageSize: 10,
+                totalCount: 2,
+                items: [
+                    {
+                        id: expect.any(String),
+                        content: "комментарий ко второму посту",
+                        commentatorInfo: {
+                            userId: userTwo.user.id,
+                            userLogin: userTwo.user.login
+                        },
+                        createdAt: expect.any(String),
+                        likesInfo: {
+                            likesCount: 0,
+                            dislikesCount: 0,
+                            myStatus: "None"
+                        },
+                        postInfo: {
+                            id: postTwo.body.id,
+                            title: postTwo.body.title,
+                            blogId: postTwo.body.blogId,
+                            blogName: expect.any(String)
+                        }
+                    },
+                    {
+                        id: expect.any(String),
+                        content: "комментарий к первому посту",
+                        commentatorInfo: {
+                            userId: userTwo.user.id,
+                            userLogin: userTwo.user.login
+                        },
+                        createdAt: expect.any(String),
+                        likesInfo: {
+                            likesCount: 0,
+                            dislikesCount: 0,
+                            myStatus: "None"
+                        },
+                        postInfo: {
+                            id: postByUserOneBlog2.id,
+                            title: postByUserOneBlog2.title,
+                            blogId: postByUserOneBlog2.blogId,
+                            blogName: expect.any(String)
+                        }
+                    }
+
+                ]
+            })
+
+
+        })
+
+
 
     })
 

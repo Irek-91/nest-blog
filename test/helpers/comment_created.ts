@@ -1,26 +1,25 @@
 import { commentViewModel } from './../../src/comments/model/comments-model';
 import { settings } from './../../src/settings';
-import  jwt  from 'jsonwebtoken';
-import  request  from "supertest";
+import jwt from 'jsonwebtoken';
+import request from "supertest";
 import { ObjectId } from "mongodb";
 
 export type comenntInput = {
-    content: string  
+    content: string
 }
 
 export const createHeadersJWT = async (userId: string) => {
-    const AccessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 100})
-    const headersJWT = {Authorization: `Bearer ${AccessToken}`}
+    const AccessToken = jwt.sign({ userId: userId }, settings.JWT_SECRET, { expiresIn: 100 })
+    const headersJWT = { Authorization: `Bearer ${AccessToken}` }
     return headersJWT
 }
 
-export const createComment = async (postId: string, data: comenntInput, 
-                                    expectedStatusCode: number, userOneId : string, httpServer: any)
-                                    : Promise<{ response: request.Response; createdComment: null | commentViewModel;}
-                                    > => {
-        const AccessToken = jwt.sign({userId : userOneId}, settings.JWT_SECRET, {expiresIn: 100})
-        const headersJWT = {Authorization: `Bearer ${AccessToken}`}
-   
+export const createComment = async (postId: string, data: comenntInput,
+    expectedStatusCode: number, userOneId: string, httpServer: any)
+    : Promise<{ response: request.Response; createdComment: null | commentViewModel; }> => {
+    const AccessToken = jwt.sign({ userId: userOneId }, settings.JWT_SECRET, { expiresIn: 100 })
+    const headersJWT = { Authorization: `Bearer ${AccessToken}` }
+
 
     const response = await request(httpServer).post(`/posts/${postId}/comments`)
         .set(headersJWT)

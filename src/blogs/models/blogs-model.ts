@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsString, IsInt, MaxLength, IsDefined, isURL, IsOptional, IsNotEmpty, IsUrl } from "class-validator";
+import { IsString, IsInt, MaxLength, IsDefined, isURL, IsOptional, IsNotEmpty, IsUrl, IsBoolean } from "class-validator";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
@@ -46,6 +46,10 @@ export type blogSAOutput = {
   blogOwnerInfo : {
     userId :string,
     userLogin: string
+  },
+  banInfo: {
+    isBanned: boolean,
+    banDate: string
   }
 }
 
@@ -68,6 +72,11 @@ export class blogInput {
   @IsString()
   @IsUrl(undefined, {message: 'URL is not valid'})
   websiteUrl: string
+}
+
+export class banBlogInput {
+  @IsBoolean()
+  isBanned: boolean
 }
 
 

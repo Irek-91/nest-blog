@@ -1,3 +1,5 @@
+import { paginationGetCommentsByBlog } from './../comments/model/comments-model';
+import { GetCommentsByBlogCommand } from './../comments/application/use-case/get.comments.by.blog.use.cae';
 import { BanUserByBloggerCommand } from './../users/application/use-case/ban.user.by.blogger.use.case';
 import { BanUserByBloggerInputModel } from './../users/models/users-model';
 import { CustomPipe } from './../adapters/pipe';
@@ -10,7 +12,7 @@ import { GetBlogDBCommand } from './application/use-case/get.blog.DB.use.case';
 import { GetBlogIdCommand } from './application/use-case/get.blog.id.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
 import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
-import { blogInput } from './models/blogs-model';
+import { blogInput, paginatorBlog } from './models/blogs-model';
 import { CreateBlogCommand } from './application/use-case/create.blog.use.case';
 import { UserAuthGuard } from './../auth/guards/auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
@@ -46,8 +48,35 @@ export class BloggerController {
         const userId = req.userId//исправить после авторизации
 
         const queryFilter = this.pagination.getPaginationFromQuery(query);
-        return await this.commandBus.execute(new FindBlogsCommand(queryFilter, userId))
+        const blogs: paginatorBlog = await this.commandBus.execute(new FindBlogsCommand(queryFilter, userId))
+        if (!blogs) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return blogs
+        }
     }
+
+    @Get('blogs/comments')
+    async getCommentsPostsByBlog(@Query()
+    query: {
+        sortBy?: string;
+        sortDirection?: string;
+        pageNumber?: string;
+        pageSize?: string;
+    }, @Request() req: any) {
+        const userId = req.userId
+
+        const queryFilter = this.pagination.getPaginationFromQuery(query);
+        const comments: paginationGetCommentsByBlog | null = await this.commandBus.execute(new GetCommentsByBlogCommand(userId, queryFilter))
+
+        if (!comments) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return comments
+        }
+    }
+
+
 
 
 
@@ -80,6 +109,8 @@ export class BloggerController {
         }
     }
 
+
+
     @Post('blogs')
     async createBlogByBlogger(@Body() blogInputData: blogInput,
         @Request() req: any) {
@@ -100,7 +131,7 @@ export class BloggerController {
             content: inputData.content,
             blogId: blogId,
         }
-        const blog: Blog| null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
@@ -139,7 +170,7 @@ export class BloggerController {
         }
     }
 
-    
+
 
 
     @Put('blogs/:blogId/posts/:postId')

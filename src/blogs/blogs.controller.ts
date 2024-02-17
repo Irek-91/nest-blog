@@ -70,7 +70,10 @@ export class BlogsController {
         }
         const pagination = this.pagination.getPaginationFromQuery(query)
 
-        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog: blogOutput | null = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        if (!blog) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
         const foundPosts = await this.commandBus.execute(new FindPostsByBlogIdCommand(pagination, blogId, userId));
 
         if (!foundPosts) {

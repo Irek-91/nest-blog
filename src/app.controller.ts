@@ -3,7 +3,7 @@ import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo';
 import { PairGameRepo } from './quiz.pair/dv-psql/pair.game.repo';
 import { QuestionsQueryRepository } from './quiz.questions/db-psql/questions.query.repo';
 import { LikesRepository } from './likes/likes.repo';
-import { CommentsService } from './comments/comments.service';
+import { CommentsService } from './comments/application/comments.service';
 import { Controller, Delete, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { AppService } from './app.service';
 import { UsersService } from './users/application/users.service';

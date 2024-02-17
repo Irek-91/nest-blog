@@ -1,3 +1,4 @@
+import { banBlogInput } from './../src/blogs/models/blogs-model';
 import request from 'supertest'
 import { log } from 'console';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -144,6 +145,27 @@ describe ('tests for blogs', () => {
                 isMembership: false})
             })
 
+
+            it('забанить блог суперадмином',async () => {
+                const {blog} = expect.getState()
+                const data: banBlogInput = {
+                    isBanned: true
+                }
+                const dataIncorrect = {
+                    isBanned: 'true'
+                }
+
+                const res1 = await request(httpServer).put(`/sa/blogs/${blog.id}/ban`)
+                                              .auth('admin', 'qwerty')
+                                              .send(dataIncorrect)
+                                              .expect(400)
+
+                const res = await request(httpServer).put(`/sa/blogs/${blog.id}/ban`)
+                                              .auth('admin', 'qwerty')
+                                              .send(data)
+                                              .expect(204)
+            })
+                
             it('удаление блога',async () => {
                 const {blog} = expect.getState()
                 const res = await request(httpServer).delete(`/sa/blogs/${blog.id}`)

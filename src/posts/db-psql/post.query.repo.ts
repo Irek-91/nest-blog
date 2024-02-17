@@ -27,6 +27,7 @@ export class PostQueryRepoPSQL {
         const posts: Post[] | null = await this.postModel.getRepository(Post)
             .createQueryBuilder('p')
             .leftJoinAndSelect('p.blogId', 'b')
+            .where('b.banStatus = :banStatus', { banStatus: false })
             .orderBy(sortBy, paginationQuery.sortDirection)
             .skip(paginationQuery.skip)
             .take(paginationQuery.pageSize)
@@ -128,6 +129,7 @@ export class PostQueryRepoPSQL {
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
                 .where('b._id = :id', { id: blogId })
+                .andWhere('b.banStatus = :banStatus', { banStatus: false })
                 .orderBy(`p.${paginationQuery.sortBy}`, paginationQuery.sortDirection)
                 .skip(paginationQuery.skip)
                 .take(paginationQuery.pageSize)
@@ -293,6 +295,7 @@ export class PostQueryRepoPSQL {
                 .leftJoinAndSelect('p.blogId', 'b')
                 .leftJoinAndSelect('b.blogger', 'u')
                 .where('p._id = :id', { id: postId })
+                .andWhere('b.banStatus = :banStatus', { banStatus: false })
                 .andWhere(new Brackets(qb => {
                     qb.where('u.status = false')
                         .orWhere('b.blogger is null');

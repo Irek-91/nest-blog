@@ -4,10 +4,10 @@ import { Transform } from "class-transformer";
 
 
 export class commentInput {
-  
+
   @MaxLength(300)
   @MinLength(20)
-  @Transform(({value}) => value?.trim())
+  @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
   content: string
@@ -26,6 +26,35 @@ export type commentViewModel = {
     dislikesCount: number,
     myStatus: string
   }
+}
+
+export type getCommentsByBlog = {
+    id: string,
+    content: string,
+    commentatorInfo: {
+      userId: string,
+      userLogin: string
+    },
+    createdAt: string,
+    likesInfo: {
+      likesCount: number,
+      dislikesCount: number,
+      myStatus: string
+    },
+    postInfo: {
+      id: string,
+      title: string,
+      blogId: string,
+      blogName: string
+    }
+  }
+
+export type paginationGetCommentsByBlog = {
+  pagesCount: number,
+  page: number,
+  pageSize: number,
+  totalCount: number,
+  items: getCommentsByBlog[] | []
 }
 
 export type commentMongoModel = {

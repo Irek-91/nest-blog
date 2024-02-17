@@ -1,5 +1,6 @@
+import { Comment } from './../../../comments/db-psql/entity/comments.entity';
 import { Blog } from './../../../blogs/db-psql/entity/blog.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Post {
@@ -21,5 +22,11 @@ export class Post {
     @ManyToOne((type) => Blog, (blogs) => blogs._id, {nullable: true})
     @JoinColumn({name: 'blogId'})
     public blogId: Blog
+
+    @OneToMany((type) => Comment, (comments) => comments.postId._id, {nullable: true})
+    @JoinColumn({name: 'commentId'})
+    public commentId: Comment[]
+
+
 
 }

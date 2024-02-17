@@ -26,6 +26,18 @@ export class Blog {
     @Column()
     isMembership: boolean
 
+    @Column({
+        default: false
+    })
+    banStatus: boolean
+
+    @Column({
+        default: null, nullable: true
+    })
+    banDate: string
+
+
+
     @ManyToOne(() => User, (p) => p._id, { nullable: true , 
         onDelete: 'CASCADE'
     })
