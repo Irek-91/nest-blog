@@ -1,3 +1,4 @@
+import { ImageForPost } from './image.post.entity';
 import { Comment } from './../../../comments/db-psql/entity/comments.entity';
 import { Blog } from './../../../blogs/db-psql/entity/blog.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
@@ -27,6 +28,8 @@ export class Post {
     @JoinColumn({name: 'commentId'})
     public commentId: Comment[]
 
-
+    @OneToMany((type) => ImageForPost, (images) => images.post, {nullable: true})
+    @JoinColumn({name: 'imageForPost'})
+    public imageForPost: ImageForPost
 
 }

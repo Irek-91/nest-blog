@@ -36,6 +36,20 @@ export class Statistic {
         type: "numeric"
     })
     drawcount: number
+    
+    @Column({ type: 'numeric', default: 0 })
+    avgScores: number;
+
+    @BeforeInsert()
+    updateAvgScores() {
+        if (this.winsCount + this.lossesCount + this.drawcount > 0) {
+            this.avgScores = this.sumScore / (this.winsCount + this.lossesCount + this.drawcount);
+        } else {
+            this.avgScores = 0;
+        }
+    }
+}
+
 
     // @Column({
     //     type: "numeric",
@@ -54,7 +68,5 @@ export class Statistic {
     //     name: 'resultsId'
     // })
     // public resultsId: Pairresult[]
-
-}
 
 

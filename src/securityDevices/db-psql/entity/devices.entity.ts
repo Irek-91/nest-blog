@@ -18,7 +18,9 @@ export class Device {
     @Column()
     deviceName: string
 
-    @ManyToOne((type)=> User, (user) => user.deviceId)
+    @ManyToOne((type)=> User, (user) => user.deviceId, {
+        onDelete: 'CASCADE'
+    })
     @JoinColumn({
         name: 'userId'
     })

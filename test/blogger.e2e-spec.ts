@@ -1,4 +1,3 @@
-import { postOutput } from './../dist/posts/model/post-model.d';
 import jwt from 'jsonwebtoken';
 import { settings } from './../src/settings';
 import { userInputModel } from '../src/users/models/users-model';
@@ -124,7 +123,11 @@ describe('tests for blogger', () => {
                 description: model.description,
                 websiteUrl: model.websiteUrl,
                 createdAt: expect.any(String),
-                isMembership: false
+                isMembership: false,
+                images: {
+                    wallpaper: null,
+                    main: []
+                }
             })
 
             expect.setState({ blog: res.body })
@@ -144,7 +147,11 @@ describe('tests for blogger', () => {
                 description: blog.description,
                 websiteUrl: blog.websiteUrl,
                 createdAt: expect.any(String),
-                isMembership: false
+                isMembership: false,
+                images: {
+                    wallpaper: null,
+                    main: []
+                }
             })
 
         })
@@ -243,7 +250,10 @@ describe('tests for blogger', () => {
                     dislikesCount: 0,
                     myStatus: "None",
                     newestLikes: expect.any(Array)
-                }
+                },
+                images: {
+                    main: []
+                  }
             })
             expect.setState({ postByUserOneBlog2: res.body })
 
@@ -439,6 +449,26 @@ describe('tests for blogger', () => {
                 ]
             })
 
+
+        })
+
+        it('Отправка изображение main для блога', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const { postByUserOneBlog2 } = expect.getState()
+            const buffer = Buffer.from('svsvsvsv')
+            const inputData = {
+                fieldname: 'file',
+                originalname: 'img-156x156.jpg',
+                encoding: '7bit',
+                mimetype: 'image/jpeg',
+                buffer: buffer,
+                size: 5507
+              }
+            const res = await request(httpServer).post(`blogs/${blog2.id}/images/main`)
+                .send(inputData).set(userOne.headers)
+            expect(res.status).toBe(201)
 
         })
 

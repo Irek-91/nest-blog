@@ -56,6 +56,9 @@ export class CreatedPostByBlogIdUseCase implements ICommandHandler<CreatedPostBy
                 dislikesCount: 0,
                 myStatus: 'None',
                 newestLikes: []
+            },
+            images: {
+                main : null 
             }
         }
     }

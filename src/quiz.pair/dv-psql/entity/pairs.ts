@@ -32,12 +32,6 @@ finishGameDate: string
 status: string
 
 
-// @OneToMany((type) => Pairresult, (result) => result.pairId)
-// @JoinColumn({
-//     name: 'resultsId'
-// })
-// public resultsId: Pairresult[]
-
 }
 
 

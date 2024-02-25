@@ -6,4 +6,11 @@ declare global {
             userId: string | null
         }
     }
+   
 }
+
+declare namespace NodeJS {
+    interface Global {
+      __TESTCONTAINER__: any;
+    }
+  }

@@ -51,54 +51,6 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
         const resultUpdateSecondPlayer = await this.pairGameQueryRepo.getResultPairsByPlayerId(pair.id, pair.secondPlayerId)
 //38-51
 
-        // if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 && resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
-        //     let scoreOne = resultUpdateFirstPlayer!.score
-        //     let scoreTwo = resultUpdateSecondPlayer!.score
-        //     const updateStatusByPair = await this.pairGameRepo.updateStatusByPair(pair.id)
-
-        //     const answersAddedAtOne = resultUpdateFirstPlayer!.answersAddedAt[4] //время последнего ответа пользователя 1
-        //     const answersAddedAtTwo = resultUpdateSecondPlayer!.answersAddedAt[4] //время последнего ответа пользователя 2
-
-        //     if (resultUpdateFirstPlayer!.answersStatus.includes('Correct')) {
-        //         if (new Date(answersAddedAtOne) < new Date(answersAddedAtTwo)) {
-        //             scoreOne++
-        //         }
-        //     } //бонусный бал
-
-        //     if (resultUpdateSecondPlayer!.answersStatus.includes('Correct')) {
-        //         if (new Date(answersAddedAtOne) > new Date(answersAddedAtTwo)) {
-        //             scoreTwo++
-        //         }
-        //     }//бонусный бал
-
-        //     let winnerPlayer = {
-        //         id: pair.firstPlayerId,
-        //         score: scoreOne
-        //     }
-
-        //     let loserPlayer = {
-        //         id: pair.secondPlayerId,
-        //         score: scoreTwo
-        //     }
-
-        //     if (scoreTwo > scoreOne) {
-        //         winnerPlayer = {
-        //             id: pair.secondPlayerId,
-        //             score: scoreTwo
-        //         }
-        //         loserPlayer = {
-        //             id: pair.firstPlayerId,
-        //             score: scoreOne
-        //         }
-        //     }
-
-        //     if (scoreTwo !== scoreOne) {
-        //         const updateDateFinish = await this.pairGameRepo.updateStatusGame(pair.id, winnerPlayer, loserPlayer)
-        //     }
-        //     if (scoreTwo === scoreOne) {
-        //         const updateDateFinish = await this.pairGameRepo.resultUpdateIsAdraw(pair.id, winnerPlayer, loserPlayer)
-        //     }
-        // }
         if (resultUpdateFirstPlayer!.answersAddedAt.length === 5 || resultUpdateSecondPlayer!.answersAddedAt.length === 5) {
             setTimeout(async () => {
                 const resPair = await this.pairGameQueryRepo.getPairById(pair.id)
@@ -186,7 +138,6 @@ export class SendAnswerUseCase implements ICommandHandler<SendAnswerCommand> {
                 if (scoreTwo === scoreOne) {
                     const updateDateFinish = await this.pairGameRepo.resultUpdateIsAdraw(resPair!.id, winnerPlayer, loserPlayer)
                 }
-                log(winnerPlayer, loserPlayer)
             }, 10000)
         }
 

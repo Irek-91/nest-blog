@@ -1,8 +1,10 @@
+import { WallpaperImageForBlog } from './wallpaper.image.blog.entity';
 import { UsersBannedByBlogger } from './../../../users/db-psql/entity/users.banned.by.blogger.entity';
 import { BannedUser } from './../../../users/db-psql/entity/banned.user.entity';
 import { Post } from './../../../posts/db-psql/entity/post.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { User } from './../../../users/db-psql/entity/user.entity';
+import { MainImageForBlog } from './main.image.blog.entity';
 
 @Entity()
 export class Blog {
@@ -52,6 +54,18 @@ export class Blog {
         name: 'postId'
     })
     public postId: Post[]
+
+    @OneToMany((type) => MainImageForBlog, (image) => image.blog, { nullable: true })
+    @JoinColumn({
+        name: 'mainImage'
+    })
+    public mainImage: MainImageForBlog[]
+
+    @OneToMany((type) => WallpaperImageForBlog, (wallpaper) => wallpaper.blog, { nullable: true })
+    @JoinColumn({
+        name: 'wallpaperImage'
+    })
+    public wallpaperImage: WallpaperImageForBlog[]
 
 
     @OneToMany((type) => UsersBannedByBlogger, (b) => b.userId._id, { nullable: true , onDelete: 'CASCADE'})

@@ -1,5 +1,5 @@
 import { User } from './../../users/db-psql/entity/user.entity';
-import { blogSAOutput, paginatorBlogSA } from './../models/blogs-model';
+import { blogSAOutput, paginatorBlogSA, blogsImageWiewModel, photoSizeViewModel } from './../models/blogs-model';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
 import { Filter, ObjectId } from "mongodb";
@@ -21,7 +21,8 @@ export class BlogsQueryRepoPSQL {
   async findBlogs(pagination: queryPaginationType, userId: string | null): Promise<paginatorBlog> {
 
     const sortDirection = pagination.sortDirection
-
+    let wallpaper: photoSizeViewModel | null = null
+    let main: [] | photoSizeViewModel[] = []
     let sortBy = {
     }
 
@@ -36,10 +37,12 @@ export class BlogsQueryRepoPSQL {
     }
 
     const sortByWithCollate = pagination.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
-    
+
     let blogsOne = await this.dataSource
       .createQueryBuilder(Blog, 'b')
       .leftJoinAndSelect('b.blogger', 'u')
+      .leftJoinAndSelect('b.wallpaperImage', 'w')
+      .leftJoinAndSelect('b.mainImage', 'm')
       .where('b.banStatus = :banStatus', { banStatus: false })
       .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
       // .andWhere('u._id = :userId', {
@@ -87,6 +90,24 @@ export class BlogsQueryRepoPSQL {
 
 
     const blogsOutput: blogOutput[] = blogsOne.map((b) => {
+      if (b!.wallpaperImage.length !== 0) {
+        wallpaper = {
+          url: b.wallpaperImage[0].url,
+          width: 1028,
+          height: 312,
+          fileSize: b.wallpaperImage[0].fileSize
+        }
+      }
+      if (b!.mainImage.length !== 0) {
+        main = [
+          {
+            url: b.mainImage[0].url,
+            width: 156,
+            height: 156,
+            fileSize: b.mainImage[0].fileSize
+          }
+        ]
+      }
       return {
         id: b._id,
         name: b.name,
@@ -94,8 +115,13 @@ export class BlogsQueryRepoPSQL {
         websiteUrl: b.websiteUrl,
         createdAt: b.createdAt,
         isMembership: b.isMembership,
+        images: {
+          wallpaper: wallpaper,
+          main: main
+        }
       }
     })
+
     return {
       pagesCount: Math.ceil(totalCount.length / pagination.pageSize),
       page: pagination.pageNumber,
@@ -139,6 +165,7 @@ export class BlogsQueryRepoPSQL {
       .getMany()
 
     const blogsOutput: blogSAOutput[] = blogsOne.map((b) => {
+
       return {
         id: b._id,
         name: b.name,
@@ -168,14 +195,36 @@ export class BlogsQueryRepoPSQL {
     try {
 
       let blog = await this.dataSource
-      .createQueryBuilder(Blog, 'b')
-      .leftJoinAndSelect('b.blogger', 'u')
-      .where('b.banStatus = :banStatus', { banStatus: false })
-      .andWhere({ _id: id })
-      .getOne()
+        .createQueryBuilder(Blog, 'b')
+        .leftJoinAndSelect('b.blogger', 'u')
+        .leftJoinAndSelect('b.wallpaperImage', 'w')
+        .leftJoinAndSelect('b.mainImage', 'm')
+        .where('b.banStatus = :banStatus', { banStatus: false })
+        .andWhere({ _id: id })
+        .getOne()
+      let wallpaper: photoSizeViewModel | null = null
+      let main: [] | photoSizeViewModel[] = []
 
       if (!blog) { return null }
       else {
+        if (blog!.wallpaperImage.length !== 0) {
+          wallpaper = {
+            url: blog.wallpaperImage[0].url,
+            width: 1028,
+            height: 312,
+            fileSize: blog.wallpaperImage[0].fileSize
+          }
+        }
+        if (blog!.mainImage.length !== 0) {
+          main = [
+            {
+              url: blog.mainImage[0].url,
+              width: 156,
+              height: 156,
+              fileSize: blog.mainImage[0].fileSize
+            }
+          ]
+        }
         return {
           id: blog._id.toString(),
           name: blog.name,
@@ -183,6 +232,10 @@ export class BlogsQueryRepoPSQL {
           websiteUrl: blog.websiteUrl,
           createdAt: blog.createdAt,
           isMembership: false,
+          images: {
+            wallpaper: wallpaper,
+            main: main
+          }
         }
 
       }
@@ -194,14 +247,36 @@ export class BlogsQueryRepoPSQL {
 
   async getSABlogId(id: string): Promise<blogOutput | null> {
     try {
+      let wallpaper: photoSizeViewModel | null = null
+      let main: [] | photoSizeViewModel[] = []
       let blog = await this.dataSource
-      .createQueryBuilder(Blog, 'b')
-      .leftJoinAndSelect('b.blogger', 'u')
-      .andWhere({ _id: id })
-      .getOne()
+        .createQueryBuilder(Blog, 'b')
+        .leftJoinAndSelect('b.blogger', 'u')
+        .leftJoinAndSelect('b.wallpaperImage', 'w')
+        .leftJoinAndSelect('b.mainImage', 'm')
+        .andWhere({ _id: id })
+        .getOne()
 
       if (!blog) { return null }
       else {
+        if (blog!.wallpaperImage.length !== 0) {
+          wallpaper = {
+            url: blog.wallpaperImage[0].url,
+            width: 1028,
+            height: 312,
+            fileSize: blog.wallpaperImage[0].fileSize
+          }
+        }
+        if (blog!.mainImage.length !== 0) {
+          main = [
+            {
+              url: blog.mainImage[0].url,
+              width: 156,
+              height: 156,
+              fileSize: blog.mainImage[0].fileSize
+            }
+          ]
+        }
         return {
           id: blog._id.toString(),
           name: blog.name,
@@ -209,6 +284,10 @@ export class BlogsQueryRepoPSQL {
           websiteUrl: blog.websiteUrl,
           createdAt: blog.createdAt,
           isMembership: false,
+          images: {
+            wallpaper: wallpaper,
+            main: main
+          }
         }
 
       }
@@ -264,6 +343,39 @@ export class BlogsQueryRepoPSQL {
       return blog
     }
     catch (e) {
+      return null
+    }
+  }
+
+  async getImagesByBlog(blogId: string): Promise<blogsImageWiewModel | null> {
+    try {
+      const res = await this.dataSource
+        .createQueryBuilder(Blog, 'b')
+        .leftJoinAndSelect('b.mainImage', 'm')
+        .leftJoinAndSelect('b.wallpaperImage', 'w')
+        .where({ _id: blogId })
+        .getOne()
+
+      if (!res) {
+        return null
+      }
+      return {
+        wallpaper: {
+          url: res.wallpaperImage[0].url,
+          width: 1028,
+          height: 312,
+          fileSize: res.wallpaperImage[0].fileSize
+        },
+        main: [{
+          url: res.mainImage[0].url,
+          width: 156,
+          height: 156,
+          fileSize: res.mainImage[0].fileSize
+        }]
+      }
+
+
+    } catch (e) {
       return null
     }
   }

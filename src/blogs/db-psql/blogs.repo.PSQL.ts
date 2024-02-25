@@ -1,3 +1,4 @@
+import { WallpaperImageForBlog } from './entity/wallpaper.image.blog.entity';
 import { blogPSQLDB } from './../models/blogs-model';
 import { User } from './../../users/db-psql/entity/user.entity';
 import { DeletePostsByBlogIdCommand } from './../../posts/application/use-case/delete.posts.by.blog.id.use.case';
@@ -15,6 +16,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { log } from 'console';
 import { CommandBus } from '@nestjs/cqrs';
+import { MainImageForBlog } from './entity/main.image.blog.entity';
 
 @Injectable()
 export class BlogsRepoPSQL {
@@ -51,7 +53,7 @@ export class BlogsRepoPSQL {
           websiteUrl: inputData.websiteUrl,
           createdAt: inputData.createdAt,
           isMembership: inputData.isMembership,
-          blogger: {_id : inputData.userId},
+          blogger: { _id: inputData.userId },
         })
         await queryRunner.commitTransaction()
         return newBlog.generatedMaps
@@ -64,7 +66,7 @@ export class BlogsRepoPSQL {
     }
   }
 
-  async updateBlog(blogId: string, bloginputData: blogInput): Promise<true| null> {
+  async updateBlog(blogId: string, bloginputData: blogInput): Promise<true | null> {
     const queryRunner = this.dataSource.createQueryRunner()
     const manager = queryRunner.manager
     await queryRunner.connect()
@@ -91,7 +93,7 @@ export class BlogsRepoPSQL {
     }
   }
 
-  async updateBanStatusByBlogId(blogId: string, banStatus: boolean): Promise<true| null> {
+  async updateBanStatusByBlogId(blogId: string, banStatus: boolean): Promise<true | null> {
     const queryRunner = this.dataSource.createQueryRunner()
     const manager = queryRunner.manager
     await queryRunner.connect()
@@ -100,9 +102,9 @@ export class BlogsRepoPSQL {
       const banDate = new Date().toISOString()
       const blog = await manager.update(Blog,
         { _id: blogId },
-        {banStatus: banStatus, banDate: banDate}
+        { banStatus: banStatus, banDate: banDate }
       )
- 
+
       await queryRunner.commitTransaction()
       return true
     }
@@ -134,6 +136,61 @@ export class BlogsRepoPSQL {
       await queryRunner.release()
 
     }
+  }
+
+  async saveInfoByMainImageInDB(blogId: string, url: string, fileId: string, fileSize: number) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+
+    await queryRunner.startTransaction()
+    try {
+      const createDate = new Date().toISOString()
+        const newMainImage = await manager.insert(MainImageForBlog, {
+          url: url,
+          fileId: fileId,
+          createdAt: createDate,
+          fileSize: fileSize,
+          blog: {_id: blogId}
+        })
+        await queryRunner.commitTransaction()
+        return true
+      
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      await queryRunner.release()
+    }
+
+  }
+
+
+  async saveInfoByWallpaperImageInDB(blogId: string, url: string, fileId: string, fileSize :number) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+
+    await queryRunner.startTransaction()
+    try {
+      const createDate = new Date().toISOString()
+        const newMainImage = await manager.insert(WallpaperImageForBlog, {
+          url: url,
+          fileId: fileId,
+          createdAt: createDate,
+          fileSize: fileSize,
+          blog: {_id: blogId}
+        })
+        await queryRunner.commitTransaction()
+        return true
+      
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      await queryRunner.release()
+    }
+
   }
 
 

@@ -52,7 +52,12 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
             description: newBlog.description,
             websiteUrl: newBlog.websiteUrl,
             createdAt: newBlog.createdAt,
-            isMembership: newBlog.isMembership
+            isMembership: newBlog.isMembership,
+            images: {
+                wallpaper: null,
+                main: []
+              }
+
         }
     }
 

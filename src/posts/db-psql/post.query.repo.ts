@@ -1,3 +1,4 @@
+import { postImagesViewModel } from './../model/post-model';
 import { HttpException } from '@nestjs/common';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -7,11 +8,12 @@ import { Brackets, DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Post } from './entity/post.entity';
 import { Like } from '../../likes/entity/likes.entity';
+import { ImageForPost } from './entity/image.post.entity';
 
 @Injectable()
 
 export class PostQueryRepoPSQL {
-    constructor(@InjectDataSource() private postModel: DataSource
+    constructor(@InjectDataSource() private dataSource: DataSource
 
     ) { }
 
@@ -24,7 +26,7 @@ export class PostQueryRepoPSQL {
             sortBy = `b._id`
         }
 
-        const posts: Post[] | null = await this.postModel.getRepository(Post)
+        const posts: Post[] | null = await this.dataSource.getRepository(Post)
             .createQueryBuilder('p')
             .leftJoinAndSelect('p.blogId', 'b')
             .where('b.banStatus = :banStatus', { banStatus: false })
@@ -37,7 +39,7 @@ export class PostQueryRepoPSQL {
             return null
         }
 
-        const totalCount = await this.postModel.getRepository(Post)
+        const totalCount = await this.dataSource.getRepository(Post)
             .createQueryBuilder()
             .getCount()
 
@@ -48,7 +50,7 @@ export class PostQueryRepoPSQL {
 
             const postId = b._id.toString()
             if (userId) {
-                const status = await this.postModel.getRepository(Like)
+                const status = await this.dataSource.getRepository(Like)
                     .createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .where('u._id = :userId', { userId: userId })
@@ -59,7 +61,7 @@ export class PostQueryRepoPSQL {
                     myStatus = status.status
                 }
             }
-            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+            const likesCount = await this.dataSource.getRepository(Like).createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .select()
                 .where({ postIdOrCommentId: postId })
@@ -67,7 +69,7 @@ export class PostQueryRepoPSQL {
                 .andWhere('u.status = :status', { status: false })
                 .getCount()
 
-            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+            const dislikesCount = await this.dataSource.getRepository(Like).createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .select()
                 .where({
@@ -78,7 +80,7 @@ export class PostQueryRepoPSQL {
                 .getCount()
 
 
-            const newestLikes = await this.postModel.getRepository(Like)
+            const newestLikes = await this.dataSource.getRepository(Like)
                 .createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .where('l.status = :status', { status: 'Like' })
@@ -109,7 +111,30 @@ export class PostQueryRepoPSQL {
                     dislikesCount: dislikesCount,
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
+                },
+                images: {
+                    main: [
+                        {
+                            url: b.imageForPost.urlForOriginal,
+                            width: 940,
+                            height: 320,
+                            fileSize: b.imageForPost.fileSizeForOriginal
+                        },
+                        {
+                            url: b.imageForPost.urlForMiddle,
+                            width: 300,
+                            height: 180,
+                            fileSize: b.imageForPost.fileSizeForMiddle
+                        },
+                        {
+                            url: b.imageForPost.urlForSmall,
+                            width: 149,
+                            height: 96,
+                            fileSize: b.imageForPost.fileSizeForSmall
+                        }
+                    ]
                 }
+
 
             }
         }
@@ -125,7 +150,7 @@ export class PostQueryRepoPSQL {
 
     async findPostsBlogId(paginationQuery: queryPaginationType, blogId: string, userId: string | null): Promise<paginatorPost | null> {
         try {
-            const posts: Post[] | null = await this.postModel.getRepository(Post)
+            const posts: Post[] | null = await this.dataSource.getRepository(Post)
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
                 .where('b._id = :id', { id: blogId })
@@ -139,7 +164,7 @@ export class PostQueryRepoPSQL {
                 return null
             }
 
-            const totalCount = await this.postModel.getRepository(Post)
+            const totalCount = await this.dataSource.getRepository(Post)
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
                 .where('b._id = :id', { id: blogId })
@@ -154,7 +179,7 @@ export class PostQueryRepoPSQL {
                 const postId = b._id.toString()
 
                 if (userId) {
-                    const status = await this.postModel.getRepository(Like)
+                    const status = await this.dataSource.getRepository(Like)
                         .createQueryBuilder('l')
                         .leftJoinAndSelect('l.userId', 'u')
                         .where('u._id = :userId', { userId: userId })
@@ -166,7 +191,7 @@ export class PostQueryRepoPSQL {
                     }
                 }
 
-                const newestLikes = await this.postModel.getRepository(Like)
+                const newestLikes = await this.dataSource.getRepository(Like)
                     .createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .where('l.status = :status', { status: 'Like' })
@@ -184,7 +209,7 @@ export class PostQueryRepoPSQL {
                     }
                 })
 
-                const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                const likesCount = await this.dataSource.getRepository(Like).createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .select()
                     .where({ postIdOrCommentId: postId })
@@ -192,7 +217,7 @@ export class PostQueryRepoPSQL {
                     .andWhere('u.status = :status', { status: false })
                     .getCount()
 
-                const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+                const dislikesCount = await this.dataSource.getRepository(Like).createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .select()
                     .where({
@@ -216,6 +241,28 @@ export class PostQueryRepoPSQL {
                         dislikesCount: dislikesCount,
                         myStatus: myStatus,
                         newestLikes: newestLikesMaped
+                    },
+                    images: {
+                        main: [
+                            {
+                                url: b.imageForPost.urlForOriginal,
+                                width: 940,
+                                height: 320,
+                                fileSize: b.imageForPost.fileSizeForOriginal
+                            },
+                            {
+                                url: b.imageForPost.urlForMiddle,
+                                width: 300,
+                                height: 180,
+                                fileSize: b.imageForPost.fileSizeForMiddle
+                            },
+                            {
+                                url: b.imageForPost.urlForSmall,
+                                width: 149,
+                                height: 96,
+                                fileSize: b.imageForPost.fileSizeForSmall
+                            }
+                        ]
                     }
                 }
             }))
@@ -230,67 +277,9 @@ export class PostQueryRepoPSQL {
         } catch (e) { return null }
 
     }
-
-    // async getPostById(id: string): Promise<postMongoDb | null> {
-    //     try {
-    //         const post: Post | null = await this.postModel.getRepository(Post)
-    //             .createQueryBuilder('p')
-    //             .leftJoinAndSelect('p.blogId', 'b')
-    //             .leftJoinAndSelect('b.user', 'u')
-    //             .where('p._id = :id', { id: id })
-    //             .andWhere('u.status = :status', {status: false})
-    //             .getOne()
-    //         if (!post) {
-    //             return null
-    //         }
-
-    //         const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
-    //             .leftJoinAndSelect('l.userId', 'u')
-    //             .select()
-    //             .where({
-    //                 postIdOrCommentId: id
-    //             })
-    //             .andWhere('u.status = :status', { status: false })
-    //             .andWhere({
-    //                 status: 'Like'
-    //             })
-    //             .getCount()
-
-    //         const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
-    //             .leftJoinAndSelect('l.userId', 'u')
-    //             .select()
-    //             .where({
-    //                 postIdOrCommentId: id
-    //             })
-    //             .andWhere('u.status = :status', { status: false })
-    //             .andWhere({
-    //                 status: 'Dislike'
-    //             })
-    //             .getCount()
-
-    //         const resultPost = {
-    //             _id: post._id,
-    //             title: post.title,
-    //             shortDescription: post.shortDescription,
-    //             content: post.content,
-    //             blogId: post.blogId._id,
-    //             blogName: post.blogId.name,
-    //             createdAt: post.createdAt,
-    //             extendedLikesInfo: {
-    //                 likesCount: likesCount,
-    //                 dislikesCount: dislikesCount,
-    //                 myStatus: 'None',
-    //                 newestLikes: []
-    //             }
-    //         }
-    //         return resultPost
-    //     } catch (e) { return null }
-    // }
-
-
     async getPostId(postId: string, userId: string | null): Promise<postOutput | null> {
         try {
-            const post: Post | null = await this.postModel.getRepository(Post)
+            const post: Post | null = await this.dataSource.getRepository(Post)
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
                 .leftJoinAndSelect('b.blogger', 'u')
@@ -299,17 +288,17 @@ export class PostQueryRepoPSQL {
                 .andWhere(new Brackets(qb => {
                     qb.where('u.status = false')
                         .orWhere('b.blogger is null');
-                })
-                )
-                //.andWhere('u.status = :status', { status: false })
+                }))
                 .getOne()
+
+
             if (!post) {
                 return null
             }
 
             let myStatus = 'None'
             if (userId) {
-                const status = await this.postModel.getRepository(Like)
+                const status = await this.dataSource.getRepository(Like)
                     .createQueryBuilder('l')
                     .leftJoinAndSelect('l.userId', 'u')
                     .where('u._id = :userId', { userId: userId })
@@ -321,7 +310,7 @@ export class PostQueryRepoPSQL {
                 }
             }
 
-            const newestLikes = await this.postModel.getRepository(Like)
+            const newestLikes = await this.dataSource.getRepository(Like)
                 .createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .where({
@@ -340,7 +329,7 @@ export class PostQueryRepoPSQL {
                     login: like.userId.login
                 }
             })
-            const likesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+            const likesCount = await this.dataSource.getRepository(Like).createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .select()
                 .where({ postIdOrCommentId: postId })
@@ -350,7 +339,7 @@ export class PostQueryRepoPSQL {
                 .andWhere('u.status = :status', { status: false })
                 .getCount()
 
-            const dislikesCount = await this.postModel.getRepository(Like).createQueryBuilder('l')
+            const dislikesCount = await this.dataSource.getRepository(Like).createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .select()
                 .where({
@@ -375,8 +364,69 @@ export class PostQueryRepoPSQL {
                     dislikesCount: dislikesCount,
                     myStatus: myStatus,
                     newestLikes: newestLikesMaped
+                },
+                images: {
+                    main: [
+                        {
+                            url: post.imageForPost.urlForOriginal,
+                            width: 940,
+                            height: 320,
+                            fileSize: post.imageForPost.fileSizeForOriginal
+                        },
+                        {
+                            url: post.imageForPost.urlForMiddle,
+                            width: 300,
+                            height: 180,
+                            fileSize: post.imageForPost.fileSizeForMiddle
+                        },
+                        {
+                            url: post.imageForPost.urlForSmall,
+                            width: 149,
+                            height: 96,
+                            fileSize: post.imageForPost.fileSizeForSmall
+                        }
+                    ]
                 }
             }
         } catch (e) { return null }
+    }
+
+    async getImagesForPosts(postId: string): Promise<postImagesViewModel | null> {
+        try {
+            const res = await this.dataSource.getRepository(ImageForPost)
+                .createQueryBuilder('image')
+                .leftJoinAndSelect('image.post', 'post')
+                .where('post._id = :id', { id: postId })
+                .getOne()
+            if (!res) {
+                return null
+            }
+            return {
+                main: [
+                    {
+                        url: res.urlForOriginal,
+                        width: 940,
+                        height: 320,
+                        fileSize: res.fileSizeForOriginal
+                    },
+                    {
+                        url: res.urlForMiddle,
+                        width: 300,
+                        height: 180,
+                        fileSize: res.fileSizeForMiddle
+                    },
+                    {
+                        url: res.urlForSmall,
+                        width: 149,
+                        height: 96,
+                        fileSize: res.fileSizeForSmall
+                    }
+                ]
+            }
+
+        } catch (e) {
+            return null
+        }
+
     }
 }

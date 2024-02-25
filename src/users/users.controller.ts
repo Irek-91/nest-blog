@@ -2,7 +2,7 @@ import { BanUserByBloggerCommand } from './application/use-case/ban.user.by.blog
 import { GetBlogsByBloggerCommand } from './../blogs/application/use-case/get.blogs.by.blogger.use.case';
 import { Blog } from './../blogs/db-psql/entity/blog.entity';
 import { PaginationUsersSa } from './../helpers/query-filter-users-SA';
-import { CustomPipe } from './../adapters/pipe';
+import { PipeisValidUUID } from './../adapters/pipe';
 import { AuthGuard } from './../auth.guard';
 import { CreateUserCommand } from './application/use-case/create.user.use.case';
 import { EmailOrLoginGuard, UserAuthGuard } from './../auth/guards/auth.guard';
@@ -58,7 +58,7 @@ export class UsersController {
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(UserAuthGuard)
     @Put('blogger/users/:id/ban')
-    async banUserByBlogger(@Param('id', new CustomPipe()) banUserId: string,
+    async banUserByBlogger(@Param('id', new PipeisValidUUID()) banUserId: string,
         @Body() updateData: BanUserByBloggerInputModel,
         @Request() req: any) {
         const bloggerId = req.userId
@@ -85,7 +85,7 @@ export class UsersController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(UserAuthGuard)
     @Get('blogger/users/blog/:id')
-    async getBannedUsersByBlog(@Param('id', new CustomPipe()) blogId: string,
+    async getBannedUsersByBlog(@Param('id', new PipeisValidUUID()) blogId: string,
         @Request() req: any,
         @Query()
         query: {

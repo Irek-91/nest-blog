@@ -26,14 +26,28 @@ export type blogPSQLDB = {
   userLogin: string | null,
 
 }
-
+export type photoSizeViewModel = {
+  url: string,
+  width: number,
+  height: number,
+  fileSize: number
+}
+export type blogsImageWiewModel = {
+  wallpaper : photoSizeViewModel,
+  main: photoSizeViewModel[] | []
+}
 export type blogOutput = {
   id: string,
   name: string,
   description: string,
   websiteUrl: string,
   createdAt: string,
-  isMembership: boolean
+  isMembership: boolean,
+  images: {
+    wallpaper:photoSizeViewModel | null,
+    main: photoSizeViewModel[]
+  }
+
 }
 
 export type blogSAOutput = {

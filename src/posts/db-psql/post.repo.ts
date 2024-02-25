@@ -1,3 +1,4 @@
+import { ImageForPost } from './entity/image.post.entity';
 import { Like } from './../../likes/entity/likes.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import mongoose, { HydratedDocument, Model } from "mongoose"
@@ -13,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 
 export class PostRepoPSQL {
-    constructor(@InjectDataSource() private postModel: DataSource,
+    constructor(@InjectDataSource() private dataSource: DataSource,
 
 
     ) { }
@@ -25,7 +26,7 @@ export class PostRepoPSQL {
 
     async createdPost(newPost: postMongoDb): Promise<true | null> {
         try {
-            const postCreated = await this.postModel.createQueryBuilder()
+            const postCreated = await this.dataSource.createQueryBuilder()
                 .insert()
                 .into(Post)
                 .values({
@@ -53,7 +54,7 @@ export class PostRepoPSQL {
     async updatePostId(id: string | ObjectId, title: string, shortDescription: string, content: string): Promise<boolean> {
         try {
 
-            const postUpdate = await this.postModel.createQueryBuilder()
+            const postUpdate = await this.dataSource.createQueryBuilder()
                 .update(Post)
                 .set({
                     title: title,
@@ -73,7 +74,7 @@ export class PostRepoPSQL {
         try {
             const createdAt = (new Date()).toISOString()
 
-            const status = await this.postModel.getRepository(Like)
+            const status = await this.dataSource.getRepository(Like)
                 .createQueryBuilder('l')
                 .leftJoinAndSelect('l.userId', 'u')
                 .where('u._id = :userId', { userId: userId })
@@ -81,7 +82,7 @@ export class PostRepoPSQL {
                 .getOne()
 
             if (status) {
-                const likeResult = await this.postModel
+                const likeResult = await this.dataSource
                     .createQueryBuilder()
                     .update(Like)
                     .set({
@@ -96,7 +97,7 @@ export class PostRepoPSQL {
             } else {
                 const likeId = uuidv4()
 
-                const likeResult = await this.postModel.createQueryBuilder()
+                const likeResult = await this.dataSource.createQueryBuilder()
                     .insert()
                     .into(Like)
                     .values({
@@ -115,8 +116,40 @@ export class PostRepoPSQL {
         }
     }
 
+    async saveInfoByImageInDB(postId: string, url: string, fileId: string, fileSize: number) {
+        const queryRunner = this.dataSource.createQueryRunner()
+        const manager = queryRunner.manager
+        await queryRunner.connect()
+    
+        await queryRunner.startTransaction()
+        try {
+          const createDate = new Date().toISOString()
+            const newMainImage = await manager.insert(ImageForPost, {
+              urlForOriginal: url,
+              urlForMiddle: '',
+              urlForSmall: '',
+              fileId: fileId,
+              fileSizeForOriginal: fileSize,
+              fileSizeForMiddle: 0,
+              fileSizeForSmall: 0,
+              createdAt: createDate,
+              post: {_id: postId}
+            })
+            await queryRunner.commitTransaction()
+            return true
+          
+        } catch (e) {
+          await queryRunner.rollbackTransaction()
+          return null
+        } finally {
+          await queryRunner.release()
+        }
+    
+      }
+
+
     async deletePostAll(): Promise<boolean> {
-        const postsDeleted = await this.postModel.query(`
+        const postsDeleted = await this.dataSource.query(`
         DELETE FROM public."posts"
         `)
         if (postsDeleted[1] > 0) { return true }
@@ -124,14 +157,14 @@ export class PostRepoPSQL {
     }
 
     async deletePostId(id: string): Promise<Boolean | null> {
-        const likesByPostId = await this.postModel.createQueryBuilder()
+        const likesByPostId = await this.dataSource.createQueryBuilder()
             .delete()
             .from(Like)
             .where({
                 postIdOrCommentId: id
             }).execute()
 
-        const postDelete = await this.postModel.createQueryBuilder()
+        const postDelete = await this.dataSource.createQueryBuilder()
             .delete()
             .from(Post)
             .where({
@@ -144,7 +177,7 @@ export class PostRepoPSQL {
     }
 
     async deletePostsByBlogId(blogId: string): Promise<Boolean | null> {
-        const postsDeleted = await this.postModel.createQueryBuilder()
+        const postsDeleted = await this.dataSource.createQueryBuilder()
             .delete()
             .from(Post)
             .where({

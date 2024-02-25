@@ -3,7 +3,10 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": "blogger.e2e-spec.ts$",
+  "globalSetup": "./setup.ts",
+  "globalTeardown": "./teardown.ts",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "testTimeout": 10000
 }

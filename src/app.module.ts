@@ -1,3 +1,10 @@
+import { ImageForPost } from './posts/db-psql/entity/image.post.entity';
+import { SaveImageForPostUseCase } from './posts/application/use-case/save.image.for.post.use.case';
+import { SaveWallpaperImageForBlogUseCase } from './blogs/application/use-case/save.wallpaper.image.for.blog.use.case';
+import { SaveMainImageForBlogUseCase } from './blogs/application/use-case/save.main.image.for.blog.use.case';
+import { MainImageForBlog } from './blogs/db-psql/entity/main.image.blog.entity';
+import { WallpaperImageForBlog } from './blogs/db-psql/entity/wallpaper.image.blog.entity';
+import { S3StorageAdapter } from './adapters/s3-storage-adapter';
 import { GetCommentsByBlogUseCase } from './comments/application/use-case/get.comments.by.blog.use.cae';
 import { UpdateLikeStatusCommentUseCase } from './comments/application/use-case/update.like.status.commet.use.case';
 import { FindCommentsByPostUseCase } from './comments/application/use-case/find.comments.by.post.use.case';
@@ -51,7 +58,7 @@ import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo';
 import { PairGameQueryRepo } from './quiz.pair/dv-psql/pair.game.query.repo';
 import { Statistic } from './quiz.pair/dv-psql/entity/statistic';
 import { CheckingActivePair } from './auth/guards/auth.guard';
-import { CustomPipe } from './adapters/pipe';
+import { PipeisValidUUID, FileValidationPipe, FileWallpaperValidationPipe, FileMainValidationPipe, PostImageValidationPipe } from './adapters/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
 import { Pair } from './quiz.pair/dv-psql/entity/pairs';
 import { PairGameService } from './quiz.pair/application/pair.game.service';
@@ -68,7 +75,7 @@ import { LikesRepository } from './likes/likes.repo';
 import { CommentsRepoPSQL } from './comments/db-psql/comments.repo.PSQL';
 import { CommentsService } from './comments/application/comments.service';
 import { ConfigModule } from '@nestjs/config';
-import { Module} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController, TestingController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
@@ -99,7 +106,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersQueryRepoPSQL } from './users/db-psql/users.qurey.repo.PSQL';
 import { UsersRepositoryPSQL } from './users/db-psql/users.repo.PSQL';
 import { UsersSAController } from './users/users.SA.controller';
-import { log } from 'console';
 import { SecurityDeviceRepoPSQL } from './securityDevices/db-psql/securityDevice.repo.PSQL';
 import { BlogsQueryRepoPSQL } from './blogs/db-psql/blogs.query.repo.PSQL';
 import { BlogsRepoPSQL } from './blogs/db-psql/blogs.repo.PSQL';
@@ -119,29 +125,32 @@ import { DeleteBlogsAllUseCase } from './blogs/application/use-case/delete.blogs
 import { GetBlogIdUseCase } from './blogs/application/use-case/get.blog.id.use.case';
 import { UpdatePostUseCase } from './posts/application/use-case/update.post.use.case';
 
-const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase, 
+const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
   UpdateQuestionIdUseCase, UpdateQuestionInPublishUseCase,
   DeleteQuestionIdUseCase]
-const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase, 
+const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
   GetTopUsersUseCase, GetAllPairsByUserUseCase, GetPairByIdUseCase,
   CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
 
-const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase, 
+const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
   DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase,
-  UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase]
+  UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase, SaveMainImageForBlogUseCase, SaveWallpaperImageForBlogUseCase]
 
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
-  DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase]
+  DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase,
+  SaveImageForPostUseCase]
 
-const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase, DeleteUserIdUseCase, 
+const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase, DeleteUserIdUseCase,
   BanUserByBloggerUseCase, GetBannedUsersForBlogUseCase]
 
 const commentUseCase = [CreatedCommentPostUseCase, UpdateCommentByPostUseCase, GetCommentByIdUseCase,
   DeleteCommentByIdUseCase, FindCommentsByPostUseCase, UpdateLikeStatusCommentUseCase, GetCommentsByBlogUseCase]
 
-export const entities = [User, EmailConfirmation, Device, Post, Blog, 
-  Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser, UsersBannedByBlogger]
+export const entities = [User, EmailConfirmation, Device, Post, Blog,
+  Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser, UsersBannedByBlogger,
+  WallpaperImageForBlog, MainImageForBlog, WallpaperImageForBlog, ImageForPost]
 
+let { PSQL_URL } = process.env;
 
 @Module({
   imports: [
@@ -156,85 +165,79 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
     ConfigModule.forRoot(),
     //MongooseModule.forRoot('mongodb+srv://admin:admin1@atlascluster.0x495z3.mongodb.net/BlogPlatform?retryWrites=true&w=majority'),
     //MongooseModule.forFeature([
-      // {
-      //   name: User.name,
-      //   schema: UserSchema
-      // },
-      // {
-      //   name: Blog.name,
-      //   schema: BlogSchema
-      // },
-      // {
-      //   name: Post.name,
-      //   schema: PostSchema
-      // },
-      // {
-      //   name: Comment.name,
-      //   schema: CommentSchema
-      // },
-      // {
-      //   name: Like.name,
-      //   schema: LikeSchema
-      // },
-      // {
-      //   name: DevicesModel.name,
-      //   schema: DevicesModelSchema
-      // },
-      // {
-      //   name: IPAndURIModel.name,
-      //   schema: IPAndURISchema
-      // }
+    // {
+    //   name: User.name,
+    //   schema: UserSchema
+    // },
+    // {
+    //   name: Blog.name,
+    //   schema: BlogSchema
+    // },
+    // {
+    //   name: Post.name,
+    //   schema: PostSchema
+    // },
+    // {
+    //   name: Comment.name,
+    //   schema: CommentSchema
+    // },
+    // {
+    //   name: Like.name,
+    //   schema: LikeSchema
+    // },
+    // {
+    //   name: DevicesModel.name,
+    //   schema: DevicesModelSchema
+    // },
+    // {
+    //   name: IPAndURIModel.name,
+    //   schema: IPAndURISchema
+    // }
     //])
     //
-    
+
 
     TypeOrmModule.forRoot(
-      {
-      //useFactory: (configService: ConfigService<ConfigType>) => ({
-      type: 'postgres',
-      host: process.env.PGHOSTLOCAL,
-      port:  Number(process.env.PORTLOCAL),
-      username: process.env.PGUSERLOCAL,
-      password: process.env.PGPASSWORDLOCAL,
-      database: process.env.PGDATABASELOCAL,
-      autoLoadEntities: false,
-      synchronize: true,
-      entities:[...entities],
-      migrations: [__dirname +'/db/migrations/*.ts'],
-      migrationsTableName: "custom_migration_table",
-      logging: true,
-      namingStrategy: new CustomNaimingStrategy()
-    }
+      { type: 'postgres',
+        url: process.env.PSQL_URL,
+        autoLoadEntities: false,
+        synchronize: true,
+        entities: [...entities],
+        migrations: [__dirname + '/db/migrations/*.ts'],
+        migrationsTableName: "custom_migration_table",
+        logging: true,
+        namingStrategy: new CustomNaimingStrategy()
+      }
     ),
-    TypeOrmModule.forFeature([...entities])    
+    TypeOrmModule.forFeature([...entities])
     ,
     JwtModule.register({
       secret: env.JWT_SECRET,
-      signOptions: {expiresIn: 10}
+      signOptions: { expiresIn: 10 }
     }),
     PassportModule
   ],
 
-  
-  controllers: [AppController, 
-    TestingController, 
+
+  controllers: [AppController,
+    TestingController,
     UsersController, UsersSAController,
-    BlogsController,BlogsSAController, BloggerController,
-    PostsController, 
+    BlogsController, BlogsSAController, BloggerController,
+    PostsController,
     CommentsController,
     AuthController,
     SecurityDeviceController,
     QusetionsSAController,
     PairGameController
   ],
-  providers: [ AppService,
-    AuthService, 
+  providers: [AppService,
+    AuthService,
     EmailAdapter,
     Pagination, PaginationUsersSa,
-    JwtService, JwtStrategy, LocalStrategy, 
-    BasicStrategy,
+    JwtService, JwtStrategy, LocalStrategy,
+    BasicStrategy, S3StorageAdapter,
     UsersService, ...userUseCase,
-    UsersQueryRepoPSQL,UsersRepositoryPSQL,  
+    UsersQueryRepoPSQL, UsersRepositoryPSQL,
     BlogsService, ...blogUseCase,
     //BlogsRepository, BlogsQueryRepository, 
     IsBlogIdAlreadyExistConstraint, BlogsQueryRepoPSQL, BlogsRepoPSQL,
@@ -248,8 +251,8 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
     LikesRepository,
     QusetionsService, QuestionsRepository, QuestionsQueryRepository, ...questionsUseCase,
     PairGameService, PairGameRepo, PairGameQueryRepo, ...pairGameUseCase,
-    CustomPipe,
+    PipeisValidUUID, FileValidationPipe, FileWallpaperValidationPipe, FileMainValidationPipe, PostImageValidationPipe,
     CheckingActivePair
   ],
 })
-export class AppModule {}
+export class AppModule { }

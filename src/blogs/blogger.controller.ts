@@ -1,28 +1,35 @@
+import { SaveImageForPostCommand } from './../posts/application/use-case/save.image.for.post.use.case';
 import { paginationGetCommentsByBlog } from './../comments/model/comments-model';
 import { GetCommentsByBlogCommand } from './../comments/application/use-case/get.comments.by.blog.use.cae';
 import { BanUserByBloggerCommand } from './../users/application/use-case/ban.user.by.blogger.use.case';
 import { BanUserByBloggerInputModel } from './../users/models/users-model';
-import { CustomPipe } from './../adapters/pipe';
+import { PipeisValidUUID, FileValidationPipe, FileWallpaperValidationPipe, FileMainValidationPipe, PostImageValidationPipe } from './../adapters/pipe';
 import { UpdatePostCommand } from './../posts/application/use-case/update.post.use.case';
 import { FindPostsByBlogIdCommand } from './../posts/application/use-case/find.posts.by.blog.id.use.case';
 import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/created.post.by.blog.id.use.case';
-import { postInputModelSpecific } from './../posts/model/post-model';
+import { postInputModelSpecific, postImagesViewModel } from './../posts/model/post-model';
 import { UpdateBlogCommand } from './application/use-case/update.blog.use.case';
 import { GetBlogDBCommand } from './application/use-case/get.blog.DB.use.case';
 import { GetBlogIdCommand } from './application/use-case/get.blog.id.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
 import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
-import { blogInput, paginatorBlog } from './models/blogs-model';
+import { blogInput, paginatorBlog, blogsImageWiewModel } from './models/blogs-model';
 import { CreateBlogCommand } from './application/use-case/create.blog.use.case';
 import { UserAuthGuard } from './../auth/guards/auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { Pagination } from './../helpers/query-filter';
 import { PostsService } from './../posts/application/posts.service';
 import { BlogsService } from './application/blogs.service';
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, FileTypeValidator, Get, HttpCode, HttpException, HttpStatus, MaxFileSizeValidator, Param, ParseFilePipe, ParseFilePipeBuilder, Post, Put, Query, Request, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { paginatorPost, postInputModel, postOutput } from '../posts/model/post-model';
 import { DeletePostIdCommand } from './../posts/application/use-case/delete.post.id.use.case';
 import { Blog } from './db-psql/entity/blog.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { SaveMainImageForBlogCommand } from './application/use-case/save.main.image.for.blog.use.case';
+import { extname } from 'path';
+import { SaveWallpaperImageForBlogCommand } from './application/use-case/save.wallpaper.image.for.blog.use.case';
+import { log } from 'console';
+import { GetPostIdCommand } from '../posts/application/use-case/get.post.id.use.case';
 
 
 @UseGuards(UserAuthGuard)
@@ -101,7 +108,7 @@ export class BloggerController {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
 
-        const foundPosts = await this.commandBus.execute(new FindPostsByBlogIdCommand(pagination, blogId, userId));
+        const foundPosts:paginatorPost | null = await this.commandBus.execute(new FindPostsByBlogIdCommand(pagination, blogId, userId));
         if (!foundPosts) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         } else {
@@ -121,7 +128,7 @@ export class BloggerController {
 
 
     @Post('blogs/:blogId/posts')
-    async createPostByBlog(@Param('blogId', new CustomPipe()) blogId: string,
+    async createPostByBlog(@Param('blogId', new PipeisValidUUID()) blogId: string,
         @Body() inputData: postInputModelSpecific,
         @Request() req: any) {
         const userId = req.userId//исправить после авторизации
@@ -147,9 +154,85 @@ export class BloggerController {
         }
     }
 
+    @Post('blogs/:blogId/images/main')
+    @UseInterceptors(FileInterceptor('file'))
+    async saveMainImageForBlog(@UploadedFile(new FileValidationPipe(), new FileMainValidationPipe())
+    file: Express.Multer.File,
+        @Param('blogId', new PipeisValidUUID()) blogId: string,
+        @Request() req: any) {
+        const userId = req.userId//исправить после авторизации
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        if (!blog) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+        if (blog.blogger._id !== userId) {
+            throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        }
+        const newMainImage = await this.commandBus.execute(new SaveMainImageForBlogCommand(blogId, userId, file));
+
+        if (!newMainImage) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return newMainImage
+        }
+    }
+
+    @Post('blogs/:blogId/images/wallpaper')
+    @UseInterceptors(FileInterceptor('file'))
+    async saveWallpaperImageForBlog(@UploadedFile(new FileValidationPipe(), new FileWallpaperValidationPipe())
+    file: Express.Multer.File,
+        @Param('blogId', new PipeisValidUUID()) blogId: string,
+        @Request() req: any) {
+        const userId = req.userId//исправить после авторизации
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        if (!blog) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+        // Проверка прав доступа
+        if (blog.blogger._id !== userId) {
+            throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        }
+        // Сохранение изображения обоев для блога
+        const newMainImage: blogsImageWiewModel | null = await this.commandBus.execute(new SaveWallpaperImageForBlogCommand(blogId, userId, file));
+
+        if (!newMainImage) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return newMainImage
+        }
+    }
+
+    @Post('blogs/:blogId/posts/:postId/images/main')
+    @UseInterceptors(FileInterceptor('file'))
+    async saveImagesForPost(@UploadedFile(new FileValidationPipe(), new PostImageValidationPipe())
+    file: Express.Multer.File,
+        @Param('blogId', new PipeisValidUUID()) blogId: string, @Param('postId') postId: string,
+        @Request() req: any) {
+        const userId = req.userId//исправить после авторизации
+        const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        if (!blog) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+        if (blog.blogger._id !== userId) {
+            throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+        }
+        const post: postOutput | null = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
+        if (!post) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        }
+        // Сохранение изображения для поста
+        const newMainImage: postImagesViewModel | null = await this.commandBus.execute(new SaveImageForPostCommand(blogId, userId, postId, file));
+
+        if (!newMainImage) {
+            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+        } else {
+            return newMainImage
+        }
+    }
+
 
     @Put('blogs/:id')
-    async updateBlog(@Param('id') blogId: string,
+    async updateBlog(@Param('id', new PipeisValidUUID()) blogId: string,
         @Body() blogInputData: blogInput,
         @Request() req: any) {
         const userId = req.userId//исправить после авторизации
@@ -174,7 +257,7 @@ export class BloggerController {
 
 
     @Put('blogs/:blogId/posts/:postId')
-    async updatePostByBlogId(@Param('blogId') blogId: string, @Param('postId') postId: string,
+    async updatePostByBlogId(@Param('blogId', new PipeisValidUUID()) blogId: string, @Param('postId') postId: string,
         @Body() postUpdateData: postInputModelSpecific,
         @Request() req: any) {
         const userId = req.userId//исправить после авторизации

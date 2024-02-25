@@ -17,10 +17,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "cross-env ENV=TEST jest --config ./test/jest-e2e.json --detectOpenHandles",
     "swagger": "node ./swagger.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.515.0",
     "@mobizerg/nest-nodemailer": "^1.1.0",
     "@nestjs-modules/mailer": "^1.9.1",
     "@nestjs/common": "^10.2.7",
@@ -41,6 +42,7 @@
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
     "date-fns": "^2.30.0",
+    "dockerode": "^4.0.2",
     "mongodb-memory-server": "^9.0.1",
     "mongoose": "^7.6.2",
     "nest-bcrypt": "^0.0.4",
@@ -62,6 +64,7 @@
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {
+    "-": "^0.0.1",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
@@ -69,6 +72,7 @@
     "@types/cron": "^2.4.0",
     "@types/express": "^4.17.20",
     "@types/jest": "^29.5.2",
+    "@types/multer": "^1.4.11",
     "@types/node": "^20.9.1",
     "@types/nodemailer": "^6.4.13",
     "@types/passport-local": "^1.0.37",
@@ -76,6 +80,8 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "cross": "^1.0.0",
+    "env": "^0.0.2",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

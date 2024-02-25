@@ -5,7 +5,7 @@ import { GetAllPairsByUserCommand } from './application/use-case/get.all.pairs.b
 import { GetTopUsersCommand } from './application/use-case/get.top.users';
 import { GetPairMyCurrentCommand } from './application/use-case/get.pair.my.current.use.case';
 import { Pagination, queryPaginationPairsType, queryPaginationTopUsersType } from './../helpers/query-filter';
-import { CustomPipe } from '../adapters/pipe';
+import { PipeisValidUUID } from '../adapters/pipe';
 import { PairGameService } from './application/pair.game.service';
 import { gamePairViewModel, AnswerInputModel, gameAllPairsViewModel, myStatisticViewModel, topGamePlayerViewModel } from './model/games.model';
 import { UserAuthGuard, CheckingActivePair } from './../auth/guards/auth.guard';
@@ -91,7 +91,7 @@ export class PairGameController {
     @Get('/pairs/:id')
     async getPairById(
         @Param('id',
-            new CustomPipe()
+            new PipeisValidUUID()
         ) pairId: string,
         @Request() req: any
     ) {

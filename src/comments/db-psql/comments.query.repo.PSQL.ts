@@ -201,12 +201,11 @@ export class CommentsQueryRepoPSQL {
 
       const totalCount = await this.commetsModel.getRepository(Comment)
       .createQueryBuilder('c')
-      //.leftJoinAndSelect('c.postId', 'p')
       .leftJoinAndSelect('c.userId', 'u')
       .leftJoinAndSelect('c.postId', 'p')
       .leftJoinAndSelect('p.blogId', 'b')
       .where('u.status = :status', { status: false })
-      .andWhere('b._id = :blogId', { blogId: blogId })
+      //.andWhere('b', {_id: blogId} )
       .getCount()
       
 
@@ -218,7 +217,7 @@ export class CommentsQueryRepoPSQL {
         .leftJoinAndSelect('c.postId', 'p')
         .leftJoinAndSelect('p.blogId', 'b')
         .where('u.status = :status', { status: false })
-        //.andWhere('c.postId = :postId', { postId: postId })
+        //.andWhere('p.blogId = :blog', { blog: {_id: blogId }})
         .orderBy(`c.${pagination.sortBy}`, pagination.sortDirection)
         .skip(pagination.skip)
         .take(pagination.pageSize)
@@ -274,11 +273,11 @@ export class CommentsQueryRepoPSQL {
         return {
           id: commentId,
           content: c.content,
+          createdAt: c.createdAt,
           commentatorInfo: {
             userId: c.userId._id,
             userLogin: c.userId.login
           },
-          createdAt: c.createdAt,
           likesInfo: {
             likesCount: likesCount,
             dislikesCount: dislikesCount,

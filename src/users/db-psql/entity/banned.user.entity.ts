@@ -8,7 +8,9 @@ export class BannedUser {
     @PrimaryGeneratedColumn()
     id: number
     // @PrimaryColumn()
-    @OneToOne(() => User, (user) => user._id)
+    @OneToOne(() => User, (user) => user._id, {
+        onDelete: 'CASCADE'
+    })
     @JoinColumn({
         name: 'userId'
     })
