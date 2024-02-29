@@ -30,6 +30,6 @@ export class Post {
 
     @OneToMany((type) => ImageForPost, (images) => images.post, {nullable: true})
     @JoinColumn({name: 'imageForPost'})
-    public imageForPost: ImageForPost
+    public imageForPost: ImageForPost[]
 
 }

@@ -253,7 +253,7 @@ describe('tests for blogger', () => {
                 },
                 images: {
                     main: []
-                  }
+                }
             })
             expect.setState({ postByUserOneBlog2: res.body })
 
@@ -377,7 +377,7 @@ describe('tests for blogger', () => {
             const { blog2 } = expect.getState()
             const { userOne } = expect.getState()
             const { userTwo } = expect.getState()
-            const { postByUserOneBlog2} = expect.getState()
+            const { postByUserOneBlog2 } = expect.getState()
 
             const postData = {
                 title: "postTwo",
@@ -457,19 +457,97 @@ describe('tests for blogger', () => {
             const { userOne } = expect.getState()
             const { userTwo } = expect.getState()
             const { postByUserOneBlog2 } = expect.getState()
-            const buffer = Buffer.from('svsvsvsv')
-            const inputData = {
-                fieldname: 'file',
-                originalname: 'img-156x156.jpg',
-                encoding: '7bit',
-                mimetype: 'image/jpeg',
-                buffer: buffer,
-                size: 5507
-              }
-            const res = await request(httpServer).post(`blogs/${blog2.id}/images/main`)
-                .send(inputData).set(userOne.headers)
-            expect(res.status).toBe(201)
 
+            const res = await request(httpServer).post(`/blogger/blogs/${blog2.id}/images/main`).attach('file', 'C:/BackEnd/blogImageMain.jpg')
+                .set(userOne.headers)
+
+            expect(res.status).toBe(201)
+            expect(res.body).toEqual({
+                wallpaper: null,
+                main: [
+                    {
+                        url: expect.any(String),
+                        width: 156,
+                        height: 156,
+                        fileSize: expect.any(Number)
+                    }
+                ]
+            })
+            //отправка изображения не того формата ошибка 400
+            const res2 = await request(httpServer).post(`/blogger/blogs/${blog2.id}/images/main`).attach('file', 'C:/BackEnd/blogImageMainIncorrect.jpg')
+                .set(userOne.headers)
+            expect(res2.status).toBe(400)
+
+            //отправка текстового файла, ошибка 400
+            const res3 = await request(httpServer).post(`/blogger/blogs/${blog2.id}/images/main`).attach('file', 'C:/BackEnd/blogImageMainIncorrect.txt')
+                .set(userOne.headers)
+            expect(res3.status).toBe(400)
+
+
+
+        })
+
+        it('Отправка изображение wallpaper для блога', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const { postByUserOneBlog2 } = expect.getState()
+
+            const res = await request(httpServer).post(`/blogger/blogs/${blog2.id}/images/wallpaper`).attach('file', 'C:/BackEnd/blogImageWallpaper.jpg')
+                .set(userOne.headers)
+
+            expect(res.status).toBe(201)
+            expect(res.body).toEqual({
+                wallpaper: {
+                    url: expect.any(String),
+                    width: 1028,
+                    height: 312,
+                    fileSize: expect.any(Number)
+                },
+                main: [
+                    {
+                        url: expect.any(String),
+                        width: 156,
+                        height: 156,
+                        fileSize: expect.any(Number)
+                    }
+                ]
+            })
+        })
+
+        it('Отправка изображение main для поста', async () => {
+            const { blog2 } = expect.getState()
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+            const { postByUserOneBlog2 } = expect.getState()
+
+            const res = await request(httpServer).post(`/blogger/blogs/${blog2.id}/posts/${postByUserOneBlog2.id}/images/main`)
+                .attach('file', 'C:/BackEnd/postImageMain.jpg')
+                .set(userOne.headers)
+
+            expect(res.status).toBe(201)
+            expect(res.body).toEqual({
+                main: [
+                    {
+                        url: expect.any(String),
+                        width: 940,
+                        height: 432,
+                        fileSize: expect.any(Number)
+                    },
+                    {
+                        url: expect.any(String),
+                        width: 300,
+                        height: 180,
+                        fileSize: expect.any(Number)
+                    },
+                    {
+                        url: expect.any(String),
+                        width: 149,
+                        height: 96,
+                        fileSize: expect.any(Number)
+                    }
+                ]
+            })
         })
 
 

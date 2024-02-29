@@ -3,6 +3,7 @@ import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { validate as isValidUUID } from 'uuid';
 import { log } from 'console';
+import sharp from 'sharp';
 
 @Injectable()
 export class PipeisValidUUID implements PipeTransform<any> {
@@ -20,38 +21,42 @@ export class PipeisValidUUID implements PipeTransform<any> {
 
 @Injectable()
 export class FileValidationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    const regex = /\d+x\d+/;
-    const res = value.originalname.match(regex)
+  async transform(value: Express.Multer.File, metadata: ArgumentMetadata) {
+    try {
+      const { size, format } = await sharp(value.buffer).metadata();
+      const oneKb = 102400;
+      const correctFormat = ['jpeg', 'png']
 
-    const oneKb = 102400;
-    const correctFormat = ['image/jpeg', 'image/png']
-    const correctSize = ['156x156']
-    
-    const result = correctFormat.includes(value.mimetype)
+      const result = correctFormat.includes(format!)
 
-    if (result === false) {
+      if (result === false) {
+        throw new BadRequestException([
+          { message: 'Invalid image format. Supported formats: JPEG, PNG', field: 'file' },
+        ]);
+      }
+
+      if (size! > oneKb) {
+        throw new BadRequestException([
+          { message: 'Maximum file size allowed is 100 KB', field: 'file' },
+        ]);
+      }
+      return value
+
+    } catch (e) {
       throw new BadRequestException([
-        { message: 'Invalid image format. Supported formats: JPEG, PNG', field: 'file' },
+        { message: 'File incorrect format', field: 'file' },
       ]);
     }
 
-    if (value.size > oneKb) {
-      throw new BadRequestException([
-        { message: 'Maximum file size allowed is 100 KB', field: 'file' },
-      ]);
-    }
-    return value
   }
 }
 
 @Injectable()
 export class FileWallpaperValidationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    const regex = /\d+x\d+/;
-    const res = value.originalname.match(regex)
+  async transform(value: Express.Multer.File, metadata: ArgumentMetadata) {
+    const { width, height } = await sharp(value.buffer).metadata();
 
-    if (res[0] !== '1028x312') {
+    if (width !== 1028 || height !== 312) {
       throw new BadRequestException([
         { message: 'Wallpaper format incorrect', field: 'file' },
       ]);
@@ -62,11 +67,9 @@ export class FileWallpaperValidationPipe implements PipeTransform {
 
 @Injectable()
 export class FileMainValidationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    const regex = /\d+x\d+/;
-    const res = value.originalname.match(regex)
-
-    if (res[0] !== '156x156') {
+  async transform(value: Express.Multer.File, metadata: ArgumentMetadata) {
+    const { width, height } = await sharp(value.buffer).metadata();
+    if (width !== 156 || height !== 156) {
       throw new BadRequestException([
         { message: 'Main format incorrect', field: 'file' },
       ]);
@@ -77,11 +80,10 @@ export class FileMainValidationPipe implements PipeTransform {
 
 @Injectable()
 export class PostImageValidationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    const regex = /\d+x\d+/;
-    const res = value.originalname.match(regex)
+  async transform(value: Express.Multer.File, metadata: ArgumentMetadata) {
+    const { width, height } = await sharp(value.buffer).metadata();
 
-    if (res[0] !== '940x432') {
+    if (width !== 940 || height !== 432) {
       throw new BadRequestException([
         { message: 'Post image format incorrect', field: 'file' },
       ]);

@@ -33,7 +33,7 @@ export type photoSizeViewModel = {
   fileSize: number
 }
 export type blogsImageWiewModel = {
-  wallpaper : photoSizeViewModel,
+  wallpaper : photoSizeViewModel | null,
   main: photoSizeViewModel[] | []
 }
 export type blogOutput = {

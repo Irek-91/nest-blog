@@ -67,6 +67,8 @@ export class BlogsQueryRepoPSQL {
       blogsOne = await this.dataSource
         .createQueryBuilder(Blog, 'b')
         .leftJoinAndSelect('b.blogger', 'u')
+        .leftJoinAndSelect('b.wallpaperImage', 'w')
+        .leftJoinAndSelect('b.mainImage', 'm')
         .where('b.banStatus = :banStatus', { banStatus: false })
         .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
         .andWhere('u._id = :userId', {
@@ -90,6 +92,7 @@ export class BlogsQueryRepoPSQL {
 
 
     const blogsOutput: blogOutput[] = blogsOne.map((b) => {
+
       if (b!.wallpaperImage.length !== 0) {
         wallpaper = {
           url: b.wallpaperImage[0].url,
@@ -349,29 +352,39 @@ export class BlogsQueryRepoPSQL {
 
   async getImagesByBlog(blogId: string): Promise<blogsImageWiewModel | null> {
     try {
-      const res = await this.dataSource
+      let wallpaper: photoSizeViewModel | null = null
+      let main: [] | photoSizeViewModel[] = []
+      const blog = await this.dataSource
         .createQueryBuilder(Blog, 'b')
         .leftJoinAndSelect('b.mainImage', 'm')
         .leftJoinAndSelect('b.wallpaperImage', 'w')
         .where({ _id: blogId })
         .getOne()
 
-      if (!res) {
+      if (!blog) {
         return null
       }
-      return {
-        wallpaper: {
-          url: res.wallpaperImage[0].url,
+      if (blog!.wallpaperImage.length !== 0) {
+        wallpaper = {
+          url: blog.wallpaperImage[0].url,
           width: 1028,
           height: 312,
-          fileSize: res.wallpaperImage[0].fileSize
-        },
-        main: [{
-          url: res.mainImage[0].url,
-          width: 156,
-          height: 156,
-          fileSize: res.mainImage[0].fileSize
-        }]
+          fileSize: blog.wallpaperImage[0].fileSize
+        }
+      }
+      if (blog!.mainImage.length !== 0) {
+        main = [
+          {
+            url: blog.mainImage[0].url,
+            width: 156,
+            height: 156,
+            fileSize: blog.mainImage[0].fileSize
+          }
+        ]
+      }
+      return {
+        wallpaper: wallpaper,
+        main: main
       }
 
 

@@ -1,3 +1,4 @@
+import { filesResizingImages } from './../../adapters/s3-storage-adapter';
 import { ImageForPost } from './entity/image.post.entity';
 import { Like } from './../../likes/entity/likes.entity';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -116,7 +117,7 @@ export class PostRepoPSQL {
         }
     }
 
-    async saveInfoByImageInDB(postId: string, url: string, fileId: string, fileSize: number) {
+    async saveInfoByImageInDB(postId: string, files: filesResizingImages) {
         const queryRunner = this.dataSource.createQueryRunner()
         const manager = queryRunner.manager
         await queryRunner.connect()
@@ -125,13 +126,13 @@ export class PostRepoPSQL {
         try {
           const createDate = new Date().toISOString()
             const newMainImage = await manager.insert(ImageForPost, {
-              urlForOriginal: url,
-              urlForMiddle: '',
-              urlForSmall: '',
-              fileId: fileId,
-              fileSizeForOriginal: fileSize,
-              fileSizeForMiddle: 0,
-              fileSizeForSmall: 0,
+              urlForOriginal: files.fileOriginal.url,
+              urlForMiddle: files.fileMiddle.url,
+              urlForSmall: files.fileSmall.url,
+              fileId: files.fileOriginal.fileId,
+              fileSizeForOriginal: files.fileOriginal.size,
+              fileSizeForMiddle: files.fileMiddle.size,
+              fileSizeForSmall: files.fileSmall.size,
               createdAt: createDate,
               post: {_id: postId}
             })

@@ -93,7 +93,7 @@ export type postOutput = {
     newestLikes: newestLikes[]
   },
   images: {
-    main: photoSizeViewModel[] | null
+    main: photoSizeViewModel[] | []
   }
 }
 export type postsCollectionsType = postOutput[];

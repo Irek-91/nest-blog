@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "cross-env ENV=TEST jest --config ./test/jest-e2e.json --detectOpenHandles",
+    "test:e2e": "jest --config ./test/jest-e2e.json --detectOpenHandles",
     "swagger": "node ./swagger.js"
   },
   "dependencies": {
@@ -59,12 +59,12 @@
     "reflect-metadata": "^0.1.13",
     "remove": "^0.1.5",
     "rxjs": "^7.8.1",
+    "sharp": "^0.33.2",
     "typeorm": "^0.3.17",
     "types": "^0.1.1",
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {
-    "-": "^0.0.1",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
@@ -80,8 +80,6 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "cross": "^1.0.0",
-    "env": "^0.0.2",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

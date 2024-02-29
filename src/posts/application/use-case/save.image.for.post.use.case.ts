@@ -1,8 +1,10 @@
+import { filesResizingImages } from './../../../adapters/s3-storage-adapter';
 import { PostQueryRepoPSQL } from './../../db-psql/post.query.repo';
 import { postImagesViewModel } from './../../model/post-model';
 import { PostRepoPSQL } from './../../db-psql/post.repo';
 import { S3StorageAdapter } from '../../../adapters/s3-storage-adapter';
 import { CommandHandler } from "@nestjs/cqrs";
+import sharp from 'sharp';
 
 export class SaveImageForPostCommand {
     constructor(public blogId: string, public userId:string, public postId: string,
@@ -23,12 +25,16 @@ export class SaveImageForPostUseCase {
         const file = command.file
         const blogId = command.blogId
         const postId = command.postId
-        const result = await this.s3StorageAdapter.saveImageForPost(userId, postId, file)
+        const fileMiddle = await sharp(file.buffer).resize({width: 300, height: 180}).toBuffer()
+        const fileSmall = await sharp(file.buffer).resize({width: 149, height: 96}).toBuffer()
+
+        const result:filesResizingImages | null = await this.s3StorageAdapter.saveImageForPost(userId, postId, file.buffer, fileMiddle, fileSmall)
         if (!result) {
             return null
         }
 
-        const saveInfoInDB = await this.postsRepository.saveInfoByImageInDB(postId, result.url, result.fileId, file.size)
+
+        const saveInfoInDB = await this.postsRepository.saveInfoByImageInDB(postId, result)
         if (!saveInfoInDB) {
             return null
         }

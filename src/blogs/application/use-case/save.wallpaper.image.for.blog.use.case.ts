@@ -29,16 +29,17 @@ export class SaveWallpaperImageForBlogUseCase {
         if (!saveInfoInDB) {
             return null
         }
-        //const res = await this.blogsQueryRepository.getImagesByBlog(blogId)
-        return {
-            wallpaper: {
-                url: result.url,
-                width: 1028,
-                height: 312,
-                fileSize: file.size
-            },
-            main: []
-        }
+        const res = await this.blogsQueryRepository.getImagesByBlog(blogId)
+        return res
+        // return {
+        //     wallpaper: {
+        //         url: result.url,
+        //         width: 1028,
+        //         height: 312,
+        //         fileSize: file.size
+        //     },
+        //     main: []
+        // }
 
     } 
 }

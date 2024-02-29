@@ -58,7 +58,7 @@ export class CreatedPostByBlogIdUseCase implements ICommandHandler<CreatedPostBy
                 newestLikes: []
             },
             images: {
-                main : null 
+                main : [] 
             }
         }
     }

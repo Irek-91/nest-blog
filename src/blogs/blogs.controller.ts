@@ -72,12 +72,12 @@ export class BlogsController {
 
         const blog: blogOutput | null = await this.commandBus.execute(new GetBlogIdCommand(blogId))
         if (!blog) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+            throw new HttpException('Not Found by blog', HttpStatus.NOT_FOUND)
         }
         const foundPosts = await this.commandBus.execute(new FindPostsByBlogIdCommand(pagination, blogId, userId));
 
         if (!foundPosts) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+            throw new HttpException('Not Found by posts', HttpStatus.NOT_FOUND)
         } else {
             return foundPosts
         }

@@ -1,3 +1,4 @@
+import { photoSizeViewModel } from './../../blogs/models/blogs-model';
 import { postImagesViewModel } from './../model/post-model';
 import { HttpException } from '@nestjs/common';
 import { queryPaginationType } from '../../helpers/query-filter';
@@ -47,7 +48,30 @@ export class PostQueryRepoPSQL {
 
         const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
             let myStatus = 'None'
+            let main: [] | photoSizeViewModel[] = []
 
+            if (b.imageForPost.length !== 0) {
+                main = [
+                    {
+                        url: b.imageForPost[0].urlForOriginal,
+                        width: 940,
+                        height: 432,
+                        fileSize: b.imageForPost[0].fileSizeForOriginal
+                    },
+                    {
+                        url: b.imageForPost[0].urlForMiddle,
+                        width: 300,
+                        height: 180,
+                        fileSize: b.imageForPost[0].fileSizeForMiddle
+                    },
+                    {
+                        url: b.imageForPost[0].urlForSmall,
+                        width: 149,
+                        height: 96,
+                        fileSize: b.imageForPost[0].fileSizeForSmall
+                    }
+                ]
+            }
             const postId = b._id.toString()
             if (userId) {
                 const status = await this.dataSource.getRepository(Like)
@@ -113,26 +137,7 @@ export class PostQueryRepoPSQL {
                     newestLikes: newestLikesMaped
                 },
                 images: {
-                    main: [
-                        {
-                            url: b.imageForPost.urlForOriginal,
-                            width: 940,
-                            height: 320,
-                            fileSize: b.imageForPost.fileSizeForOriginal
-                        },
-                        {
-                            url: b.imageForPost.urlForMiddle,
-                            width: 300,
-                            height: 180,
-                            fileSize: b.imageForPost.fileSizeForMiddle
-                        },
-                        {
-                            url: b.imageForPost.urlForSmall,
-                            width: 149,
-                            height: 96,
-                            fileSize: b.imageForPost.fileSizeForSmall
-                        }
-                    ]
+                    main: main
                 }
 
 
@@ -153,6 +158,7 @@ export class PostQueryRepoPSQL {
             const posts: Post[] | null = await this.dataSource.getRepository(Post)
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
+                .leftJoinAndSelect('p.imageForPost', 'image')
                 .where('b._id = :id', { id: blogId })
                 .andWhere('b.banStatus = :banStatus', { banStatus: false })
                 .orderBy(`p.${paginationQuery.sortBy}`, paginationQuery.sortDirection)
@@ -163,6 +169,7 @@ export class PostQueryRepoPSQL {
             if (!posts) {
                 return null
             }
+
 
             const totalCount = await this.dataSource.getRepository(Post)
                 .createQueryBuilder('p')
@@ -177,6 +184,30 @@ export class PostQueryRepoPSQL {
             const postsOutput: postOutput[] = await Promise.all(posts.map(async (b) => {
                 let myStatus = 'None'
                 const postId = b._id.toString()
+                let main: [] | photoSizeViewModel[] = []
+
+                if (b.imageForPost.length !== 0) {
+                    main = [
+                        {
+                            url: b.imageForPost[0].urlForOriginal,
+                            width: 940,
+                            height: 432,
+                            fileSize: b.imageForPost[0].fileSizeForOriginal
+                        },
+                        {
+                            url: b.imageForPost[0].urlForMiddle,
+                            width: 300,
+                            height: 180,
+                            fileSize: b.imageForPost[0].fileSizeForMiddle
+                        },
+                        {
+                            url: b.imageForPost[0].urlForSmall,
+                            width: 149,
+                            height: 96,
+                            fileSize: b.imageForPost[0].fileSizeForSmall
+                        }
+                    ]
+                }
 
                 if (userId) {
                     const status = await this.dataSource.getRepository(Like)
@@ -243,26 +274,7 @@ export class PostQueryRepoPSQL {
                         newestLikes: newestLikesMaped
                     },
                     images: {
-                        main: [
-                            {
-                                url: b.imageForPost.urlForOriginal,
-                                width: 940,
-                                height: 320,
-                                fileSize: b.imageForPost.fileSizeForOriginal
-                            },
-                            {
-                                url: b.imageForPost.urlForMiddle,
-                                width: 300,
-                                height: 180,
-                                fileSize: b.imageForPost.fileSizeForMiddle
-                            },
-                            {
-                                url: b.imageForPost.urlForSmall,
-                                width: 149,
-                                height: 96,
-                                fileSize: b.imageForPost.fileSizeForSmall
-                            }
-                        ]
+                        main: main
                     }
                 }
             }))
@@ -279,10 +291,13 @@ export class PostQueryRepoPSQL {
     }
     async getPostId(postId: string, userId: string | null): Promise<postOutput | null> {
         try {
+            let main: [] | photoSizeViewModel[] = []
+
             const post: Post | null = await this.dataSource.getRepository(Post)
                 .createQueryBuilder('p')
                 .leftJoinAndSelect('p.blogId', 'b')
                 .leftJoinAndSelect('b.blogger', 'u')
+                .leftJoinAndSelect('p.imageForPost', 'image')
                 .where('p._id = :id', { id: postId })
                 .andWhere('b.banStatus = :banStatus', { banStatus: false })
                 .andWhere(new Brackets(qb => {
@@ -294,6 +309,28 @@ export class PostQueryRepoPSQL {
 
             if (!post) {
                 return null
+            }
+            if (post.imageForPost.length !== 0) {
+                main = [
+                    {
+                        url: post.imageForPost[0].urlForOriginal,
+                        width: 940,
+                        height: 432,
+                        fileSize: post.imageForPost[0].fileSizeForOriginal
+                    },
+                    {
+                        url: post.imageForPost[0].urlForMiddle,
+                        width: 300,
+                        height: 180,
+                        fileSize: post.imageForPost[0].fileSizeForMiddle
+                    },
+                    {
+                        url: post.imageForPost[0].urlForSmall,
+                        width: 149,
+                        height: 96,
+                        fileSize: post.imageForPost[0].fileSizeForSmall
+                    }
+                ]
             }
 
             let myStatus = 'None'
@@ -366,26 +403,7 @@ export class PostQueryRepoPSQL {
                     newestLikes: newestLikesMaped
                 },
                 images: {
-                    main: [
-                        {
-                            url: post.imageForPost.urlForOriginal,
-                            width: 940,
-                            height: 320,
-                            fileSize: post.imageForPost.fileSizeForOriginal
-                        },
-                        {
-                            url: post.imageForPost.urlForMiddle,
-                            width: 300,
-                            height: 180,
-                            fileSize: post.imageForPost.fileSizeForMiddle
-                        },
-                        {
-                            url: post.imageForPost.urlForSmall,
-                            width: 149,
-                            height: 96,
-                            fileSize: post.imageForPost.fileSizeForSmall
-                        }
-                    ]
+                    main: main
                 }
             }
         } catch (e) { return null }
@@ -406,7 +424,7 @@ export class PostQueryRepoPSQL {
                     {
                         url: res.urlForOriginal,
                         width: 940,
-                        height: 320,
+                        height: 432,
                         fileSize: res.fileSizeForOriginal
                     },
                     {

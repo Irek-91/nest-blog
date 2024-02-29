@@ -145,7 +145,7 @@ export class BloggerController {
         if (blog.blogger._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
-        const newPost = await this.commandBus.execute(new CreatedPostByBlogIdCommand(inputDataModel));
+        const newPost: postOutput | null = await this.commandBus.execute(new CreatedPostByBlogIdCommand(inputDataModel));
 
         if (!newPost) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
@@ -162,16 +162,17 @@ export class BloggerController {
         @Request() req: any) {
         const userId = req.userId//исправить после авторизации
         const blog: Blog | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }
         if (blog.blogger._id !== userId) {
             throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
         }
-        const newMainImage = await this.commandBus.execute(new SaveMainImageForBlogCommand(blogId, userId, file));
+        const newMainImage: blogsImageWiewModel | null = await this.commandBus.execute(new SaveMainImageForBlogCommand(blogId, userId, file));
 
         if (!newMainImage) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+            throw new HttpException('Not Found SaveMainImageForBlogCommand', HttpStatus.NOT_FOUND)
         } else {
             return newMainImage
         }
@@ -218,13 +219,13 @@ export class BloggerController {
         }
         const post: postOutput | null = await this.commandBus.execute(new GetPostIdCommand(postId, userId))
         if (!post) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+            throw new HttpException('Not found post by id', HttpStatus.NOT_FOUND)
         }
         // Сохранение изображения для поста
         const newMainImage: postImagesViewModel | null = await this.commandBus.execute(new SaveImageForPostCommand(blogId, userId, postId, file));
 
         if (!newMainImage) {
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
+            throw new HttpException('Not Found SaveImageForPostCommand', HttpStatus.NOT_FOUND)
         } else {
             return newMainImage
         }
