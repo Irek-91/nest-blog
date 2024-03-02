@@ -1,3 +1,5 @@
+import { GetBlogDBCommand } from './application/use-case/get.blog.DB.use.case';
+import { UnsubscribeUserToBlog } from './application/use-case/unsubscribe.user.to.blog.use.case';
 import { FindPostsByBlogIdCommand } from './../posts/application/use-case/find.posts.by.blog.id.use.case';
 import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
 import { GetBlogIdCommand } from './application/use-case/get.blog.id.use.case';
@@ -6,15 +8,16 @@ import { CommandBus } from '@nestjs/cqrs';
 import { postInputModelSpecific } from './../posts/model/post-model';
 import { PostsService } from '../posts/application/posts.service';
 import { Pagination } from './../helpers/query-filter';
-import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards, Request } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards, Request, HttpCode } from "@nestjs/common";
 import { BlogsService } from "./application/blogs.service";
 import { log } from "console";
 import { blogInput, blogOutput } from "./models/blogs-model";
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
-import { GetUserIdByAuth } from './../auth/guards/auth.guard';
+import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
 import { UpdateBlogCommand } from './application/use-case/update.blog.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
 import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/created.post.by.blog.id.use.case';
+import { SubscriptionUserToBlog } from './application/use-case/subscription.user.to.blog.use.case';
 
 
 @Controller('blogs')
@@ -70,7 +73,7 @@ export class BlogsController {
         }
         const pagination = this.pagination.getPaginationFromQuery(query)
 
-        const blog: blogOutput | null = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog: blogOutput | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found by blog', HttpStatus.NOT_FOUND)
         }
@@ -90,6 +93,21 @@ export class BlogsController {
         return blog
     }
 
+
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(UserAuthGuard)
+    @Post(':blogId/subscription')
+    async subscriptionUserToBlog(@Param('blogId') blogId: string,
+        @Request() req: any) {
+        const userId = req.userId
+        const blog: blogOutput | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        if (!blog) {
+            throw new HttpException('Not Found blog', HttpStatus.NOT_FOUND)
+        }
+        const res = await this.commandBus.execute(new SubscriptionUserToBlog(blogId, userId))
+
+    }
+
     @UseGuards(BasicAuthGuard)
     @Post(':blogId/posts')
     async createPostByBlog(@Param('blogId') blogId: string,
@@ -101,7 +119,7 @@ export class BlogsController {
             blogId: blogId,
         }
 
-        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog: blogOutput | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
 
         const newPost = await this.commandBus.execute(new CreatedPostByBlogIdCommand(inputDataModel));
 
@@ -117,7 +135,7 @@ export class BlogsController {
     @Put(':id')
     async updateBlog(@Param('id') blogId: string,
         @Body() blogInputData: blogInput) {
-        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
 
         const blogUpdate = await this.commandBus.execute(new UpdateBlogCommand(blogId, blogInputData))
 
@@ -137,6 +155,20 @@ export class BlogsController {
         } else {
             throw new HttpException('No Content', HttpStatus.NO_CONTENT)
         }
+    }
+
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(UserAuthGuard)
+    @Delete(':blogId/subscription')
+    async unsubscribeUserToBlog(@Param('blogId') blogId: string,
+        @Request() req: any) {
+        const userId = req.userId
+        const blog: blogOutput | null = await this.commandBus.execute(new GetBlogDBCommand(blogId))
+        if (!blog) {
+            throw new HttpException('Not Found blog', HttpStatus.NOT_FOUND)
+        }
+        const res = await this.commandBus.execute(new UnsubscribeUserToBlog(blogId, userId))
+
     }
 
 }

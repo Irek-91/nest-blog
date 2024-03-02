@@ -16,7 +16,6 @@ import { HttpCode, Put, Request } from "@nestjs/common/decorators";
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteUserIdCommand } from './application/use-case/delete.user.id.use.case';
 import { GetBannedUsersForBlogCommand } from './application/use-case/get.banned.users.for.blog.use.case';
-import { GetBlogIdCommand } from '../blogs/application/use-case/get.blog.id.use.case';
 import { GetUserByIdCommand } from './application/use-case/get.user.by.id.use.case';
 import { GetBlogDBCommand } from '../blogs/application/use-case/get.blog.DB.use.case';
 

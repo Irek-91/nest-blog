@@ -1,3 +1,4 @@
+import { GetBlogDBCommand } from './application/use-case/get.blog.DB.use.case';
 import { FindBlogsSACommand } from './application/use-case/find.blogs.SA.use.case copy';
 import { BindBlogWithUserCommand } from './application/use-case/bind.blog.with.user.use.case';
 import { UpdatePostCommand } from './../posts/application/use-case/update.post.use.case';
@@ -15,8 +16,6 @@ import { banBlogInput, blogInput, blogOutput } from "./models/blogs-model";
 import { BasicAuthGuard } from '../auth/guards/basic-auth.guard';
 import { GetUserIdByAuth } from '../auth/guards/auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
-import { GetBlogIdCommand } from './application/use-case/get.blog.id.use.case';
-import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
 import { FindPostsByBlogIdCommand } from './../posts/application/use-case/find.posts.by.blog.id.use.case';
 import { DeletePostIdCommand } from './../posts/application/use-case/delete.post.id.use.case';
 import { UpdateBanStatusByBlogCommand } from './application/use-case/update.ban.status.by.blog.use.case';
@@ -185,7 +184,7 @@ export class BlogsSAController {
 
     @Delete(':blogId/posts/:postId')
     async deletPost(@Param('blogId') blogId: string, @Param('postId') postId: string) {
-        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         const post = await this.commandBus.execute(new DeletePostIdCommand(postId));
         if (!post) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);

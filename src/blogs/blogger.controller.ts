@@ -10,7 +10,6 @@ import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/crea
 import { postInputModelSpecific, postImagesViewModel } from './../posts/model/post-model';
 import { UpdateBlogCommand } from './application/use-case/update.blog.use.case';
 import { GetBlogDBCommand } from './application/use-case/get.blog.DB.use.case';
-import { GetBlogIdCommand } from './application/use-case/get.blog.id.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
 import { FindBlogsCommand } from './application/use-case/find.blogs.use.case';
 import { blogInput, paginatorBlog, blogsImageWiewModel } from './models/blogs-model';
@@ -103,7 +102,7 @@ export class BloggerController {
             userId = null
         }
         const pagination = this.pagination.getPaginationFromQuery(query)
-        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+        const blog = await this.commandBus.execute(new GetBlogDBCommand(blogId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         }

@@ -38,7 +38,8 @@ export class Blog {
     })
     banDate: string
 
-
+    @Column()
+    subscribersCount: number
 
     @ManyToOne(() => User, (p) => p._id, { nullable: true , 
         onDelete: 'CASCADE'

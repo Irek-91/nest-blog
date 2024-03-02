@@ -1,5 +1,5 @@
 import { WallpaperImageForBlog } from './entity/wallpaper.image.blog.entity';
-import { blogPSQLDB } from './../models/blogs-model';
+import { blogPSQLDB, SubscriptionStatus } from './../models/blogs-model';
 import { User } from './../../users/db-psql/entity/user.entity';
 import { DeletePostsByBlogIdCommand } from './../../posts/application/use-case/delete.posts.by.blog.id.use.case';
 import { PostsService } from '../../posts/application/posts.service';
@@ -13,10 +13,11 @@ import { Model } from "mongoose"
 import { blogInput, blogMongoDB, blogOutput, paginatorBlog } from "../models/blogs-model"
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { log } from 'console';
 import { CommandBus } from '@nestjs/cqrs';
 import { MainImageForBlog } from './entity/main.image.blog.entity';
+import { BlogSubscriber } from './entity/subscribers.blog.entity';
 
 @Injectable()
 export class BlogsRepoPSQL {
@@ -42,6 +43,7 @@ export class BlogsRepoPSQL {
           websiteUrl: inputData.websiteUrl,
           createdAt: inputData.createdAt,
           isMembership: inputData.isMembership,
+          subscribersCount: 0
         })
         await queryRunner.commitTransaction()
         return newBlog.generatedMaps
@@ -54,6 +56,7 @@ export class BlogsRepoPSQL {
           createdAt: inputData.createdAt,
           isMembership: inputData.isMembership,
           blogger: { _id: inputData.userId },
+          subscribersCount: 0
         })
         await queryRunner.commitTransaction()
         return newBlog.generatedMaps
@@ -146,16 +149,16 @@ export class BlogsRepoPSQL {
     await queryRunner.startTransaction()
     try {
       const createDate = new Date().toISOString()
-        const newMainImage = await manager.insert(MainImageForBlog, {
-          url: url,
-          fileId: fileId,
-          createdAt: createDate,
-          fileSize: fileSize,
-          blog: {_id: blogId}
-        })
-        await queryRunner.commitTransaction()
-        return true
-      
+      const newMainImage = await manager.insert(MainImageForBlog, {
+        url: url,
+        fileId: fileId,
+        createdAt: createDate,
+        fileSize: fileSize,
+        blog: { _id: blogId }
+      })
+      await queryRunner.commitTransaction()
+      return true
+
     } catch (e) {
       await queryRunner.rollbackTransaction()
       return null
@@ -166,7 +169,7 @@ export class BlogsRepoPSQL {
   }
 
 
-  async saveInfoByWallpaperImageInDB(blogId: string, url: string, fileId: string, fileSize :number) {
+  async saveInfoByWallpaperImageInDB(blogId: string, url: string, fileId: string, fileSize: number) {
     const queryRunner = this.dataSource.createQueryRunner()
     const manager = queryRunner.manager
     await queryRunner.connect()
@@ -174,16 +177,16 @@ export class BlogsRepoPSQL {
     await queryRunner.startTransaction()
     try {
       const createDate = new Date().toISOString()
-        const newMainImage = await manager.insert(WallpaperImageForBlog, {
-          url: url,
-          fileId: fileId,
-          createdAt: createDate,
-          fileSize: fileSize,
-          blog: {_id: blogId}
-        })
-        await queryRunner.commitTransaction()
-        return true
-      
+      const newMainImage = await manager.insert(WallpaperImageForBlog, {
+        url: url,
+        fileId: fileId,
+        createdAt: createDate,
+        fileSize: fileSize,
+        blog: { _id: blogId }
+      })
+      await queryRunner.commitTransaction()
+      return true
+
     } catch (e) {
       await queryRunner.rollbackTransaction()
       return null
@@ -192,7 +195,59 @@ export class BlogsRepoPSQL {
     }
 
   }
+  async subscriptionUser(blogId: string, userId: string, manager: EntityManager): Promise<true | null> {
+    const createdAt = new Date().toISOString()
+    const code = uuidv4()
+    const insertedRes = await manager.createQueryBuilder()
+      .insert()
+      .into(BlogSubscriber)
+      .values({
+        blogId: { _id: blogId },
+        subscriber: { _id: userId },
+        code: code,
+        createdAt: createdAt,
+        status: SubscriptionStatus.Subscribed
+      })
+      .execute();
 
+    if (insertedRes.generatedMaps.length === 0) {
+      // Если вставка не удалась, выполнить обновление
+      const updatedRes = await manager.createQueryBuilder()
+        .update(BlogSubscriber)
+        .set({
+          createdAt: createdAt,
+          status: SubscriptionStatus.Subscribed
+        })
+        .where("blogId = :blogId", { blogId })
+        .andWhere("subscriber = :userId", { userId })
+        .execute();
+    }
+
+    const addSubscriberCount = await manager.update(Blog, { _id: blogId },
+      {
+        subscribersCount: () => `subscribersCount + 1`
+      })
+
+    return true
+  }
+
+
+  async unsubscribeUserToBlog(blogId: string, userId: string, manager: EntityManager): Promise<true | null> {
+    const createdAt = new Date().toISOString()
+    const res = await manager.update(BlogSubscriber, {
+      blogId: { _id: blogId },
+      subscriber: { _id: userId }
+    },
+      {
+        status: SubscriptionStatus.Unsubscribed,
+        createdAt: createdAt
+      })
+    const deleteSubscriberCount = await manager.update(Blog, { _id: blogId },
+      {
+        subscribersCount: () => `subscribersCount - 1`
+      })
+    return true
+  }
 
   async deleteBlogId(id: string): Promise<boolean | null> {
     const queryRunner = this.dataSource.createQueryRunner()

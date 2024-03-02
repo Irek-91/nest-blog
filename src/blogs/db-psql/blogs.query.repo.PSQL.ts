@@ -1,5 +1,6 @@
+import { BlogSubscriber } from './entity/subscribers.blog.entity';
 import { User } from './../../users/db-psql/entity/user.entity';
-import { blogSAOutput, paginatorBlogSA, blogsImageWiewModel, photoSizeViewModel } from './../models/blogs-model';
+import { blogSAOutput, paginatorBlogSA, blogsImageWiewModel, photoSizeViewModel, SubscriptionStatus } from './../models/blogs-model';
 import { queryPaginationType } from '../../helpers/query-filter';
 import { HttpStatus, Injectable, HttpException } from '@nestjs/common';
 import { Filter, ObjectId } from "mongodb";
@@ -37,6 +38,7 @@ export class BlogsQueryRepoPSQL {
     }
 
     const sortByWithCollate = pagination.sortBy !== 'createdAt' ? 'COLLATE "C"' : '';
+    let subscriptionStatus = 'None'
 
     let blogsOne = await this.dataSource
       .createQueryBuilder(Blog, 'b')
@@ -88,6 +90,16 @@ export class BlogsQueryRepoPSQL {
           userId: userId
         })
         .getMany()
+      
+      const resStatus = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
+      .leftJoinAndSelect(User, "u", "u._id = b.subscriber")
+      .where('u._id = :userId', {
+        userId: userId
+      })
+      .getOne()
+
+      resStatus !== null ? subscriptionStatus = resStatus.status : subscriptionStatus = SubscriptionStatus.None
+      
     }
 
 
@@ -121,7 +133,9 @@ export class BlogsQueryRepoPSQL {
         images: {
           wallpaper: wallpaper,
           main: main
-        }
+        },
+        currentUserSubscriptionStatus: subscriptionStatus,
+        subscribersCount: b.subscribersCount
       }
     })
 
@@ -205,6 +219,8 @@ export class BlogsQueryRepoPSQL {
         .where('b.banStatus = :banStatus', { banStatus: false })
         .andWhere({ _id: id })
         .getOne()
+      
+
       let wallpaper: photoSizeViewModel | null = null
       let main: [] | photoSizeViewModel[] = []
 
@@ -238,7 +254,9 @@ export class BlogsQueryRepoPSQL {
           images: {
             wallpaper: wallpaper,
             main: main
-          }
+          },
+          subscribersCount: blog.subscribersCount,
+          currentUserSubscriptionStatus: 'None'
         }
 
       }
@@ -290,7 +308,10 @@ export class BlogsQueryRepoPSQL {
           images: {
             wallpaper: wallpaper,
             main: main
-          }
+          },
+          subscribersCount: blog.subscribersCount,
+          currentUserSubscriptionStatus: 'None'
+          
         }
 
       }

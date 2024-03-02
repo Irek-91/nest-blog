@@ -46,8 +46,15 @@ export type blogOutput = {
   images: {
     wallpaper:photoSizeViewModel | null,
     main: photoSizeViewModel[]
-  }
+  },
+  currentUserSubscriptionStatus: string,
+  subscribersCount: number
+}
 
+export enum SubscriptionStatus {
+  Subscribed = 'Subscribed',
+  Unsubscribed = 'Unsubscribed',
+  None = 'None'
 }
 
 export type blogSAOutput = {

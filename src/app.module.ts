@@ -1,3 +1,8 @@
+import { UnsubscribeUserToBlogUseCase } from './blogs/application/use-case/unsubscribe.user.to.blog.use.case';
+import { BlogSubscriber } from './blogs/db-psql/entity/subscribers.blog.entity';
+import { SubscriptionUserToBlogUseCase } from './blogs/application/use-case/subscription.user.to.blog.use.case';
+import { TelegramAdapter } from './adapters/telegram-adapter';
+import { IntegrationsController } from './integrations/integrations.controller';
 import { ImageForPost } from './posts/db-psql/entity/image.post.entity';
 import { SaveImageForPostUseCase } from './posts/application/use-case/save.image.for.post.use.case';
 import { SaveWallpaperImageForBlogUseCase } from './blogs/application/use-case/save.wallpaper.image.for.blog.use.case';
@@ -134,7 +139,8 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
 
 const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
   DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase,
-  UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase, SaveMainImageForBlogUseCase, SaveWallpaperImageForBlogUseCase]
+  UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase, SaveMainImageForBlogUseCase, SaveWallpaperImageForBlogUseCase,
+  SubscriptionUserToBlogUseCase, UnsubscribeUserToBlogUseCase]
 
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase,
@@ -148,7 +154,7 @@ const commentUseCase = [CreatedCommentPostUseCase, UpdateCommentByPostUseCase, G
 
 export const entities = [User, EmailConfirmation, Device, Post, Blog,
   Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser, UsersBannedByBlogger,
-  WallpaperImageForBlog, MainImageForBlog, WallpaperImageForBlog, ImageForPost]
+  WallpaperImageForBlog, MainImageForBlog, WallpaperImageForBlog, ImageForPost, BlogSubscriber]
 
 let { PSQL_URL } = process.env;
 
@@ -228,11 +234,11 @@ let { PSQL_URL } = process.env;
     AuthController,
     SecurityDeviceController,
     QusetionsSAController,
-    PairGameController
+    PairGameController, IntegrationsController
   ],
   providers: [AppService,
     AuthService,
-    EmailAdapter,
+    EmailAdapter, TelegramAdapter,
     Pagination, PaginationUsersSa,
     JwtService, JwtStrategy, LocalStrategy,
     BasicStrategy, S3StorageAdapter,

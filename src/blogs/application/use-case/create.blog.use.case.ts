@@ -1,6 +1,6 @@
 import { UsersQueryRepoPSQL } from './../../../users/db-psql/users.qurey.repo.PSQL';
 import { BlogsRepoPSQL } from './../../db-psql/blogs.repo.PSQL';
-import { blogInput, blogMongoDB, blogOutput, blogPSQLDB } from './../../models/blogs-model';
+import { SubscriptionStatus, blogInput, blogMongoDB, blogOutput, blogPSQLDB } from './../../models/blogs-model';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -56,8 +56,9 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
             images: {
                 wallpaper: null,
                 main: []
-              }
-
+              },
+            subscribersCount: 0,
+            currentUserSubscriptionStatus: SubscriptionStatus.None
         }
     }
 
