@@ -1,3 +1,4 @@
+import { SubscriptionStatus } from './../src/blogs/models/blogs-model';
 import { AppModule } from './../src/app.module';
 import { userInputModel } from '../src/users/models/users-model';
 import request from 'supertest'
@@ -7,6 +8,7 @@ import { appSettings } from '../src/app.settings';
 import { blogInput } from '../src/blogs/models/blogs-model';
 import { createBlogSa, createBlogByBlogger } from './helpers/blogs-tests-helpers';
 import { createUser } from './helpers/users-tests-helpers';
+import { log } from 'node:console';
 
 
 
@@ -53,9 +55,24 @@ describe('tests for blogger', () => {
             const userTwo = await createUser('admin', 'qwerty', userTwoModel, httpServer)
             expect.setState({ userTwo: userTwo })
 
+            const userFreeModel: userInputModel = {
+                login: 'userFree',
+                password: 'userFree2023',
+                email: 'userFree@mail.com',
+            }
+            const userFree = await createUser('admin', 'qwerty', userFreeModel, httpServer)
+            expect.setState({ userFree: userFree })
+            
+            const userFourModel: userInputModel = {
+                login: 'userFour',
+                password: 'userFour2023',
+                email: 'userFour@mail.com',
+            }
+            const userFour = await createUser('admin', 'qwerty', userFourModel, httpServer)
+            expect.setState({ userFour: userFour })
         })
 
-        it('Создаем блог для пользователя и посты', async () => {
+        it('Создаем блог для пользователя и пост', async () => {
             const { userOne } = expect.getState()
             const model: blogInput = {
                 name: 'name',
@@ -78,27 +95,49 @@ describe('tests for blogger', () => {
         it('Подписываемся к блогу 1 пользователем 2', async () => {
             const { userOne } = expect.getState()
             const { userTwo } = expect.getState()
+            const { userFree } = expect.getState()
+
             const { blogOne } = expect.getState()
 
             const res1 = await request(httpServer).post(`/blogs/${123}/subscription`).set(userTwo.headers)
             expect(res1.status).toBe(404)
-
 
             const res2 = await request(httpServer).post(`/blogs/${blogOne.id}/subscription`)
             expect(res2.status).toBe(401)
 
             const res3 = await request(httpServer).post(`/blogs/${blogOne.id}/subscription`).set(userTwo.headers)
             expect(res3.status).toBe(204)
+        })
+
+        it('Попытка повторно подписаться к блогу 1 пользователем 2', async () => {
+            const { userTwo } = expect.getState()
+
+            const { blogOne } = expect.getState()
+
+            const res3 = await request(httpServer).post(`/blogs/${blogOne.id}/subscription`).set(userTwo.headers)
+            expect(res3.status).toBe(204)
+        })
+
+        it('Запорс link для телеграмма пользователем 2', async () => {
+            const { userTwo } = expect.getState()
+
+            const { blogOne } = expect.getState()
+
+            const res3 = await request(httpServer).get(`/integrations/telegram/auth-bot-link`).set(userTwo.headers)
+            expect(res3.status).toBe(200)
+            expect(res3.body).toEqual({
+                link: `https://t.me/BlogPlatform_Bot?code=${expect.any(String)}`
+            })
 
         })
 
-        it('Возвращаем блог, в которм есть один подписчик', async () => {
+
+        it('Возвращаем блог от лица пользователя 2, куда подписался пользователь 2', async () => {
             const { userOne } = expect.getState()
             const { userTwo } = expect.getState()
 
             const { blogOne } = expect.getState()
             const res = await request(httpServer).get(`/blogs/${blogOne.id}`).set(userTwo.headers)
-
 
             expect(res.status).toBe(200)
             expect(res.body).toEqual({
@@ -112,13 +151,13 @@ describe('tests for blogger', () => {
                     wallpaper: expect.any(Object),
                     main: expect.any(Array)
                 },
-                currentUserSubscriptionStatus: "Subscribed",
+                currentUserSubscriptionStatus: SubscriptionStatus.Subscribed,
                 subscribersCount: 1
             })
-
         })
 
-        it('Отписываемя от блогу 1 пользователем 2', async () => {
+
+        it('Отписываемя от блога 1, пользователем 2', async () => {
             const { userOne } = expect.getState()
             const { userTwo } = expect.getState()
             const { blogOne } = expect.getState()
@@ -134,6 +173,75 @@ describe('tests for blogger', () => {
             expect(res.status).toBe(204)
 
         })
-    })
 
+        it('Возвращаем блог от лица пользователя 2, от котогорого отписался пользователь 2', async () => {
+            const { userOne } = expect.getState()
+            const { userTwo } = expect.getState()
+
+            const { blogOne } = expect.getState()
+            const res = await request(httpServer).get(`/blogs/${blogOne.id}`).set(userTwo.headers)
+
+            expect(res.status).toBe(200)
+            expect(res.body).toEqual({
+                id: expect.any(String),
+                name: blogOne.name,
+                description: blogOne.description,
+                websiteUrl: blogOne.websiteUrl,
+                createdAt: expect.any(String),
+                isMembership: false,
+                images: {
+                    wallpaper: expect.any(Object),
+                    main: expect.any(Array)
+                },
+                currentUserSubscriptionStatus: SubscriptionStatus.Unsubscribed,
+                subscribersCount: 0
+            })
+        })
+        it('Возвращаем блог от лица пользователя 4, который не подписывался', async () => {
+            const { userFour } = expect.getState()
+
+            const { blogOne } = expect.getState()
+            const res = await request(httpServer).get(`/blogs/${blogOne.id}`).set(userFour.headers)
+
+            expect(res.status).toBe(200)
+            expect(res.body).toEqual({
+                id: expect.any(String),
+                name: blogOne.name,
+                description: blogOne.description,
+                websiteUrl: blogOne.websiteUrl,
+                createdAt: expect.any(String),
+                isMembership: false,
+                images: {
+                    wallpaper: expect.any(Object),
+                    main: expect.any(Array)
+                },
+                currentUserSubscriptionStatus: SubscriptionStatus.None,
+                subscribersCount: 0
+            })
+        })
+
+        it('Возвращаем блог от неавторизованного лица', async () => {
+            const { userFour } = expect.getState()
+
+            const { blogOne } = expect.getState()
+            const res = await request(httpServer).get(`/blogs/${blogOne.id}`)
+
+            expect(res.status).toBe(200)
+            expect(res.body).toEqual({
+                id: expect.any(String),
+                name: blogOne.name,
+                description: blogOne.description,
+                websiteUrl: blogOne.websiteUrl,
+                createdAt: expect.any(String),
+                isMembership: false,
+                images: {
+                    wallpaper: expect.any(Object),
+                    main: expect.any(Array)
+                },
+                currentUserSubscriptionStatus: SubscriptionStatus.None,
+                subscribersCount: 0
+            })
+        })
+
+    })
 })

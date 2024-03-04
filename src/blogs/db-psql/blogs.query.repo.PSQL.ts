@@ -90,16 +90,16 @@ export class BlogsQueryRepoPSQL {
           userId: userId
         })
         .getMany()
-      
+
       const resStatus = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
-      .leftJoinAndSelect(User, "u", "u._id = b.subscriber")
-      .where('u._id = :userId', {
-        userId: userId
-      })
-      .getOne()
+        .leftJoinAndSelect('b.subscriber', 'user')
+        .where('user._id = :userId', {
+          userId: userId
+        })
+        .getOne()
 
       resStatus !== null ? subscriptionStatus = resStatus.status : subscriptionStatus = SubscriptionStatus.None
-      
+
     }
 
 
@@ -208,8 +208,9 @@ export class BlogsQueryRepoPSQL {
       items: blogsOutput
     }
   }
-  async getBlogId(id: string): Promise<blogOutput | null> {
+  async getBlogId(blogId: string, userId: string | null): Promise<blogOutput | null> {
     try {
+      let subscriptionStatus = 'None'
 
       let blog = await this.dataSource
         .createQueryBuilder(Blog, 'b')
@@ -217,9 +218,17 @@ export class BlogsQueryRepoPSQL {
         .leftJoinAndSelect('b.wallpaperImage', 'w')
         .leftJoinAndSelect('b.mainImage', 'm')
         .where('b.banStatus = :banStatus', { banStatus: false })
-        .andWhere({ _id: id })
+        .andWhere({ _id: blogId })
         .getOne()
-      
+
+      const resStatus = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
+        .leftJoinAndSelect('b.subscriber', 'user')
+        .where('user._id = :userId', {
+          userId: userId
+        })
+        .getOne()
+
+      resStatus !== null ? subscriptionStatus = resStatus.status : subscriptionStatus = SubscriptionStatus.None
 
       let wallpaper: photoSizeViewModel | null = null
       let main: [] | photoSizeViewModel[] = []
@@ -256,7 +265,7 @@ export class BlogsQueryRepoPSQL {
             main: main
           },
           subscribersCount: blog.subscribersCount,
-          currentUserSubscriptionStatus: 'None'
+          currentUserSubscriptionStatus: subscriptionStatus
         }
 
       }
@@ -311,7 +320,7 @@ export class BlogsQueryRepoPSQL {
           },
           subscribersCount: blog.subscribersCount,
           currentUserSubscriptionStatus: 'None'
-          
+
         }
 
       }
@@ -412,5 +421,41 @@ export class BlogsQueryRepoPSQL {
     } catch (e) {
       return null
     }
+  }
+
+  async getCodeBySubscriber(userId: string): Promise<string | null> {
+    try {
+    const res =  await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
+    .leftJoinAndSelect('b.subscriber', 'user')
+    .leftJoinAndSelect('b.blogId', 'blog')
+    .where('user._id = :userId', {
+      userId: userId
+    })
+    .getOne()
+
+    return res!.code
+  } catch(e) {
+    console.log(e)
+    return null
+  }
+  }
+
+  async findSubscribersThisBlog (blogId:string): Promise<null | BlogSubscriber[]> {
+    try {
+      const res =  await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
+      .leftJoinAndSelect('b.subscriber', 'user')
+      .leftJoinAndSelect('b.blogId', 'blog')
+      .where('blog._id = :blogId', {
+        blogId: blogId
+      })
+      .getMany()
+      if (!res) {
+        return null
+      }
+      return res    
+    } catch(e) {
+      return null
+    }
+    
   }
 }

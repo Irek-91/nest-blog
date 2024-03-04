@@ -15,6 +15,10 @@ export class BlogSubscriber {
     @Column()
     createdAt: string
 
+    @Column({
+        nullable: true})
+    telegramId: number
+
     @IsEnum(SubscriptionStatus)
     @Column()
     status: string
@@ -33,6 +37,8 @@ export class BlogSubscriber {
         name: 'subscriber'
     })
     public subscriber: User
+
+
 
 
 }

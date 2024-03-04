@@ -198,6 +198,21 @@ export class BlogsRepoPSQL {
   async subscriptionUser(blogId: string, userId: string, manager: EntityManager): Promise<true | null> {
     const createdAt = new Date().toISOString()
     const code = uuidv4()
+
+    const res = await manager.createQueryBuilder(BlogSubscriber, 'b')
+      .leftJoinAndSelect('b.subscriber', 'user')
+      .leftJoinAndSelect('b.blogId', 'blog')
+      .where('user._id = :userId', {
+        userId: userId
+      })
+      .andWhere('blog._id = :blogId', {
+        blogId: blogId
+      })
+      .getOne()
+
+    if (res !== null) {
+      return true
+    }
     const insertedRes = await manager.createQueryBuilder()
       .insert()
       .into(BlogSubscriber)
@@ -209,20 +224,9 @@ export class BlogsRepoPSQL {
         status: SubscriptionStatus.Subscribed
       })
       .execute();
-
     if (insertedRes.generatedMaps.length === 0) {
-      // Если вставка не удалась, выполнить обновление
-      const updatedRes = await manager.createQueryBuilder()
-        .update(BlogSubscriber)
-        .set({
-          createdAt: createdAt,
-          status: SubscriptionStatus.Subscribed
-        })
-        .where("blogId = :blogId", { blogId })
-        .andWhere("subscriber = :userId", { userId })
-        .execute();
+      return null
     }
-
     const addSubscriberCount = await manager.update(Blog, { _id: blogId },
       {
         subscribersCount: () => `subscribersCount + 1`
@@ -240,13 +244,29 @@ export class BlogsRepoPSQL {
     },
       {
         status: SubscriptionStatus.Unsubscribed,
-        createdAt: createdAt
+        createdAt: createdAt,
+        telegramId: null as any // нужно уточнить как избежать этого
       })
     const deleteSubscriberCount = await manager.update(Blog, { _id: blogId },
       {
         subscribersCount: () => `subscribersCount - 1`
       })
     return true
+  }
+  async addTelegramIdForSuscriber(code: string, telegramId: number): Promise<true | null> {
+    try {
+      const res = await this.dataSource.createQueryBuilder().update(BlogSubscriber)
+        .set({ telegramId: telegramId })
+        .where({ code: code })
+        .execute()
+      if (res.affected === 0) {
+        return null
+      }
+      return true
+    } catch (e) {
+      return null
+
+    }
   }
 
   async deleteBlogId(id: string): Promise<boolean | null> {

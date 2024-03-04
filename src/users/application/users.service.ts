@@ -55,7 +55,6 @@ export class UsersService {
   }
 
   async findByUserId(userId: string): Promise<MeViewModel | null> {
-
     const result = await this.usersQueryRepository.findUserById(userId)
     const resultUserViewModel: MeViewModel = {
       email: result!.email,

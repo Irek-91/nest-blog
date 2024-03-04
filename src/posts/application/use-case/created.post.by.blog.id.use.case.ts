@@ -1,3 +1,4 @@
+import { TelegramAdapter } from './../../../adapters/telegram-adapter';
 import { PostRepoPSQL } from './../../db-psql/post.repo';
 import { BlogsQueryRepoPSQL } from './../../../blogs/db-psql/blogs.query.repo.PSQL';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -13,7 +14,8 @@ export class CreatedPostByBlogIdCommand {
 @CommandHandler(CreatedPostByBlogIdCommand)
 export class CreatedPostByBlogIdUseCase implements ICommandHandler<CreatedPostByBlogIdCommand> {
     constructor(private blogQueryRepository: BlogsQueryRepoPSQL,
-        private postRepository: PostRepoPSQL) {
+        private postRepository: PostRepoPSQL,
+        private telegramAdapter: TelegramAdapter) {
     }
 
     async execute(command: CreatedPostByBlogIdCommand): Promise<postOutput | null> {
@@ -43,6 +45,14 @@ export class CreatedPostByBlogIdUseCase implements ICommandHandler<CreatedPostBy
         const result = await this.postRepository.createdPost(newPost)
 
         if (!result) { return null }
+        const subscribers = await this.blogQueryRepository.findSubscribersThisBlog(postData.blogId)
+        if (subscribers !== null) {
+            const text = `New post published for blog ${blogName.toString()} `
+            const send =  subscribers.forEach( (subscribers)=> 
+            this.telegramAdapter.sendMessage(text, subscribers.telegramId)
+            ) 
+        }
+
         return {
             id: newPost._id.toString(),
             title: newPost.title,
@@ -58,7 +68,7 @@ export class CreatedPostByBlogIdUseCase implements ICommandHandler<CreatedPostBy
                 newestLikes: []
             },
             images: {
-                main : [] 
+                main: []
             }
         }
     }

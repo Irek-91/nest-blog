@@ -96,6 +96,7 @@ export class AuthController {
         const user = await this.usersService.findByUserId(req.user)
         return user
     }
+    
     @UseGuards(ThrottlerGuard,
          EmailOrLoginGuard)
     @Post('/registration')

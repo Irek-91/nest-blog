@@ -45,9 +45,12 @@ export class BlogsController {
         const queryFilter = this.pagination.getPaginationFromQuery(query);
         return await this.commandBus.execute(new FindBlogsCommand(queryFilter, userId))
     }
+
+    @UseGuards(GetUserIdByAuth)
     @Get(':id')
-    async getBlogId(@Param('id') blogId: string) {
-        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId))
+    async getBlogId(@Param('id') blogId: string, @Request() req: any) {
+        const userId = req.userId
+        const blog = await this.commandBus.execute(new GetBlogIdCommand(blogId, userId))
         if (!blog) {
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
         } else {
@@ -168,7 +171,6 @@ export class BlogsController {
             throw new HttpException('Not Found blog', HttpStatus.NOT_FOUND)
         }
         const res = await this.commandBus.execute(new UnsubscribeUserToBlog(blogId, userId))
-
     }
 
 }

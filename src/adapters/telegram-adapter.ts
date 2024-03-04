@@ -15,6 +15,31 @@ export class TelegramAdapter {
             url: url
         })
     }
+    
+    async sendMessage(text: string, recipientId: number) {
+        await this.axiosInstanse.post(`sendMessage`, {
+            chat_id: recipientId,
+            text: text
+        })
+    }
+    
 
 
+}
+
+
+
+export type TelegramUpdateMessage = {
+    message: {
+        from : {
+            id: number,
+            first_name: string,
+            last_name: string
+        };
+        text: string
+    }
+}
+
+export type AuthLinkWiewModel = {
+    link: string
 }

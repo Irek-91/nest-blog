@@ -1,3 +1,6 @@
+import { AddTelegramIdBySubscriberUseCase } from './blogs/application/use-case/add.telegramId.for.subscriber.use.case';
+import { HandleTelegramUseCase } from './integrations/use-case/handle.telegram.use.case';
+import { GetLinkForSuscriberUseCase } from './users/application/use-case/get.link.for.suscriber.use.case';
 import { UnsubscribeUserToBlogUseCase } from './blogs/application/use-case/unsubscribe.user.to.blog.use.case';
 import { BlogSubscriber } from './blogs/db-psql/entity/subscribers.blog.entity';
 import { SubscriptionUserToBlogUseCase } from './blogs/application/use-case/subscription.user.to.blog.use.case';
@@ -140,14 +143,14 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
 const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
   DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase,
   UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase, SaveMainImageForBlogUseCase, SaveWallpaperImageForBlogUseCase,
-  SubscriptionUserToBlogUseCase, UnsubscribeUserToBlogUseCase]
+  SubscriptionUserToBlogUseCase, UnsubscribeUserToBlogUseCase, GetLinkForSuscriberUseCase, AddTelegramIdBySubscriberUseCase]
 
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase,
   SaveImageForPostUseCase]
 
 const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase, DeleteUserIdUseCase,
-  BanUserByBloggerUseCase, GetBannedUsersForBlogUseCase]
+  BanUserByBloggerUseCase, GetBannedUsersForBlogUseCase, HandleTelegramUseCase]
 
 const commentUseCase = [CreatedCommentPostUseCase, UpdateCommentByPostUseCase, GetCommentByIdUseCase,
   DeleteCommentByIdUseCase, FindCommentsByPostUseCase, UpdateLikeStatusCommentUseCase, GetCommentsByBlogUseCase]
@@ -204,8 +207,14 @@ let { PSQL_URL } = process.env;
 
 
     TypeOrmModule.forRoot(
-      { type: 'postgres',
-        url: process.env.PSQL_URL,
+      {
+        type: 'postgres',
+        host: "localhost",
+        port: +process.env.PORTLOCAL!,
+        username: process.env.PGUSERLOCAL,
+        password: process.env.PGPASSWORDLOCAL,
+        database: process.env.PGDATABASELOCAL,
+        //url: process.env.PSQL_URL,
         autoLoadEntities: false,
         synchronize: true,
         entities: [...entities],
