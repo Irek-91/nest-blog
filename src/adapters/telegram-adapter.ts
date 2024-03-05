@@ -15,6 +15,18 @@ export class TelegramAdapter {
             url: url
         })
     }
+
+    async deleteWebhook(url: string) {
+        await this.axiosInstanse.post(`deleteWebhook`, {
+            url: url
+        })
+    }
+
+    async getUpdates() {
+        await this.axiosInstanse.post(`getUpdates`, {
+            limit: 0
+        })
+    }
     
     async sendMessage(text: string, recipientId: number) {
         await this.axiosInstanse.post(`sendMessage`, {
@@ -23,9 +35,8 @@ export class TelegramAdapter {
         })
     }
     
-
-
 }
+
 
 
 

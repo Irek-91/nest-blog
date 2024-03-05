@@ -65,45 +65,48 @@ export class BlogsQueryRepoPSQL {
       // })
       .getMany()
 
-    if (userId !== null) {
-      blogsOne = await this.dataSource
-        .createQueryBuilder(Blog, 'b')
-        .leftJoinAndSelect('b.blogger', 'u')
-        .leftJoinAndSelect('b.wallpaperImage', 'w')
-        .leftJoinAndSelect('b.mainImage', 'm')
-        .where('b.banStatus = :banStatus', { banStatus: false })
-        .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
-        .andWhere('u._id = :userId', {
-          userId: userId
-        })
-        .orderBy(`b.${pagination.sortBy}`, pagination.sortDirection)
-        .skip(pagination.skip)
-        .take(pagination.pageSize)
-        .getMany()
+    // if (userId !== null) {
+    //   blogsOne = await this.dataSource
+    //     .createQueryBuilder(Blog, 'b')
+    //     .leftJoinAndSelect('b.blogger', 'u')
+    //     .leftJoinAndSelect('b.wallpaperImage', 'w')
+    //     .leftJoinAndSelect('b.mainImage', 'm')
+    //     .where('b.banStatus = :banStatus', { banStatus: false })
+    //     .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+    //     .andWhere('u._id = :userId', {
+    //       userId: userId
+    //     })
+    //     .orderBy(`b.${pagination.sortBy}`, pagination.sortDirection)
+    //     .skip(pagination.skip)
+    //     .take(pagination.pageSize)
+    //     .getMany()
 
-      totalCount = await this.dataSource
-        .createQueryBuilder(Blog, 'b')
-        .leftJoinAndSelect(User, "u", "u._id = b.blogger")
-        .where('b.banStatus = :banStatus', { banStatus: false })
-        .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
-        .andWhere('u._id = :userId', {
-          userId: userId
-        })
-        .getMany()
+    //   totalCount = await this.dataSource
+    //     .createQueryBuilder(Blog, 'b')
+    //     .leftJoinAndSelect(User, "u", "u._id = b.blogger")
+    //     .where('b.banStatus = :banStatus', { banStatus: false })
+    //     .andWhere(`${pagination.searchNameTerm !== null ? `b.name ILIKE '%${pagination.searchNameTerm}%'` : `b.name is not null`}`)
+    //     .andWhere('u._id = :userId', {
+    //       userId: userId
+    //     })
+    //     .getMany()
+    // }
 
+
+    const blogsOutput: blogOutput[] = await Promise.all(blogsOne.map(async (b) => {
+      
       const resStatus = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
         .leftJoinAndSelect('b.subscriber', 'user')
+        .leftJoinAndSelect('b.blogId', 'blog')
         .where('user._id = :userId', {
           userId: userId
+        })
+        .andWhere('blog._id = :blogId', {
+          blogId: b._id
         })
         .getOne()
 
       resStatus !== null ? subscriptionStatus = resStatus.status : subscriptionStatus = SubscriptionStatus.None
-
-    }
-
-
-    const blogsOutput: blogOutput[] = blogsOne.map((b) => {
 
       if (b!.wallpaperImage.length !== 0) {
         wallpaper = {
@@ -138,6 +141,7 @@ export class BlogsQueryRepoPSQL {
         subscribersCount: b.subscribersCount
       }
     })
+    )
 
     return {
       pagesCount: Math.ceil(totalCount.length / pagination.pageSize),
@@ -223,8 +227,12 @@ export class BlogsQueryRepoPSQL {
 
       const resStatus = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
         .leftJoinAndSelect('b.subscriber', 'user')
+        .leftJoinAndSelect('b.blogId', 'blog')
         .where('user._id = :userId', {
           userId: userId
+        })
+        .andWhere('blog._id = :blogId', {
+          blogId: blogId
         })
         .getOne()
 
@@ -425,37 +433,59 @@ export class BlogsQueryRepoPSQL {
 
   async getCodeBySubscriber(userId: string): Promise<string | null> {
     try {
-    const res =  await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
-    .leftJoinAndSelect('b.subscriber', 'user')
-    .leftJoinAndSelect('b.blogId', 'blog')
-    .where('user._id = :userId', {
-      userId: userId
-    })
-    .getOne()
+      const res = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
+        .leftJoinAndSelect('b.subscriber', 'user')
+        .leftJoinAndSelect('b.blogId', 'blog')
+        .where('user._id = :userId', {
+          userId: userId
+        })
+        .getOne()
 
-    return res!.code
-  } catch(e) {
-    console.log(e)
-    return null
-  }
+      return res!.code
+    } catch (e) {
+      console.log(e)
+      return null
+    }
   }
 
-  async findSubscribersThisBlog (blogId:string): Promise<null | BlogSubscriber[]> {
+  async findSubscribersThisBlog(blogId: string): Promise<null | BlogSubscriber[]> {
     try {
-      const res =  await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
-      .leftJoinAndSelect('b.subscriber', 'user')
-      .leftJoinAndSelect('b.blogId', 'blog')
-      .where('blog._id = :blogId', {
-        blogId: blogId
-      })
-      .getMany()
+      const res = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
+        .leftJoinAndSelect('b.subscriber', 'user')
+        .leftJoinAndSelect('b.blogId', 'blog')
+        .where('blog._id = :blogId', {
+          blogId: blogId
+        })
+        .getMany()
       if (!res) {
         return null
       }
-      return res    
-    } catch(e) {
+      return res
+    } catch (e) {
       return null
     }
-    
+  }
+  async checkStatusSubscriptionUser(blogId: string, userId: string, status: SubscriptionStatus): Promise<true | null> {
+    try {
+    const check = await this.dataSource.createQueryBuilder(BlogSubscriber, 'b')
+      .leftJoinAndSelect('b.subscriber', 'user')
+      .leftJoinAndSelect('b.blogId', 'blog')
+      .where('user._id = :userId', {
+        userId: userId
+      })
+      .andWhere('blog._id = :blogId', {
+        blogId: blogId
+      })
+      .andWhere('b.status = :status', {
+        status: status
+      })
+      .getOne()
+
+    if (check !== null) {
+      return true
+    }
+    return null } catch (e) {
+      return null
+    }
   }
 }

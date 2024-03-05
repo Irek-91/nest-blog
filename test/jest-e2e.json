@@ -2,10 +2,10 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
-  "testRegex": "subscribtion.e2e-spec.ts$",
+  "testRegex": "incubator.e2e-spec.ts$",
 
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "testTimeout": 6000
+  "testTimeout": 10000
 }

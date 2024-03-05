@@ -1,3 +1,4 @@
+import { CheckStatusSubscriptionUserUseCase } from './blogs/application/use-case/check.status.subscription.user.use.case';
 import { AddTelegramIdBySubscriberUseCase } from './blogs/application/use-case/add.telegramId.for.subscriber.use.case';
 import { HandleTelegramUseCase } from './integrations/use-case/handle.telegram.use.case';
 import { GetLinkForSuscriberUseCase } from './users/application/use-case/get.link.for.suscriber.use.case';
@@ -143,7 +144,8 @@ const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
 const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
   DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase,
   UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase, SaveMainImageForBlogUseCase, SaveWallpaperImageForBlogUseCase,
-  SubscriptionUserToBlogUseCase, UnsubscribeUserToBlogUseCase, GetLinkForSuscriberUseCase, AddTelegramIdBySubscriberUseCase]
+  SubscriptionUserToBlogUseCase, UnsubscribeUserToBlogUseCase, GetLinkForSuscriberUseCase, AddTelegramIdBySubscriberUseCase,
+  CheckStatusSubscriptionUserUseCase]
 
 const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
   DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase,

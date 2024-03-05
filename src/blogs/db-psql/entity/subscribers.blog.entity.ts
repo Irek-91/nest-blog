@@ -16,7 +16,8 @@ export class BlogSubscriber {
     createdAt: string
 
     @Column({
-        nullable: true})
+        nullable: true,
+        type: 'bigint' })
     telegramId: number
 
     @IsEnum(SubscriptionStatus)

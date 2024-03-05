@@ -195,63 +195,80 @@ export class BlogsRepoPSQL {
     }
 
   }
-  async subscriptionUser(blogId: string, userId: string, manager: EntityManager): Promise<true | null> {
-    const createdAt = new Date().toISOString()
-    const code = uuidv4()
 
-    const res = await manager.createQueryBuilder(BlogSubscriber, 'b')
-      .leftJoinAndSelect('b.subscriber', 'user')
-      .leftJoinAndSelect('b.blogId', 'blog')
-      .where('user._id = :userId', {
-        userId: userId
-      })
-      .andWhere('blog._id = :blogId', {
-        blogId: blogId
-      })
-      .getOne()
+  async subscriptionUser(blogId: string, userId: string): Promise<true | null> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      const createdAt = new Date().toISOString()
+      const code = uuidv4()
 
-    if (res !== null) {
+      const insertedRes = await manager.createQueryBuilder()
+        .insert()
+        .into(BlogSubscriber)
+        .values({
+          blogId: { _id: blogId },
+          subscriber: { _id: userId },
+          code: code,
+          createdAt: createdAt,
+          status: SubscriptionStatus.Subscribed
+        })
+        .execute();
+      if (insertedRes.generatedMaps.length === 0) {
+        await queryRunner.commitTransaction()
+        return null
+      }
+      const addSubscriberCount = await manager.update(Blog, { _id: blogId },
+        {
+          subscribersCount: () => `subscribersCount + 1`
+        })
+      await queryRunner.commitTransaction()
       return true
-    }
-    const insertedRes = await manager.createQueryBuilder()
-      .insert()
-      .into(BlogSubscriber)
-      .values({
-        blogId: { _id: blogId },
-        subscriber: { _id: userId },
-        code: code,
-        createdAt: createdAt,
-        status: SubscriptionStatus.Subscribed
-      })
-      .execute();
-    if (insertedRes.generatedMaps.length === 0) {
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
       return null
+    } finally {
+      await queryRunner.release()
     }
-    const addSubscriberCount = await manager.update(Blog, { _id: blogId },
-      {
-        subscribersCount: () => `subscribersCount + 1`
-      })
-
-    return true
   }
 
 
-  async unsubscribeUserToBlog(blogId: string, userId: string, manager: EntityManager): Promise<true | null> {
-    const createdAt = new Date().toISOString()
-    const res = await manager.update(BlogSubscriber, {
-      blogId: { _id: blogId },
-      subscriber: { _id: userId }
-    },
-      {
-        status: SubscriptionStatus.Unsubscribed,
-        createdAt: createdAt,
-        telegramId: null as any // нужно уточнить как избежать этого
-      })
-    const deleteSubscriberCount = await manager.update(Blog, { _id: blogId },
-      {
-        subscribersCount: () => `subscribersCount - 1`
-      })
-    return true
+  async unsubscribeUserToBlog(blogId: string, userId: string): Promise<true | null> {
+
+    const queryRunner = this.dataSource.createQueryRunner()
+    const manager = queryRunner.manager
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+    try {
+      const createdAt = new Date().toISOString()
+
+      const res = await manager.update(BlogSubscriber, {
+        blogId: { _id: blogId },
+        subscriber: { _id: userId }
+      },
+        {
+          status: SubscriptionStatus.Unsubscribed,
+          createdAt: createdAt,
+          telegramId: null as any // нужно уточнить как избежать этого
+        })
+      if (res.affected === 0) {
+        await queryRunner.commitTransaction()
+        return null
+      }
+      const deleteSubscriberCount = await manager.update(Blog, { _id: blogId },
+        {
+          subscribersCount: () => `subscribersCount - 1`
+        })
+      await queryRunner.commitTransaction()
+      return true
+    } catch (e) {
+      await queryRunner.rollbackTransaction()
+      return null
+    } finally {
+      await queryRunner.release()
+    }
   }
   async addTelegramIdForSuscriber(code: string, telegramId: number): Promise<true | null> {
     try {

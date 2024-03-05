@@ -1,6 +1,6 @@
 import { BlogsRepoPSQL } from '../../db-psql/blogs.repo.PSQL';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { blogInput } from '../../models/blogs-model';
+import { SubscriptionStatus, blogInput } from '../../models/blogs-model';
 import { DataSource } from 'typeorm';
 
 
@@ -21,18 +21,11 @@ export class UnsubscribeUserToBlogUseCase implements ICommandHandler<Unsubscribe
         const blogId = command.blogId
         const userId = command.userId
 
-        const queryRunner = this.dataSource.createQueryRunner()
-        const manager = queryRunner.manager
-        await queryRunner.connect()
-        await queryRunner.startTransaction()
-        try {
-            const res = await this.blogsRepository.unsubscribeUserToBlog(blogId, userId, manager)
-            await queryRunner.commitTransaction()
-            return true
-        } catch (e) {
-            await queryRunner.rollbackTransaction()
+        const res = await this.blogsRepository.unsubscribeUserToBlog(blogId, userId)
+        if (!res) {
             return null
         }
+        return true
     }
 
 

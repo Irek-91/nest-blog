@@ -31,6 +31,6 @@ async function bootstrap() {
   const baseUrl = await connectToNgrok()
   
   await telegramAdaper.setWebHook(baseUrl + '/integrations/telegram/webhook')
-}
+  }
 
 bootstrap();

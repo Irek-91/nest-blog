@@ -11,13 +11,14 @@ import { Pagination } from './../helpers/query-filter';
 import { Body, Controller, Get, Post, Put, Delete, Query, Param, HttpException, HttpStatus, UseGuards, Request, HttpCode } from "@nestjs/common";
 import { BlogsService } from "./application/blogs.service";
 import { log } from "console";
-import { blogInput, blogOutput } from "./models/blogs-model";
+import { SubscriptionStatus, blogInput, blogOutput } from "./models/blogs-model";
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
 import { UpdateBlogCommand } from './application/use-case/update.blog.use.case';
 import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.case';
 import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/created.post.by.blog.id.use.case';
 import { SubscriptionUserToBlog } from './application/use-case/subscription.user.to.blog.use.case';
+import { CheckStatusSubscriptionUserCommand } from './application/use-case/check.status.subscription.user.use.case';
 
 
 @Controller('blogs')
@@ -107,8 +108,10 @@ export class BlogsController {
         if (!blog) {
             throw new HttpException('Not Found blog', HttpStatus.NOT_FOUND)
         }
-        const res = await this.commandBus.execute(new SubscriptionUserToBlog(blogId, userId))
-
+        const checkStatus: true | null = await this.commandBus.execute(new CheckStatusSubscriptionUserCommand(blogId, userId, SubscriptionStatus.Subscribed))
+        if (!checkStatus) {
+            const res = await this.commandBus.execute(new SubscriptionUserToBlog(blogId, userId))
+        }
     }
 
     @UseGuards(BasicAuthGuard)
@@ -170,7 +173,10 @@ export class BlogsController {
         if (!blog) {
             throw new HttpException('Not Found blog', HttpStatus.NOT_FOUND)
         }
-        const res = await this.commandBus.execute(new UnsubscribeUserToBlog(blogId, userId))
+        const checkStatus: true | null = await this.commandBus.execute(new CheckStatusSubscriptionUserCommand(blogId, userId, SubscriptionStatus.Unsubscribed))
+        if (!checkStatus) {
+            const res = await this.commandBus.execute(new UnsubscribeUserToBlog(blogId, userId))
+        }
     }
 
 }
