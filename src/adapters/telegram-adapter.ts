@@ -1,12 +1,12 @@
-import { settings } from './../settings';
 import { Injectable } from "@nestjs/common";
 import axios, { AxiosInstance } from "axios";
+import { config } from 'dotenv';
 
 @Injectable()
 export class TelegramAdapter {
     private axiosInstanse: AxiosInstance
     constructor() {
-        const token = settings.TELEGRAM_BOT_KEY
+        const token = process.env.TELEGRAM_BOT_KEY
         this.axiosInstanse = axios.create({
             baseURL: `https://api.telegram.org/bot${token}/`
         })

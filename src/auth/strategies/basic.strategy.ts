@@ -1,7 +1,7 @@
-import { settings } from './../../settings';
 import { BasicStrategy as Strategy } from 'passport-http';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { config } from 'dotenv';
 
 @Injectable()
 export class BasicStrategy extends PassportStrategy(Strategy) {
@@ -10,8 +10,8 @@ export class BasicStrategy extends PassportStrategy(Strategy) {
     }
     public validate = async (username: string, password:string): Promise<boolean> => {
         if (
-            settings.HTTP_BASIC_USER === username &&
-            settings.HTTP_BASIC_PASS === password
+            process.env.HTTP_BASIC_USER === username &&
+            process.env.HTTP_BASIC_PASS === password
         ) {
             return true;
         }

@@ -1,19 +1,20 @@
 import { log } from 'console';
-import { settings } from '../settings';
 import jwt from 'jsonwebtoken'
 import mongoose from "mongoose";
 import { Injectable } from "@nestjs/common"
+import { env } from 'process';
+import { config } from 'dotenv';
 
 
 @Injectable()
 export class JwtService {
     async createdJWTAccessToken (userId : string) {
-        const accessToken = jwt.sign({userId : userId}, settings.JWT_SECRET, {expiresIn: 1000})
+        const accessToken = jwt.sign({userId : userId}, process.env.JWT_SECRET!, {expiresIn: 1000})
         return accessToken
     }
 
     async createdJWTRefreshToken (userId: string, deviceId: string): Promise< string> {
-        const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, settings.JWT_SECRET, {expiresIn: 2000})
+        const refreshToken = jwt.sign({userId: userId, deviceId: deviceId}, process.env.JWT_SECRET!, {expiresIn: 2000})
         return refreshToken
     }
 
@@ -21,7 +22,7 @@ export class JwtService {
     async getUserIdByToken (token: string) : Promise<string | null> {
        
         try {
-            const result: any = jwt.verify(token, settings.JWT_SECRET)
+            const result: any = jwt.verify(token, process.env.JWT_SECRET!)
             return result.userId
         } 
         catch (e) {
@@ -37,7 +38,7 @@ export class JwtService {
     }
     async getPayloadByRefreshToken (token: string) : Promise<any> {
         try{
-        const payload: any = jwt.verify(token, settings.JWT_SECRET)
+        const payload: any = jwt.verify(token, process.env.JWT_SECRET!)
         return payload.userId}
         catch (e) {
             return null
@@ -53,7 +54,7 @@ export class JwtService {
 
     async getIssuedAttByRefreshToken (token: string) : Promise<string | null> {
         try {
-            const result: any = jwt.verify(token, settings.JWT_SECRET)
+            const result: any = jwt.verify(token, process.env.JWT_SECRET!)
             return (new Date ((result.iat)*1000)).toISOString()
         }
         catch (e) {
@@ -68,13 +69,13 @@ export class JwtService {
 
 
     async getIssueAttByRefreshToken (token: string) : Promise<string> {
-        const result: any = jwt.verify(token, settings.JWT_SECRET)
+        const result: any = jwt.verify(token, process.env.JWT_SECRET!)
         return (new Date ((result.iat)*1000)).toISOString()
     }
 
     async checkingTokenKey (token: string) {
         try {
-            const result: any = jwt.verify(token, settings.JWT_SECRET)
+            const result: any = jwt.verify(token, process.env.JWT_SECRET!)
             return result
         } 
         catch (e) {

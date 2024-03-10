@@ -132,7 +132,9 @@ import { DeleteBlogIdUseCase } from './blogs/application/use-case/delete.blog.id
 import { DeleteBlogsAllUseCase } from './blogs/application/use-case/delete.blogs.all.use.case';
 import { GetBlogIdUseCase } from './blogs/application/use-case/get.blog.id.use.case';
 import { UpdatePostUseCase } from './posts/application/use-case/update.post.use.case';
-import { settings } from './settings';
+import { env } from 'process';
+import { config } from 'dotenv';
+config();
 
 const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
   UpdateQuestionIdUseCase, UpdateQuestionInPublishUseCase,
@@ -206,16 +208,15 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
     //])
     //
 
-
     TypeOrmModule.forRoot(
       {
         type: 'postgres',
         host: "localhost",
-        port: settings.PORTLOCAL!,
-        username: settings.PGUSERLOCAL,
-        password: settings.PGPASSWORDLOCAL,
-        database: settings.PGDATABASELOCAL,
-        //url: settings.PSQL_URL,
+        port: +env.PORTLOCAL!,
+        username: env.PGUSERLOCAL,
+        password: env.PGPASSWORDLOCAL,
+        database: env.PGDATABASELOCAL,
+        //url: env.PSQL_URL,
         autoLoadEntities: false,
         synchronize: true,
         entities: [...entities],
@@ -228,7 +229,7 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
     TypeOrmModule.forFeature([...entities])
     ,
     JwtModule.register({
-      secret: settings.JWT_SECRET,
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: 10 }
     }),
     PassportModule
