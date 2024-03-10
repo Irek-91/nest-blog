@@ -3260,6 +3260,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:>=8.1.0":
+  version: 20.11.25
+  resolution: "@types/node@npm:20.11.25"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 3a65a0469309d503e572a3198d81c9248876236b1bcc0c9943e995cfa536df7ce9a9302638258984877420d1613167a8a82dbfb3a92197319fb79ebebf9abc83
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^16.9.6":
   version: 16.18.59
   resolution: "@types/node@npm:16.18.59"
@@ -4383,6 +4392,7 @@ __metadata:
     rxjs: "npm:^7.8.1"
     sharp: "npm:^0.33.2"
     source-map-support: "npm:^0.5.21"
+    stripe: "npm:^14.19.0"
     supertest: "npm:^6.3.3"
     swagger-autogen: "npm:^2.23.7"
     ts-jest: "npm:^29.1.0"
@@ -12245,6 +12255,16 @@ __metadata:
   version: 2.0.1
   resolution: "strip-json-comments@npm:2.0.1"
   checksum: b509231cbdee45064ff4f9fd73609e2bcc4e84a4d508e9dd0f31f70356473fde18abfb5838c17d56fb236f5a06b102ef115438de0600b749e818a35fbbc48c43
+  languageName: node
+  linkType: hard
+
+"stripe@npm:^14.19.0":
+  version: 14.19.0
+  resolution: "stripe@npm:14.19.0"
+  dependencies:
+    "@types/node": "npm:>=8.1.0"
+    qs: "npm:^6.11.0"
+  checksum: 2ded93390fbdc55cafe265e8311746b75706f0eb9ec0fa259b8558aefa44f06b5fd4b5281ee27f1da8b2c0b943488f8a6cf952766cefdd7c851602880f8a0aca
   languageName: node
   linkType: hard
 

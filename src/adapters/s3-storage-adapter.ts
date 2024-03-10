@@ -2,7 +2,6 @@ import { PutBucketAclCommandOutput, PutObjectCommand, PutObjectCommandOutput, S3
 import { Injectable } from "@nestjs/common";
 import { log } from "console";
 
-import { env } from 'process';
 import sharp from "sharp";
 
 export type filesResizingImages = {

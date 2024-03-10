@@ -1,3 +1,4 @@
+import { settings } from './settings';
 import { entities } from './app.module';
 import { DataSource } from 'typeorm';
 
@@ -20,11 +21,11 @@ config();
 
 export default new DataSource ({
     type: 'postgres',
-    host: process.env.PGHOSTLOCAL,
-    port:  Number(process.env.PORTLOCAL),
-    username: process.env.PGUSERLOCAL,
-    password: process.env.PGPASSWORDLOCAL,
-    database: process.env.PGDATABASELOCAL,
+    host: settings.PGHOSTLOCAL,
+    port:  Number(settings.PORTLOCAL),
+    username: settings.PGUSERLOCAL,
+    password: settings.PGPASSWORDLOCAL,
+    database: settings.PGDATABASELOCAL,
     synchronize: false,
     entities:[...entities],
     migrations: [__dirname + '/db/migrations/*{.ts, .js}'],

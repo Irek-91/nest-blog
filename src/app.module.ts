@@ -92,7 +92,6 @@ import { UsersService } from './users/application/users.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BlogsController } from './blogs/blogs.controller';
 import { BlogsService } from './blogs/application/blogs.service';
-import { env } from 'process';
 import { Pagination } from './helpers/query-filter';
 import { PostsController } from './posts/posts.controller';
 import { PostsService } from './posts/application/posts.service';
@@ -133,6 +132,7 @@ import { DeleteBlogIdUseCase } from './blogs/application/use-case/delete.blog.id
 import { DeleteBlogsAllUseCase } from './blogs/application/use-case/delete.blogs.all.use.case';
 import { GetBlogIdUseCase } from './blogs/application/use-case/get.blog.id.use.case';
 import { UpdatePostUseCase } from './posts/application/use-case/update.post.use.case';
+import { settings } from './settings';
 
 const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
   UpdateQuestionIdUseCase, UpdateQuestionInPublishUseCase,
@@ -161,7 +161,6 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
   Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser, UsersBannedByBlogger,
   WallpaperImageForBlog, MainImageForBlog, WallpaperImageForBlog, ImageForPost, BlogSubscriber]
 
-let { PSQL_URL } = process.env;
 
 @Module({
   imports: [
@@ -212,11 +211,11 @@ let { PSQL_URL } = process.env;
       {
         type: 'postgres',
         host: "localhost",
-        port: +process.env.PORTLOCAL!,
-        username: process.env.PGUSERLOCAL,
-        password: process.env.PGPASSWORDLOCAL,
-        database: process.env.PGDATABASELOCAL,
-        //url: process.env.PSQL_URL,
+        port: settings.PORTLOCAL!,
+        username: settings.PGUSERLOCAL,
+        password: settings.PGPASSWORDLOCAL,
+        database: settings.PGDATABASELOCAL,
+        //url: settings.PSQL_URL,
         autoLoadEntities: false,
         synchronize: true,
         entities: [...entities],
@@ -229,7 +228,7 @@ let { PSQL_URL } = process.env;
     TypeOrmModule.forFeature([...entities])
     ,
     JwtModule.register({
-      secret: env.JWT_SECRET,
+      secret: settings.JWT_SECRET,
       signOptions: { expiresIn: 10 }
     }),
     PassportModule
