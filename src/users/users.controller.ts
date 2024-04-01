@@ -10,7 +10,7 @@ import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
 import { Pagination } from './../helpers/query-filter';
 import { Body, Delete, Get, HttpException, HttpStatus, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { UsersService } from "./application/users.service";
-import { BanUserByBloggerInputModel, CreatUserInputModel } from "./models/users-model";
+import { BanUserByBloggerInputModel, CreatUserInputModel, userViewModel } from "./models/users-model";
 import { Controller } from "@nestjs/common/decorators/core";
 import { HttpCode, Put, Request } from "@nestjs/common/decorators";
 import { CommandBus } from '@nestjs/cqrs';
@@ -49,7 +49,7 @@ export class UsersController {
     @UseGuards(BasicAuthGuard)
     @UseGuards(EmailOrLoginGuard)
     @Post('users')
-    async createUser(@Body() inputModel: CreatUserInputModel) {
+    async createUser(@Body() inputModel: CreatUserInputModel): Promise<userViewModel> {
         const result = await this.commandBus.execute(new CreateUserCommand(inputModel))
         return result
     }

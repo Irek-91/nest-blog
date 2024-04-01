@@ -1,20 +1,33 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
 import mongoose from "mongoose";
 
 export class CreatUserInputModel {
+    @ApiProperty({
+        maximum: 10,
+        minimum: 3,
+        type: String
+    })
     @MaxLength(10)
     @MinLength(3)
     @IsString()
     @IsNotEmpty()
     login: string
 
-
+    @ApiProperty({
+        maximum: 20,
+        minimum: 6,
+        type: String
+    })
     @MaxLength(20)
     @MinLength(6)
     @IsString()
     @IsNotEmpty()
     password: string
 
+    @ApiProperty({
+        type: String
+    })
     @IsEmail()
     @IsString()
     @IsNotEmpty()
@@ -23,10 +36,18 @@ export class CreatUserInputModel {
 
 
 export class UpdateStatusInputModel {
+    @ApiProperty({
+        type: Boolean
+    })
     @IsBoolean()
     @IsNotEmpty()
     isBanned : boolean
 
+    @ApiProperty({
+        maximum: 21,
+        minimum: 6,
+        type: String
+    })
     @MaxLength(21)
     @MinLength(6)
     @IsString()
@@ -35,15 +56,23 @@ export class UpdateStatusInputModel {
 };
 
 export class BanUserByBloggerInputModel {
+    @ApiProperty({
+        type: Boolean
+    })
     @IsBoolean()
     @IsNotEmpty()
     isBanned : boolean
 
+    @ApiProperty({
+        minimum: 20,
+        type: String
+    })
     @MinLength(20)
     @IsString()
     @IsNotEmpty()
     banReason : string
 
+    @ApiProperty()
     @IsString()
     @IsNotEmpty()
     blogId : string
