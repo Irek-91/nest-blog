@@ -1,45 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsEmail,
   IsNotEmpty,
   IsString,
   MaxLength,
   MinLength,
 } from 'class-validator';
 import mongoose from 'mongoose';
-
-export class CreatUserInputModel {
-  @ApiProperty({
-    maximum: 10,
-    minimum: 3,
-    type: String,
-  })
-  @MaxLength(10)
-  @MinLength(3)
-  @IsString()
-  @IsNotEmpty()
-  login: string;
-
-  @ApiProperty({
-    maximum: 20,
-    minimum: 6,
-    type: String,
-  })
-  @MaxLength(20)
-  @MinLength(6)
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
-  @ApiProperty({
-    type: String,
-  })
-  @IsEmail()
-  @IsString()
-  @IsNotEmpty()
-  email: string;
-}
 
 export class UpdateStatusInputModel {
   @ApiProperty({

@@ -7,7 +7,7 @@ import {
   FileWallpaperValidationPipe,
   FileMainValidationPipe,
   PostImageValidationPipe,
-} from '../adapters/pipe';
+} from '../infrastructure/adapters/pipe';
 import { UpdatePostCommand } from '../posts/application/use-case/update.post.use.case';
 import { FindPostsByBlogIdCommand } from '../posts/application/use-case/find.posts.by.blog.id.use.case';
 import { CreatedPostByBlogIdCommand } from '../posts/application/use-case/created.post.by.blog.id.use.case';

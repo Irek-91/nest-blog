@@ -3,7 +3,7 @@ import { CommandBus, CommandHandler } from '@nestjs/cqrs';
 import {
   TelegramAdapter,
   TelegramUpdateMessage,
-} from './../../adapters/telegram-adapter';
+} from '../../infrastructure/adapters/telegram-adapter';
 
 export class HandlerTelegram {
   constructor(public payload: TelegramUpdateMessage) {}

@@ -17,8 +17,11 @@ import { BlogsService } from './blogs/application/blogs.service';
 import { PostsService } from './posts/application/posts.service';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteBlogsAllCommand } from './blogs/application/use-case/delete.blogs.all.use.case';
+import { ApiTags } from '@nestjs/swagger';
+import { SwaggerOptions } from './infrastructure/decorator/swagger.decorator';
 
 @Controller()
+@ApiTags('Home')
 export class AppController {
   constructor(
     private readonly appService: AppService,
@@ -26,6 +29,20 @@ export class AppController {
   ) {}
 
   @Get()
+  @SwaggerOptions(
+    'Checking the api for functionality',
+    false,
+    false,
+    200,
+    'Works Fine!',
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  )
   getHello(): string {
     return this.appService.getHello();
   }

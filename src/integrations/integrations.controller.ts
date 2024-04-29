@@ -1,7 +1,7 @@
 import {
   AuthLinkViewModel,
   TelegramUpdateMessage,
-} from './../adapters/telegram-adapter';
+} from '../infrastructure/adapters/telegram-adapter';
 import { GetLinkForSuscriber } from './../users/application/use-case/get.link.for.suscriber.use.case';
 import { CommandBus } from '@nestjs/cqrs';
 import { UserAuthGuard } from './../auth/guards/auth.guard';

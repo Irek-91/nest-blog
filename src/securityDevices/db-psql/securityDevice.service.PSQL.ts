@@ -1,4 +1,4 @@
-import { JwtService } from '../../adapters/jwt-service';
+import { JwtService } from '../../infrastructure/adapters/jwt-service';
 import { DeviceViewModel, devicesMongo } from '../model/device-model';
 import mongoose from 'mongoose';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';

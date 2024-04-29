@@ -1,7 +1,7 @@
 import { User } from '../users/db-psql/entity/user.entity';
 import { GetUserByIdCommand } from '../users/application/use-case/get.user.by.id.use.case';
 import { UsersService } from '../users/application/users.service';
-import { JwtService } from '../adapters/jwt-service';
+import { JwtService } from '../infrastructure/adapters/jwt-service';
 import {
   Controller,
   Get,

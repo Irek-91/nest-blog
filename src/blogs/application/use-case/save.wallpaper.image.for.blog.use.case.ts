@@ -1,5 +1,5 @@
 import { blogsImageWiewModel } from './../../models/blogs-model';
-import { S3StorageAdapter } from '../../../adapters/s3-storage-adapter';
+import { S3StorageAdapter } from '../../../infrastructure/adapters/s3-storage-adapter';
 import { BlogsRepoPSQL } from '../../db-psql/blogs.repo.PSQL';
 import { BlogsQueryRepoPSQL } from '../../db-psql/blogs.query.repo.PSQL';
 import { CommandHandler } from '@nestjs/cqrs';

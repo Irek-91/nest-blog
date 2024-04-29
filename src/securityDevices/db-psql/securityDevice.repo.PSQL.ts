@@ -1,7 +1,7 @@
 import { Device } from './entity/devices.entity';
 import { devicesMongo, devicesPSQL } from '../model/device-model';
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '../../adapters/jwt-service';
+import { JwtService } from '../../infrastructure/adapters/jwt-service';
 import { InjectDataSource, InjectEntityManager } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Not } from 'typeorm';
 

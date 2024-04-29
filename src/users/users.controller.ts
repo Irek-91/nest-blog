@@ -1,7 +1,7 @@
 import { BanUserByBloggerCommand } from './application/use-case/ban.user.by.blogger.use.case';
 import { Blog } from './../blogs/db-psql/entity/blog.entity';
 import { PaginationUsersSa } from './../helpers/query-filter-users-SA';
-import { PipeisValidUUID } from './../adapters/pipe';
+import { PipeisValidUUID } from '../infrastructure/adapters/pipe';
 import { CreateUserCommand } from './application/use-case/create.user.use.case';
 import { EmailOrLoginGuard, UserAuthGuard } from './../auth/guards/auth.guard';
 import { BasicAuthGuard } from './../auth/guards/basic-auth.guard';
@@ -19,7 +19,6 @@ import {
 import { UsersService } from './application/users.service';
 import {
   BanUserByBloggerInputModel,
-  CreatUserInputModel,
   userViewModel,
 } from './models/users-model';
 import { Controller } from '@nestjs/common/decorators/core';
@@ -29,8 +28,12 @@ import { DeleteUserIdCommand } from './application/use-case/delete.user.id.use.c
 import { GetBannedUsersForBlogCommand } from './application/use-case/get.banned.users.for.blog.use.case';
 import { GetUserByIdCommand } from './application/use-case/get.user.by.id.use.case';
 import { GetBlogDBCommand } from '../blogs/application/use-case/get.blog.DB.use.case';
+import { ApiTags } from '@nestjs/swagger';
+import { SwaggerOptions } from '../infrastructure/decorator/swagger.decorator';
+import { CreatUserInputModel } from './models/create-user-input-model';
 
 @Controller()
+@ApiTags('User')
 export class UsersController {
   constructor(
     protected usersService: UsersService,
@@ -41,6 +44,20 @@ export class UsersController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get('users')
+  @SwaggerOptions(
+    'Get users',
+    false,
+    true,
+    200,
+    'Return information about the users',
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+  )
   async getUsers(
     @Query()
     query: {

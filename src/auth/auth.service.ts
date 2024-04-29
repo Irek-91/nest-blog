@@ -1,4 +1,4 @@
-import { EmailAdapter } from '../adapters/email-adapter';
+import { EmailAdapter } from '../infrastructure/adapters/email-adapter';
 import { userMongoModel, userViewModel } from '../users/models/users-model';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';

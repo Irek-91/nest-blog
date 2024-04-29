@@ -1,5 +1,5 @@
 import { BlogsQueryRepoPSQL } from './../../../blogs/db-psql/blogs.query.repo.PSQL';
-import { AuthLinkViewModel } from './../../../adapters/telegram-adapter';
+import { AuthLinkViewModel } from '../../../infrastructure/adapters/telegram-adapter';
 import { User } from '../../db-psql/entity/user.entity';
 import { UsersQueryRepoPSQL } from '../../db-psql/users.qurey.repo.PSQL';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';

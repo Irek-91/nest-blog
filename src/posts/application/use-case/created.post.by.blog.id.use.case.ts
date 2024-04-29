@@ -1,4 +1,4 @@
-import { TelegramAdapter } from './../../../adapters/telegram-adapter';
+import { TelegramAdapter } from '../../../infrastructure/adapters/telegram-adapter';
 import { PostRepoPSQL } from './../../db-psql/post.repo';
 import { BlogsQueryRepoPSQL } from './../../../blogs/db-psql/blogs.query.repo.PSQL';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';

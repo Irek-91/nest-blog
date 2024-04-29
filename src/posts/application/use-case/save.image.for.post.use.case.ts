@@ -1,8 +1,8 @@
-import { filesResizingImages } from './../../../adapters/s3-storage-adapter';
+import { filesResizingImages } from '../../../infrastructure/adapters/s3-storage-adapter';
 import { PostQueryRepoPSQL } from './../../db-psql/post.query.repo';
 import { postImagesViewModel } from './../../model/post-model';
 import { PostRepoPSQL } from './../../db-psql/post.repo';
-import { S3StorageAdapter } from '../../../adapters/s3-storage-adapter';
+import { S3StorageAdapter } from '../../../infrastructure/adapters/s3-storage-adapter';
 import { CommandHandler } from '@nestjs/cqrs';
 import sharp from 'sharp';
 

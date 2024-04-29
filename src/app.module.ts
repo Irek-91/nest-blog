@@ -5,7 +5,7 @@ import { GetLinkForSuscriberUseCase } from './users/application/use-case/get.lin
 import { UnsubscribeUserToBlogUseCase } from './blogs/application/use-case/unsubscribe.user.to.blog.use.case';
 import { BlogSubscriber } from './blogs/db-psql/entity/subscribers.blog.entity';
 import { SubscriptionUserToBlogUseCase } from './blogs/application/use-case/subscription.user.to.blog.use.case';
-import { TelegramAdapter } from './adapters/telegram-adapter';
+import { TelegramAdapter } from './infrastructure/adapters/telegram-adapter';
 import { IntegrationsController } from './integrations/integrations.controller';
 import { ImageForPost } from './posts/db-psql/entity/image.post.entity';
 import { SaveImageForPostUseCase } from './posts/application/use-case/save.image.for.post.use.case';
@@ -13,7 +13,7 @@ import { SaveWallpaperImageForBlogUseCase } from './blogs/application/use-case/s
 import { SaveMainImageForBlogUseCase } from './blogs/application/use-case/save.main.image.for.blog.use.case';
 import { MainImageForBlog } from './blogs/db-psql/entity/main.image.blog.entity';
 import { WallpaperImageForBlog } from './blogs/db-psql/entity/wallpaper.image.blog.entity';
-import { S3StorageAdapter } from './adapters/s3-storage-adapter';
+import { S3StorageAdapter } from './infrastructure/adapters/s3-storage-adapter';
 import { GetCommentsByBlogUseCase } from './comments/application/use-case/get.comments.by.blog.use.cae';
 import { UpdateLikeStatusCommentUseCase } from './comments/application/use-case/update.like.status.commet.use.case';
 import { FindCommentsByPostUseCase } from './comments/application/use-case/find.comments.by.post.use.case';
@@ -73,7 +73,7 @@ import {
   FileWallpaperValidationPipe,
   FileMainValidationPipe,
   PostImageValidationPipe,
-} from './adapters/pipe';
+} from './infrastructure/adapters/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
 import { Pair } from './quiz.pair/dv-psql/entity/pairs';
 import { PairGameService } from './quiz.pair/application/pair.game.service';
@@ -102,8 +102,8 @@ import { PostsController } from './posts/posts.controller';
 import { PostsService } from './posts/application/posts.service';
 import { CommentsController } from './comments/comments.controller';
 import { AuthService } from './auth/auth.service';
-import { EmailAdapter } from './adapters/email-adapter';
-import { JwtService } from './adapters/jwt-service';
+import { EmailAdapter } from './infrastructure/adapters/email-adapter';
+import { JwtService } from './infrastructure/adapters/jwt-service';
 import { SecurityDeviceServicePSQL } from './securityDevices/db-psql/securityDevice.service.PSQL';
 import { AuthController } from './auth/auth.controller';
 import { LocalStrategy } from './auth/strategies/local.strategy';

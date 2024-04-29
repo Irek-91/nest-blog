@@ -1,4 +1,4 @@
-import { TelegramAdapter } from './adapters/telegram-adapter';
+import { TelegramAdapter } from './infrastructure/adapters/telegram-adapter';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { appSettings } from './app.settings';
@@ -16,10 +16,12 @@ async function bootstrap() {
   const telegramAdaper = await app.resolve(TelegramAdapter);
 
   const config = new DocumentBuilder()
-    .setTitle('Blog-nest example')
+    .setTitle(
+      'Documentation for applications based on the Nest(NestJS) framework',
+    )
     .setDescription('The API description')
     .setVersion('1.0')
-    .addTag('Blog')
+    .addTag('Blog_Platform')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);

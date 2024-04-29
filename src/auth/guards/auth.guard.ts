@@ -16,7 +16,7 @@ import {
   IPAndURIDocument,
   IPAndURIModel,
 } from '../../securityDevices/model/IPAndURIModel';
-import { JwtService } from '../../adapters/jwt-service';
+import { JwtService } from '../../infrastructure/adapters/jwt-service';
 import { SecurityDeviceServicePSQL } from '../../securityDevices/db-psql/securityDevice.service.PSQL';
 
 @Injectable()

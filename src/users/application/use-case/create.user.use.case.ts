@@ -1,11 +1,11 @@
 import { userViewModel } from './../../models/users-model';
 import { UsersRepositoryPSQL } from '../../db-psql/users.repo.PSQL';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreatUserInputModel } from '../../models/users-model';
 import { UsersService } from '../users.service';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { add } from 'date-fns';
+import { CreatUserInputModel } from '../../models/create-user-input-model';
 
 export class CreateUserCommand {
   constructor(public inputModel: CreatUserInputModel) {}

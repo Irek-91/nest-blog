@@ -9,7 +9,7 @@ import {
   queryPaginationPairsType,
   queryPaginationTopUsersType,
 } from './../helpers/query-filter';
-import { PipeisValidUUID } from '../adapters/pipe';
+import { PipeisValidUUID } from '../infrastructure/adapters/pipe';
 import { PairGameService } from './application/pair.game.service';
 import {
   gamePairViewModel,

@@ -1,4 +1,4 @@
-import { filesResizingImages } from './../../adapters/s3-storage-adapter';
+import { filesResizingImages } from '../../infrastructure/adapters/s3-storage-adapter';
 import { ImageForPost } from './entity/image.post.entity';
 import { Like } from './../../likes/entity/likes.entity';
 import { Injectable } from '@nestjs/common';
