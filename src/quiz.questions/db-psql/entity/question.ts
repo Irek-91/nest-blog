@@ -1,26 +1,22 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-
-
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Question {
+  @PrimaryColumn()
+  id: string;
 
-@PrimaryColumn()
-id: string
+  @Column()
+  body: string;
 
-@Column()
-body: string
+  @Column('simple-json', { nullable: true })
+  answers: string[];
 
-@Column("simple-json", {nullable: true})
-answers: string[]
+  @Column()
+  published: boolean;
 
-@Column()
-published: boolean
+  @Column()
+  createdAt: string;
 
-@Column()
-createdAt: string
-
-@Column({nullable: true})
-updatedAt: string
-
+  @Column({ nullable: true })
+  updatedAt: string;
 }

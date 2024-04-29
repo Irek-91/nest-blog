@@ -5,8 +5,6 @@
 // import { userMongoModel, userViewModel } from "../models/users-model";
 // import { log } from "console";
 
-
-
 // @Injectable()
 
 // export class UsersRepository {
@@ -45,7 +43,7 @@
 //   }
 
 //   async updateConfirmation(_id: mongoose.Types.ObjectId): Promise<boolean> {
-//     let result = await this.userModel.updateOne({ _id }, { $set: { 
+//     let result = await this.userModel.updateOne({ _id }, { $set: {
 //         "emailConfirmation.isConfirmed": true,
 //         "emailConfirmation.confirmationCode": null,
 //         "emailConfirmation.expiritionDate": null,

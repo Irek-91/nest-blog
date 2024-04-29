@@ -67,7 +67,6 @@
 //     }
 //   }
 
-
 //   async getByBlogId(id: string): Promise< BlogDocument | null> {
 //     try {
 //       const blog = await this.blogModel.findOne({ _id: id }).lean()

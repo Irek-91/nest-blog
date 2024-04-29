@@ -1,20 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NestFactory } from '@nestjs/core'
-import { INestApplication} from '@nestjs/common';
-import { AppService } from '../src/app.service';
-import { AppController } from '../src/app.controller';
+import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { appSettings } from '../src/app.settings';
 import request from 'supertest';
-import { after } from 'node:test';
-
-
 
 describe('AppController', () => {
-  let appController: AppController;
   let app: INestApplication;
   let httpServer: any;
-
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -24,15 +16,15 @@ describe('AppController', () => {
     }).compile();
 
     //appController = app.get<AppController>(AppController);
-    app = moduleFixture.createNestApplication()
-        appSettings(app)
-        await app.init()
-        httpServer = app.getHttpServer()
-  })
-  
+    app = moduleFixture.createNestApplication();
+    appSettings(app);
+    await app.init();
+    httpServer = app.getHttpServer();
+  });
+
   afterAll(async () => {
-    await app.close()
-  })
+    await app.close();
+  });
 
   describe('root', () => {
     it('/ (GET)', () => {

@@ -1,19 +1,19 @@
-import mongoose, { ObjectId } from "mongoose"
+import mongoose from 'mongoose';
 
 export type refreshToken = {
-    token: string,
-    validToken: boolean
-}
+  token: string;
+  validToken: boolean;
+};
 
 export type devicesMongo = {
-    _id: mongoose.Types.ObjectId,
-    issuedAt: string,
-    expirationDate: string,
-    deviceId: string,
-    IP: string,
-    deviceName: string,
-    userId: string
-}
+  _id: mongoose.Types.ObjectId;
+  issuedAt: string;
+  expirationDate: string;
+  deviceId: string;
+  IP: string;
+  deviceName: string;
+  userId: string;
+};
 
 // export class DevicesMongo {
 //     constructor(public _id: ObjectId,
@@ -25,19 +25,17 @@ export type devicesMongo = {
 //         public userId: ObjectId) { }
 // }
 
-
-
 export class DeviceViewModel {
-    ip: string
-    title: string
-    lastActiveDate: string
-    deviceId: string
+  ip: string;
+  title: string;
+  lastActiveDate: string;
+  deviceId: string;
 }
 export type devicesPSQL = {
-    issuedAt: string,
-    expirationDate: string,
-    deviceId: string,
-    IP: string,
-    deviceName: string,
-    userId: string
-}
+  issuedAt: string;
+  expirationDate: string;
+  deviceId: string;
+  IP: string;
+  deviceName: string;
+  userId: string;
+};

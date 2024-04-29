@@ -36,17 +36,17 @@
 //     async deleteDeviceByUserId(refreshToken: string, deviceId: string): Promise<null | true> {
 
 //         const resultDeviceId = await this.securityDeviceRepository.findOneDeviceId(deviceId)
-//         if (!resultDeviceId) { 
-//             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)    
+//         if (!resultDeviceId) {
+//             throw new HttpException('Not Found', HttpStatus.NOT_FOUND)
 //         }
 //         const resultUserId = await this.jwtService.getUserIdByToken(refreshToken)
 
-//         if (resultDeviceId.userId !== resultUserId!) { 
+//         if (resultDeviceId.userId !== resultUserId!) {
 //             throw new HttpException('If try edit the comment that is not your own', HttpStatus.FORBIDDEN)
 //         }
 
 //         const result = await this.securityDeviceRepository.deleteDeviceId(deviceId)
-//         return result        
+//         return result
 //     }
 
 //     async deleteAllDevicesExceptOne(refreshToken: string): Promise<Boolean | null> {
@@ -59,7 +59,7 @@
 
 //     async findTokenAndDevice(token: string): Promise<boolean | null> {
 //         const deviceId = await this.jwtService.getDeviceIdByRefreshToken(token)
-//         const userId = await this.jwtService.getUserIdByRefreshToken(token) 
+//         const userId = await this.jwtService.getUserIdByRefreshToken(token)
 //         const issuedAt = await  this.jwtService.getIssueAttByRefreshToken(token)
 //         const device = await this.securityDeviceRepository.findDeviceByIdAndUserId(userId, deviceId)
 //         if (device === null) { return null }
@@ -78,7 +78,7 @@
 //             IP,
 //             deviceName,
 //             userId}
-            
+
 //         const addTokenUser = await this.securityDeviceRepository.addRefreshToken(newDeviceAndRefreshToken)
 //         if (addTokenUser !== true) { return null }
 //         return refreshToken
@@ -97,7 +97,7 @@
 //         if (userId === null) { return null }
 //         const deviceId = await  this.jwtService.getDeviceIdByRefreshToken(refreshToken)
 //         if (deviceId === null) { return null }
-        
+
 //         // const issuedAt = await  this.jwtService.getIssuedAttByRefreshToken(refreshToken)
 //         // if (issuedAt === null) { return null }
 
@@ -112,7 +112,6 @@
 //         }
 //         else { return null }
 //     }
-
 
 //     async deleteDeviceIdRefreshToken(refreshToken: string): Promise<true | null> {
 //         const userId = await  this.jwtService.getUserIdByRefreshToken(refreshToken)
@@ -130,6 +129,4 @@
 //         return true
 //     }
 
-
 // }
-

@@ -1,8 +1,11 @@
-import { UsersBannedByBlogger } from '../../../users/db-psql/entity/users.banned.by.blogger.entity';
-import { BannedUser } from '../../../users/db-psql/entity/banned.user.entity';
 import { Post } from './post.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { User } from '../../../users/db-psql/entity/user.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // export enum SizeImage {
 //     ADMIN = "admin",
@@ -12,40 +15,39 @@ import { User } from '../../../users/db-psql/entity/user.entity';
 
 @Entity()
 export class ImageForPost {
-    @PrimaryGeneratedColumn()
-    id: string
-      
-    @Column()
-    urlForOriginal: string
+  @PrimaryGeneratedColumn()
+  id: string;
 
-    @Column()
-    urlForMiddle: string
+  @Column()
+  urlForOriginal: string;
 
-    @Column()
-    urlForSmall: string
-    
-    @Column()
-    createdAt: string
+  @Column()
+  urlForMiddle: string;
 
-    @Column()
-    fileId: string
-    
-    @Column()
-    fileSizeForOriginal: number
+  @Column()
+  urlForSmall: string;
 
-    @Column()
-    fileSizeForMiddle: number
+  @Column()
+  createdAt: string;
 
-    @Column()
-    fileSizeForSmall: number
+  @Column()
+  fileId: string;
 
-    @ManyToOne(() => Post, (post) => post, { nullable: true , 
-        onDelete: 'CASCADE'
-    })
-    @JoinColumn({
-        name: 'post'
-    })
-    public post: Post
+  @Column()
+  fileSizeForOriginal: number;
 
+  @Column()
+  fileSizeForMiddle: number;
+
+  @Column()
+  fileSizeForSmall: number;
+
+  @ManyToOne(() => Post, (post) => post, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({
+    name: 'post',
+  })
+  public post: Post;
 }
-

@@ -1,11 +1,11 @@
-import { IsEnum } from "class-validator";
+import { IsEnum } from 'class-validator';
 
 export enum LikeStatusEnum {
   Like = 'Like',
   Dislike = 'Dislike',
-  None = 'None'
+  None = 'None',
 }
 export class likeStatus {
   @IsEnum(LikeStatusEnum)
-  likeStatus: string
+  likeStatus: string;
 }

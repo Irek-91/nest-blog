@@ -1,75 +1,109 @@
 import { Blog } from './../../blogs/db-psql/entity/blog.entity';
-import { banUserBlogViewModel, bannedUsersViewModel } from './../models/users-model';
+import { bannedUsersViewModel } from './../models/users-model';
 import { BannedUser } from './entity/banned.user.entity';
-import { banStatusEnum, queryPaginationTypeUserSA } from './../../helpers/query-filter-users-SA';
+import {
+  banStatusEnum,
+  queryPaginationTypeUserSA,
+} from './../../helpers/query-filter-users-SA';
 import { User } from './entity/user.entity';
 import { EmailConfirmation } from './entity/email.confirm.entity';
-import { HttpCode, HttpStatus, Injectable, HttpException } from "@nestjs/common";
-import mongoose, { ObjectId } from "mongoose";
-import { emailConfirmationPSQL, userModelPSQL, userMongoModel, userViewModel, usersViewModel } from "../models/users-model";
-import { log } from "console";
+import { Injectable } from '@nestjs/common';
+import {
+  emailConfirmationPSQL,
+  userModelPSQL,
+  userViewModel,
+  usersViewModel,
+} from '../models/users-model';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { Brackets, DataSource, Equal, ILike, In, IsNull, Like, Not } from 'typeorm';
-import { IsBoolean } from 'class-validator';
+import { Brackets, DataSource } from 'typeorm';
 import { UsersBannedByBlogger } from './entity/users.banned.by.blogger.entity';
 
-
-
 @Injectable()
-
 export class UsersQueryRepoPSQL {
-  constructor(@InjectDataSource() private dataSource: DataSource) { }
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async findUsers(paginatorUser: queryPaginationTypeUserSA): Promise<usersViewModel> {
-    let usersOutput: userViewModel[] = []
+  async findUsers(
+    paginatorUser: queryPaginationTypeUserSA,
+  ): Promise<usersViewModel> {
+    let usersOutput: userViewModel[] = [];
     try {
-      let statusFilter: null | boolean = null
-      let searchLoginTerm = paginatorUser.searchLoginTerm
-      let searchEmailTerm = paginatorUser.searchEmailTerm
+      let statusFilter: null | boolean = null;
+      const searchLoginTerm = paginatorUser.searchLoginTerm;
+      const searchEmailTerm = paginatorUser.searchEmailTerm;
 
       if (paginatorUser.banStatus === banStatusEnum.banned) {
-        statusFilter = true
+        statusFilter = true;
       }
       if (paginatorUser.banStatus === banStatusEnum.notBanned) {
-        statusFilter = false
+        statusFilter = false;
       }
 
-      let users: any = []
-      let filterLoginOrEmail = {}
-      let filterEmail = {}
-      let totalCount = 0
+      let users: any = [];
+      const filterLoginOrEmail = {};
+      const filterEmail = {};
+      let totalCount = 0;
 
       users = await this.dataSource
         .createQueryBuilder(User, 'u')
-        .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
-        .where(new Brackets(qb => {
-          qb.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
-            .orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`);
-        })
+        .leftJoinAndSelect(BannedUser, 'b', 'b.userId = u._id')
+        .where(
+          new Brackets((qb) => {
+            qb.where(
+              `${
+                searchLoginTerm !== null
+                  ? `u.login ILIKE '%${searchLoginTerm}%'`
+                  : `u.login is not null`
+              }`,
+            ).orWhere(
+              `${
+                searchEmailTerm !== null
+                  ? `u.email ILIKE '%${searchEmailTerm}%'`
+                  : `u.email is not null`
+              }`,
+            );
+          }),
         )
-        .andWhere(`${statusFilter !== null ? `u.status = ${statusFilter}` : 'u.status is not null'}`)
+        .andWhere(
+          `${
+            statusFilter !== null
+              ? `u.status = ${statusFilter}`
+              : 'u.status is not null'
+          }`,
+        )
         .orderBy(`u.${paginatorUser.sortBy}`, paginatorUser.sortDirection)
         .offset(paginatorUser.skip)
         .limit(paginatorUser.pageSize)
-        .getRawMany()
-
-
-
+        .getRawMany();
 
       totalCount = await this.dataSource
         .createQueryBuilder(User, 'u')
-        .leftJoinAndSelect(BannedUser, "b", "b.userId = u._id")
-        .where(new Brackets(qb => {
-          qb.where(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
-            .orWhere(`${searchEmailTerm !== null ? `u.email ILIKE '%${searchEmailTerm}%'` : `u.email is not null`}`);
-        })
+        .leftJoinAndSelect(BannedUser, 'b', 'b.userId = u._id')
+        .where(
+          new Brackets((qb) => {
+            qb.where(
+              `${
+                searchLoginTerm !== null
+                  ? `u.login ILIKE '%${searchLoginTerm}%'`
+                  : `u.login is not null`
+              }`,
+            ).orWhere(
+              `${
+                searchEmailTerm !== null
+                  ? `u.email ILIKE '%${searchEmailTerm}%'`
+                  : `u.email is not null`
+              }`,
+            );
+          }),
         )
-        .andWhere(`${statusFilter !== null ? `u.status = ${statusFilter}` : 'u.status is not null'}`)
+        .andWhere(
+          `${
+            statusFilter !== null
+              ? `u.status = ${statusFilter}`
+              : 'u.status is not null'
+          }`,
+        )
         .orderBy(`u.${paginatorUser.sortBy}`, paginatorUser.sortDirection)
-        .getCount()
-
-
-
+        .getCount();
 
       usersOutput = users.map((b) => {
         return {
@@ -80,189 +114,211 @@ export class UsersQueryRepoPSQL {
           banInfo: {
             isBanned: b.u_status,
             banDate: b.b_banDate,
-            banReason: b.b_banReason
-          }
-        }
-      })
+            banReason: b.b_banReason,
+          },
+        };
+      });
       return {
         pagesCount: Math.ceil(totalCount / paginatorUser.pageSize),
         page: paginatorUser.pageNumber,
         pageSize: paginatorUser.pageSize,
         totalCount: totalCount,
-        items: usersOutput
-      }
+        items: usersOutput,
+      };
     } catch (e) {
       return {
         pagesCount: 0,
         page: paginatorUser.pageNumber,
         pageSize: paginatorUser.pageSize,
         totalCount: 0,
-        items: usersOutput
-      }
+        items: usersOutput,
+      };
     }
   }
 
   async findUserById(userId: string): Promise<userModelPSQL | null> {
     try {
-      let user = await this.dataSource.getRepository(User)
+      const user = await this.dataSource
+        .getRepository(User)
         .createQueryBuilder('u')
         .where('u._id = :id', { id: userId })
-        .getOne()
+        .getOne();
 
       //query(`SELECT * FROM public."users" as u WHERE u."_id" = $1`, [userId]);
 
       if (!user) {
-        return null
-      }
-      else {
-
+        return null;
+      } else {
         return {
           _id: user._id,
           login: user.login,
           email: user.email,
           createdAt: user.createdAt,
           salt: user.salt,
-          hash: user.hash
-        }
-
+          hash: user.hash,
+        };
       }
     } catch (e) {
-      return null
+      return null;
     }
   }
 
   async getUserById(userId: string): Promise<User | null> {
     try {
-      let user = await this.dataSource.getRepository(User)
+      const user = await this.dataSource
+        .getRepository(User)
         .createQueryBuilder('u')
         .where('u._id = :id', { id: userId })
-        .getOne()
+        .getOne();
 
       //query(`SELECT * FROM public."users" as u WHERE u."_id" = $1`, [userId]);
 
       if (!user) {
-        return null
-      }
-      else {
-        return user
+        return null;
+      } else {
+        return user;
       }
     } catch (e) {
-      return null
+      return null;
     }
   }
 
   async findByLoginOrEmailL(loginOrEmail: string): Promise<User | null> {
     try {
-      const user = await this.dataSource.getRepository(User).createQueryBuilder('u')
+      const user = await this.dataSource
+        .getRepository(User)
+        .createQueryBuilder('u')
         .select()
         .where('u.login = :login', { login: loginOrEmail })
         .orWhere('u.email = :email', { email: loginOrEmail })
-        .getOne()
+        .getOne();
 
       if (!user) {
-        return null
-      }
-
-      else {
-        return user
-
+        return null;
+      } else {
+        return user;
       }
     } catch (e) {
-      return null
+      return null;
     }
   }
 
-
   async findUserByCode(code: string): Promise<emailConfirmationPSQL | null> {
     try {
-      const result = await this.dataSource.getRepository(EmailConfirmation).createQueryBuilder('e')
+      const result = await this.dataSource
+        .getRepository(EmailConfirmation)
+        .createQueryBuilder('e')
         .select()
-        .where('e.confirmationCode = :confirmationCode', { confirmationCode: code })
-        .getOne()
+        .where('e.confirmationCode = :confirmationCode', {
+          confirmationCode: code,
+        })
+        .getOne();
 
-      if (!result) { return null }
-      else {
+      if (!result) {
+        return null;
+      } else {
         return {
           userId: result.userId._id,
           confirmationCode: result.confirmationCode,
           expiritionDate: result.expiritionDate,
           isConfirmed: result.isConfirmed,
-          recoveryCode: result.recoveryCode
-        }
+          recoveryCode: result.recoveryCode,
+        };
       }
-    }
-    catch (e) {
-      return null
+    } catch (e) {
+      return null;
     }
   }
 
   async findUserByEmail(email: string): Promise<userModelPSQL | null> {
     try {
-      const result = await this.dataSource.getRepository(User).createQueryBuilder('u')
+      const result = await this.dataSource
+        .getRepository(User)
+        .createQueryBuilder('u')
         //.select()
-        .where("u.email= :email", { email: email })
-        .getOne()
+        .where('u.email= :email', { email: email })
+        .getOne();
 
-      if (!result) { return null }
-      else {
+      if (!result) {
+        return null;
+      } else {
         return {
           _id: result._id.toString(),
           login: result.login,
           email: result.email,
           createdAt: result.createdAt,
           salt: result.salt,
-          hash: result.hash
-        }
-
+          hash: result.hash,
+        };
       }
+    } catch (e) {
+      return null;
     }
-    catch (e) { return null }
   }
 
-  async getUserBannedByBlogger(userId: string): Promise<UsersBannedByBlogger | null> {
+  async getUserBannedByBlogger(
+    userId: string,
+  ): Promise<UsersBannedByBlogger | null> {
     try {
-      const result = await this.dataSource.getRepository(UsersBannedByBlogger)
+      const result = await this.dataSource
+        .getRepository(UsersBannedByBlogger)
         .findOne({
-            relations: {
-              blogId: true,
-              userId: true
-            },
-            where: {
-              userId: { _id: userId }
-            }
-          })
+          relations: {
+            blogId: true,
+            userId: true,
+          },
+          where: {
+            userId: { _id: userId },
+          },
+        });
 
-      if (!result) { return null }
-      else {
-        return result
+      if (!result) {
+        return null;
+      } else {
+        return result;
       }
+    } catch (e) {
+      return null;
     }
-    catch (e) { return null }
   }
 
-
-  async getUsersBannedByBlogId(blogId: string, paginator: queryPaginationTypeUserSA): Promise<bannedUsersViewModel> {
+  async getUsersBannedByBlogId(
+    blogId: string,
+    paginator: queryPaginationTypeUserSA,
+  ): Promise<bannedUsersViewModel> {
     try {
-      const searchLoginTerm = paginator.searchLoginTerm
-      const result = await this.dataSource.createQueryBuilder(UsersBannedByBlogger, 'b')
-        .leftJoinAndSelect(User, "u", "b.userId = u._id")
-        .leftJoinAndSelect(Blog, "blog", "b.blogId = blog._id")
+      const searchLoginTerm = paginator.searchLoginTerm;
+      const result = await this.dataSource
+        .createQueryBuilder(UsersBannedByBlogger, 'b')
+        .leftJoinAndSelect(User, 'u', 'b.userId = u._id')
+        .leftJoinAndSelect(Blog, 'blog', 'b.blogId = blog._id')
         .where('blog._id = :blogId', { blogId: blogId })
         .andWhere('b.banStatus = :banStatus', { banStatus: true })
-        .andWhere(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
+        .andWhere(
+          `${
+            searchLoginTerm !== null
+              ? `u.login ILIKE '%${searchLoginTerm}%'`
+              : `u.login is not null`
+          }`,
+        )
         .orderBy(`u.${paginator.sortBy}`, paginator.sortDirection)
         .offset(paginator.skip)
         .limit(paginator.pageSize)
-        .getRawMany()
+        .getRawMany();
 
-      const totalCount = await this.dataSource.createQueryBuilder(UsersBannedByBlogger, 'b')
-        .leftJoinAndSelect(User, "u", "b.userId = u._id")
-        .leftJoinAndSelect(Blog, "blog", "b.blogId = blog._id")
+      const totalCount = await this.dataSource
+        .createQueryBuilder(UsersBannedByBlogger, 'b')
+        .leftJoinAndSelect(User, 'u', 'b.userId = u._id')
+        .leftJoinAndSelect(Blog, 'blog', 'b.blogId = blog._id')
         .where('blog._id = :blogId', { blogId: blogId })
-        .andWhere(`${searchLoginTerm !== null ? `u.login ILIKE '%${searchLoginTerm}%'` : `u.login is not null`}`)
-        .getCount()
-
-
+        .andWhere(
+          `${
+            searchLoginTerm !== null
+              ? `u.login ILIKE '%${searchLoginTerm}%'`
+              : `u.login is not null`
+          }`,
+        )
+        .getCount();
 
       if (!result) {
         return {
@@ -270,9 +326,8 @@ export class UsersQueryRepoPSQL {
           page: 1,
           pageSize: 10,
           totalCount: 0,
-          items: []
-        }
-
+          items: [],
+        };
       }
       const usersOutput = result.map((b) => {
         return {
@@ -281,64 +336,65 @@ export class UsersQueryRepoPSQL {
           banInfo: {
             isBanned: b.b_banStatus,
             banDate: b.b_banDate,
-            banReason: b.b_banReason
-          }
-        }
-      })
+            banReason: b.b_banReason,
+          },
+        };
+      });
 
       return {
         pagesCount: Math.ceil(totalCount / paginator.pageSize),
         page: paginator.pageNumber,
         pageSize: paginator.pageSize,
         totalCount: totalCount,
-        items: usersOutput
-      }
-
-
-    }
-    catch (e) {
+        items: usersOutput,
+      };
+    } catch (e) {
       return {
         pagesCount: 0,
         page: 1,
         pageSize: 10,
         totalCount: 0,
-        items: []
-      }
+        items: [],
+      };
     }
   }
 
-
-
   async findUserByLogin(login: string): Promise<userModelPSQL | null> {
     try {
-
-      let result = await this.dataSource.getRepository(User).createQueryBuilder('u')
+      const result = await this.dataSource
+        .getRepository(User)
+        .createQueryBuilder('u')
         //.select()
         .where('u.login = :login', { login: login })
-        .getOne()
+        .getOne();
 
-      if (!result) { return null }
-      else {
+      if (!result) {
+        return null;
+      } else {
         return {
           _id: result._id.toString(),
           login: result.login,
           email: result.email,
           createdAt: result.createdAt,
           salt: result.salt,
-          hash: result.hash
-        }
+          hash: result.hash,
+        };
       }
+    } catch (e) {
+      return null;
     }
-    catch (e) { return null }
   }
 
-
-  async findUserByRecoveryCode(recoveryCode: string): Promise<emailConfirmationPSQL | null> {
+  async findUserByRecoveryCode(
+    recoveryCode: string,
+  ): Promise<emailConfirmationPSQL | null> {
     try {
-      let user = await this.dataSource.getRepository(EmailConfirmation).createQueryBuilder('e')
+      const user = await this.dataSource
+        .getRepository(EmailConfirmation)
+        .createQueryBuilder('e')
         .select()
         .where('e.recoveryCode = :recoveryCode', { recoveryCode: recoveryCode })
-        .getOne()
+        .getOne();
 
       if (user) {
         return {
@@ -346,24 +402,26 @@ export class UsersQueryRepoPSQL {
           confirmationCode: user.confirmationCode,
           expiritionDate: user.expiritionDate,
           isConfirmed: user.isConfirmed,
-          recoveryCode: user.recoveryCode
-        }
+          recoveryCode: user.recoveryCode,
+        };
       } else {
-        return null
+        return null;
       }
-    }
-    catch (e) {
-      return null
+    } catch (e) {
+      return null;
     }
   }
 
-
-  async findUserByEmailConfirmation(userId: string): Promise<emailConfirmationPSQL | null> {
+  async findUserByEmailConfirmation(
+    userId: string,
+  ): Promise<emailConfirmationPSQL | null> {
     try {
-      let user = await this.dataSource.getRepository(EmailConfirmation).createQueryBuilder('e')
+      const user = await this.dataSource
+        .getRepository(EmailConfirmation)
+        .createQueryBuilder('e')
         .select()
         .where('e.userId = :userId', { userId: userId })
-        .getOne()
+        .getOne();
 
       if (user) {
         return {
@@ -371,14 +429,13 @@ export class UsersQueryRepoPSQL {
           confirmationCode: user.confirmationCode,
           expiritionDate: user.expiritionDate,
           isConfirmed: user.isConfirmed,
-          recoveryCode: user.recoveryCode
-        }
+          recoveryCode: user.recoveryCode,
+        };
       } else {
-        return null
+        return null;
       }
-    }
-    catch (e) {
-      return null
+    } catch (e) {
+      return null;
     }
   }
 }

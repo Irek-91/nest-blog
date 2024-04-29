@@ -1,21 +1,17 @@
 import { QuestionsRepository } from '../db-psql/questions.repo';
-import { queryPaginationQuestionsType } from '../../helpers/query-filter';
 import { QuestionsQueryRepository } from '../db-psql/questions.query.repo';
-import { QuestionInputModel, questionViewModel, questionDBModel, PublishInputModel } from '../model/questionModel';
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-
 
 @Injectable()
 export class QusetionsService {
-  constructor(protected questionsRepository: QuestionsRepository,
-    protected questionsQueryRepository: QuestionsQueryRepository) { }
-
+  constructor(
+    protected questionsRepository: QuestionsRepository,
+    protected questionsQueryRepository: QuestionsQueryRepository,
+  ) {}
 
   // async findQuestions(paginationQuery: queryPaginationQuestionsType) {
   //   return await this.questionsQueryRepository.findQuestions(paginationQuery)
   // }
-
 
   // async createQuestion(inputModel: QuestionInputModel): Promise<questionViewModel> {
 
@@ -29,7 +25,6 @@ export class QusetionsService {
   //   }
   //   return await this.questionsRepository.createQuestion(newQuestion)
   // }
-
 
   // async updateQuestionId(inputModel: QuestionInputModel, questionId: string): Promise<boolean> {
 
@@ -51,20 +46,22 @@ export class QusetionsService {
   //   return updateResult
   // }
 
-  async checkingCorrectAnswer(questionsId : string, answer: string): Promise<boolean> {
+  async checkingCorrectAnswer(
+    questionsId: string,
+    answer: string,
+  ): Promise<boolean> {
     //const result = await this.questionsRepository.checkingCorrectAnswer(questionsId,answer)
-    const result = await this.questionsQueryRepository.getAnswerByQuestiontId(questionsId)
-    const res =  result.includes(answer.toString())
+    const result =
+      await this.questionsQueryRepository.getAnswerByQuestiontId(questionsId);
+    const res = result.includes(answer.toString());
     if (!res) {
-      return false
+      return false;
     } else {
-      return true
+      return true;
     }
-
   }
 
   // async deleteQuestionId(questionId: string): Promise<boolean> {
   //   return await this.questionsRepository.deleteQuestionId(questionId)
   // }
-
 }

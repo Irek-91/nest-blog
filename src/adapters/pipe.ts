@@ -1,14 +1,15 @@
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException, HttpStatus, HttpException } from '@nestjs/common';
-import { validate } from 'class-validator';
-import { plainToInstance } from 'class-transformer';
+import {
+  PipeTransform,
+  Injectable,
+  ArgumentMetadata,
+  BadRequestException,
+} from '@nestjs/common';
 import { validate as isValidUUID } from 'uuid';
-import { log } from 'console';
 import sharp from 'sharp';
 
 @Injectable()
 export class PipeisValidUUID implements PipeTransform<any> {
   async transform(value: string) {
-
     if (!isValidUUID(value)) {
       throw new BadRequestException([
         { message: 'If id has invalid format', field: 'paramId' },
@@ -16,7 +17,6 @@ export class PipeisValidUUID implements PipeTransform<any> {
     }
     return value;
   }
-
 }
 
 @Injectable()
@@ -25,13 +25,16 @@ export class FileValidationPipe implements PipeTransform {
     try {
       const { size, format } = await sharp(value.buffer).metadata();
       const oneKb = 102400;
-      const correctFormat = ['jpeg', 'png']
+      const correctFormat = ['jpeg', 'png'];
 
-      const result = correctFormat.includes(format!)
+      const result = correctFormat.includes(format!);
 
-      if (result === false) {
+      if (!result) {
         throw new BadRequestException([
-          { message: 'Invalid image format. Supported formats: JPEG, PNG', field: 'file' },
+          {
+            message: 'Invalid image format. Supported formats: JPEG, PNG',
+            field: 'file',
+          },
         ]);
       }
 
@@ -40,14 +43,12 @@ export class FileValidationPipe implements PipeTransform {
           { message: 'Maximum file size allowed is 100 KB', field: 'file' },
         ]);
       }
-      return value
-
+      return value;
     } catch (e) {
       throw new BadRequestException([
         { message: 'File incorrect format', field: 'file' },
       ]);
     }
-
   }
 }
 
@@ -61,7 +62,7 @@ export class FileWallpaperValidationPipe implements PipeTransform {
         { message: 'Wallpaper format incorrect', field: 'file' },
       ]);
     }
-    return value
+    return value;
   }
 }
 
@@ -74,7 +75,7 @@ export class FileMainValidationPipe implements PipeTransform {
         { message: 'Main format incorrect', field: 'file' },
       ]);
     }
-    return value
+    return value;
   }
 }
 
@@ -88,6 +89,6 @@ export class PostImageValidationPipe implements PipeTransform {
         { message: 'Post image format incorrect', field: 'file' },
       ]);
     }
-    return value
+    return value;
   }
 }

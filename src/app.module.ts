@@ -67,7 +67,13 @@ import { QuestionsRepository } from './quiz.questions/db-psql/questions.repo';
 import { PairGameQueryRepo } from './quiz.pair/dv-psql/pair.game.query.repo';
 import { Statistic } from './quiz.pair/dv-psql/entity/statistic';
 import { CheckingActivePair } from './auth/guards/auth.guard';
-import { PipeisValidUUID, FileValidationPipe, FileWallpaperValidationPipe, FileMainValidationPipe, PostImageValidationPipe } from './adapters/pipe';
+import {
+  PipeisValidUUID,
+  FileValidationPipe,
+  FileWallpaperValidationPipe,
+  FileMainValidationPipe,
+  PostImageValidationPipe,
+} from './adapters/pipe';
 import { Pairresult } from './quiz.pair/dv-psql/entity/result.pair';
 import { Pair } from './quiz.pair/dv-psql/entity/pairs';
 import { PairGameService } from './quiz.pair/application/pair.game.service';
@@ -89,7 +95,6 @@ import { AppController, TestingController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/application/users.service';
-import { MongooseModule } from '@nestjs/mongoose';
 import { BlogsController } from './blogs/blogs.controller';
 import { BlogsService } from './blogs/application/blogs.service';
 import { Pagination } from './helpers/query-filter';
@@ -107,7 +112,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { BasicStrategy } from './auth/strategies/basic.strategy';
 import { IsBlogIdAlreadyExistConstraint } from './blogs/models/blog.decorator';
-import { IPAndURIModel, IPAndURISchema } from './securityDevices/model/IPAndURIModel';
 import { SecurityDeviceController } from './securityDevices/securityDevice-controller';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -136,34 +140,100 @@ import { env } from 'process';
 import { config } from 'dotenv';
 config();
 
+const questionsUseCase = [
+  FindQuestionsUseCase,
+  CreateQuestionUseCase,
+  UpdateQuestionIdUseCase,
+  UpdateQuestionInPublishUseCase,
+  DeleteQuestionIdUseCase,
+];
+const pairGameUseCase = [
+  GetPairMyCurrentUseCase,
+  GetStatisticByUserUseCase,
+  GetTopUsersUseCase,
+  GetAllPairsByUserUseCase,
+  GetPairByIdUseCase,
+  CreateNewStatisticByPalyerUseCase,
+  ConnectUserByPairUseCase,
+  SendAnswerUseCase,
+];
 
-const questionsUseCase = [FindQuestionsUseCase, CreateQuestionUseCase,
-  UpdateQuestionIdUseCase, UpdateQuestionInPublishUseCase,
-  DeleteQuestionIdUseCase]
-const pairGameUseCase = [GetPairMyCurrentUseCase, GetStatisticByUserUseCase,
-  GetTopUsersUseCase, GetAllPairsByUserUseCase, GetPairByIdUseCase,
-  CreateNewStatisticByPalyerUseCase, ConnectUserByPairUseCase, SendAnswerUseCase]
+const blogUseCase = [
+  FindBlogsUseCase,
+  FindBlogsSAUseCase,
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  DeleteBlogIdUseCase,
+  DeleteBlogsAllUseCase,
+  GetBlogNameByIdUseCase,
+  GetBlogIdUseCase,
+  GetBlogDBUseCase,
+  BindBlogWithUserUseCase,
+  GetBlogsByBloggerUseCase,
+  UpdateBanStatusByBlogUseCase,
+  GetSABlogIdUseCase,
+  SaveMainImageForBlogUseCase,
+  SaveWallpaperImageForBlogUseCase,
+  SubscriptionUserToBlogUseCase,
+  UnsubscribeUserToBlogUseCase,
+  GetLinkForSuscriberUseCase,
+  AddTelegramIdBySubscriberUseCase,
+  CheckStatusSubscriptionUserUseCase,
+];
 
-const blogUseCase = [FindBlogsUseCase, FindBlogsSAUseCase, CreateBlogUseCase, UpdateBlogUseCase, DeleteBlogIdUseCase,
-  DeleteBlogsAllUseCase, GetBlogNameByIdUseCase, GetBlogIdUseCase, GetBlogDBUseCase, BindBlogWithUserUseCase, GetBlogsByBloggerUseCase,
-  UpdateBanStatusByBlogUseCase, GetSABlogIdUseCase, SaveMainImageForBlogUseCase, SaveWallpaperImageForBlogUseCase,
-  SubscriptionUserToBlogUseCase, UnsubscribeUserToBlogUseCase, GetLinkForSuscriberUseCase, AddTelegramIdBySubscriberUseCase,
-  CheckStatusSubscriptionUserUseCase]
+const postUseCase = [
+  FindPostsUseCase,
+  FindPostsByBlogIdUseCase,
+  GetPostIdUseCase,
+  DeletePostIdUseCase,
+  DeletePostsByBlogIdUseCase,
+  CreatedPostByBlogIdUseCase,
+  UpdatePostUseCase,
+  updateLikeStatusPostUseCase,
+  DeletePostsAllUseCase,
+  SaveImageForPostUseCase,
+];
 
-const postUseCase = [FindPostsUseCase, FindPostsByBlogIdUseCase, GetPostIdUseCase, DeletePostIdUseCase,
-  DeletePostsByBlogIdUseCase, CreatedPostByBlogIdUseCase, UpdatePostUseCase, updateLikeStatusPostUseCase, DeletePostsAllUseCase,
-  SaveImageForPostUseCase]
+const userUseCase = [
+  CreateUserUseCase,
+  UpdateStatusUserUseCase,
+  GetUserByIdUseCase,
+  DeleteUserIdUseCase,
+  BanUserByBloggerUseCase,
+  GetBannedUsersForBlogUseCase,
+  HandleTelegramUseCase,
+];
 
-const userUseCase = [CreateUserUseCase, UpdateStatusUserUseCase, GetUserByIdUseCase, DeleteUserIdUseCase,
-  BanUserByBloggerUseCase, GetBannedUsersForBlogUseCase, HandleTelegramUseCase]
+const commentUseCase = [
+  CreatedCommentPostUseCase,
+  UpdateCommentByPostUseCase,
+  GetCommentByIdUseCase,
+  DeleteCommentByIdUseCase,
+  FindCommentsByPostUseCase,
+  UpdateLikeStatusCommentUseCase,
+  GetCommentsByBlogUseCase,
+];
 
-const commentUseCase = [CreatedCommentPostUseCase, UpdateCommentByPostUseCase, GetCommentByIdUseCase,
-  DeleteCommentByIdUseCase, FindCommentsByPostUseCase, UpdateLikeStatusCommentUseCase, GetCommentsByBlogUseCase]
-
-export const entities = [User, EmailConfirmation, Device, Post, Blog,
-  Comment, Like, Question, Pair, Pairresult, Statistic, BannedUser, UsersBannedByBlogger,
-  WallpaperImageForBlog, MainImageForBlog, WallpaperImageForBlog, ImageForPost, BlogSubscriber]
-
+export const entities = [
+  User,
+  EmailConfirmation,
+  Device,
+  Post,
+  Blog,
+  Comment,
+  Like,
+  Question,
+  Pair,
+  Pairresult,
+  Statistic,
+  BannedUser,
+  UsersBannedByBlogger,
+  WallpaperImageForBlog,
+  MainImageForBlog,
+  WallpaperImageForBlog,
+  ImageForPost,
+  BlogSubscriber,
+];
 
 @Module({
   imports: [
@@ -176,101 +246,93 @@ export const entities = [User, EmailConfirmation, Device, Post, Blog,
       },
     ]),
     ConfigModule.forRoot(),
-    //MongooseModule.forRoot('mongodb+srv://admin:admin1@atlascluster.0x495z3.mongodb.net/BlogPlatform?retryWrites=true&w=majority'),
-    //MongooseModule.forFeature([
-    // {
-    //   name: User.name,
-    //   schema: UserSchema
-    // },
-    // {
-    //   name: Blog.name,
-    //   schema: BlogSchema
-    // },
-    // {
-    //   name: Post.name,
-    //   schema: PostSchema
-    // },
-    // {
-    //   name: Comment.name,
-    //   schema: CommentSchema
-    // },
-    // {
-    //   name: Like.name,
-    //   schema: LikeSchema
-    // },
-    // {
-    //   name: DevicesModel.name,
-    //   schema: DevicesModelSchema
-    // },
-    // {
-    //   name: IPAndURIModel.name,
-    //   schema: IPAndURISchema
-    // }
-    //])
-    //
-
-    TypeOrmModule.forRoot(
-      {
-        type: 'postgres',
-        host: "localhost",
-        port: +env.PORTLOCAL!,
-        username: env.PGUSERLOCAL,
-        password: env.PGPASSWORDLOCAL,
-        database: env.PGDATABASELOCAL,
-        //url: env.PSQL_URL,
-        autoLoadEntities: false,
-        synchronize: true,
-        entities: [...entities],
-        migrations: [__dirname + '/db/migrations/*.ts'],
-        migrationsTableName: "custom_migration_table",
-        logging: true,
-        namingStrategy: new CustomNaimingStrategy()
-      }
-    ),
-    TypeOrmModule.forFeature([...entities])
-    ,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: +env.PORTLOCAL!,
+      username: env.PGUSERLOCAL,
+      password: env.PGPASSWORDLOCAL,
+      database: env.PGDATABASELOCAL,
+      //url: env.PSQL_URL,
+      autoLoadEntities: false,
+      synchronize: true,
+      entities: [...entities],
+      migrations: [__dirname + '/db/migrations/*.ts'],
+      migrationsTableName: 'custom_migration_table',
+      logging: false,
+      namingStrategy: new CustomNaimingStrategy(),
+    }),
+    TypeOrmModule.forFeature([...entities]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: 10 }
+      signOptions: { expiresIn: 10 },
     }),
-    PassportModule
+    PassportModule,
   ],
 
-
-  controllers: [AppController,
+  controllers: [
+    AppController,
     TestingController,
-    UsersController, UsersSAController,
-    BlogsController, BlogsSAController, BloggerController,
+    UsersController,
+    UsersSAController,
+    BlogsController,
+    BlogsSAController,
+    BloggerController,
     PostsController,
     CommentsController,
     AuthController,
     SecurityDeviceController,
     QusetionsSAController,
-    PairGameController, IntegrationsController
+    PairGameController,
+    IntegrationsController,
   ],
-  providers: [AppService,
+  providers: [
+    AppService,
     AuthService,
-    EmailAdapter, TelegramAdapter,
-    Pagination, PaginationUsersSa,
-    JwtService, JwtStrategy, LocalStrategy,
-    BasicStrategy, S3StorageAdapter,
-    UsersService, ...userUseCase,
-    UsersQueryRepoPSQL, UsersRepositoryPSQL,
-    BlogsService, ...blogUseCase,
-    //BlogsRepository, BlogsQueryRepository, 
-    IsBlogIdAlreadyExistConstraint, BlogsQueryRepoPSQL, BlogsRepoPSQL,
-    PostsService, ...postUseCase,
-    PostQueryRepoPSQL, PostRepoPSQL,
-    CommentsService, ...commentUseCase,
-    //CommentsRepository,CommentsQueryRepository,
-    CommentsQueryRepoPSQL, CommentsRepoPSQL,
-    //SecurityDeviceService, SecurityDeviceRepository,
-    SecurityDeviceServicePSQL, SecurityDeviceRepoPSQL,
+    EmailAdapter,
+    TelegramAdapter,
+    Pagination,
+    PaginationUsersSa,
+    JwtService,
+    JwtStrategy,
+    LocalStrategy,
+    BasicStrategy,
+    S3StorageAdapter,
+    UsersService,
+    ...userUseCase,
+    UsersQueryRepoPSQL,
+    UsersRepositoryPSQL,
+    BlogsService,
+    ...blogUseCase,
+    //BlogsRepository, BlogsQueryRepository,
+    IsBlogIdAlreadyExistConstraint,
+    BlogsQueryRepoPSQL,
+    BlogsRepoPSQL,
+    PostsService,
+    ...postUseCase,
+    PostQueryRepoPSQL,
+    PostRepoPSQL,
+    CommentsService,
+    ...commentUseCase,
+    CommentsQueryRepoPSQL,
+    CommentsRepoPSQL,
+    SecurityDeviceServicePSQL,
+    SecurityDeviceRepoPSQL,
     LikesRepository,
-    QusetionsService, QuestionsRepository, QuestionsQueryRepository, ...questionsUseCase,
-    PairGameService, PairGameRepo, PairGameQueryRepo, ...pairGameUseCase,
-    PipeisValidUUID, FileValidationPipe, FileWallpaperValidationPipe, FileMainValidationPipe, PostImageValidationPipe,
-    CheckingActivePair
+    QusetionsService,
+    QuestionsRepository,
+    QuestionsQueryRepository,
+    ...questionsUseCase,
+    PairGameService,
+    PairGameRepo,
+    PairGameQueryRepo,
+    ...pairGameUseCase,
+    PipeisValidUUID,
+    FileValidationPipe,
+    FileWallpaperValidationPipe,
+    FileMainValidationPipe,
+    PostImageValidationPipe,
+    CheckingActivePair,
   ],
 })
-export class AppModule { }
+export class AppModule {}

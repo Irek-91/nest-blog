@@ -1,21 +1,20 @@
 import { queryPaginationQuestionsType } from './../../../helpers/query-filter';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { QuestionsQueryRepository } from '../../db-psql/questions.query.repo';
-import { Injectable } from "@nestjs/common";
 
-export class FindQuestionsComand {
-    constructor (public paginationQuery: queryPaginationQuestionsType) {
-
-    }
+export class FindQuestionsCommand {
+  constructor(public paginationQuery: queryPaginationQuestionsType) {}
 }
 
-@CommandHandler(FindQuestionsComand)
-export class FindQuestionsUseCase implements ICommandHandler<FindQuestionsComand> {
-  constructor(protected questionsQueryRepository: QuestionsQueryRepository) { }
+@CommandHandler(FindQuestionsCommand)
+export class FindQuestionsUseCase
+  implements ICommandHandler<FindQuestionsCommand>
+{
+  constructor(protected questionsQueryRepository: QuestionsQueryRepository) {}
 
-
-  async execute (comand: FindQuestionsComand)  {
-    return await this.questionsQueryRepository.findQuestions(comand.paginationQuery)
+  async execute(comand: FindQuestionsCommand) {
+    return await this.questionsQueryRepository.findQuestions(
+      comand.paginationQuery,
+    );
   }
-
 }

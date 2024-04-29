@@ -1,25 +1,27 @@
 import { QuestionsQueryRepository } from './questions.query.repo';
-import { queryPaginationQuestionsType } from '../../helpers/query-filter';
-import { questionViewModel, questionDBModel, paginatorQuestions, QuestionInputModel, PublishInputModel } from '../model/questionModel';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  questionViewModel,
+  questionDBModel,
+  QuestionInputModel,
+  PublishInputModel,
+} from '../model/questionModel';
+import { Injectable } from '@nestjs/common';
 import { Question } from './entity/question';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { log } from 'console';
-
-
-
 
 @Injectable()
-
 export class QuestionsRepository {
-  constructor(@InjectDataSource() private questionsModel: DataSource,
-  private questionsQueryRepo: QuestionsQueryRepository) { }
+  constructor(
+    @InjectDataSource() private questionsModel: DataSource,
+    private questionsQueryRepo: QuestionsQueryRepository,
+  ) {}
 
-
-  async createQuestion(newQuestion: questionDBModel): Promise<questionViewModel> {
-
-    const createUser = await this.questionsModel.createQueryBuilder()
+  async createQuestion(
+    newQuestion: questionDBModel,
+  ): Promise<questionViewModel> {
+    const createUser = await this.questionsModel
+      .createQueryBuilder()
       .insert()
       .into(Question)
       .values({
@@ -27,10 +29,9 @@ export class QuestionsRepository {
         body: newQuestion.body,
         answers: newQuestion.answers,
         published: newQuestion.published,
-        createdAt: newQuestion.createdAt
+        createdAt: newQuestion.createdAt,
       })
-      .execute()
-
+      .execute();
 
     const questionViewModel: questionViewModel = {
       id: newQuestion.id,
@@ -38,85 +39,95 @@ export class QuestionsRepository {
       correctAnswers: newQuestion.answers,
       published: newQuestion.published,
       createdAt: newQuestion.createdAt,
-      updatedAt: newQuestion.updatedAt
-
-    }
-    return questionViewModel
+      updatedAt: newQuestion.updatedAt,
+    };
+    return questionViewModel;
   }
 
-  async updateQuestionById(inputModel: QuestionInputModel, questionId: string): Promise<boolean> {
+  async updateQuestionById(
+    inputModel: QuestionInputModel,
+    questionId: string,
+  ): Promise<boolean> {
     try {
-
-      const questionUpdate = await this.questionsModel.createQueryBuilder()
+      const questionUpdate = await this.questionsModel
+        .createQueryBuilder()
         .update(Question)
         .set({
           body: inputModel.body,
           answers: inputModel.correctAnswers,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         })
         .where({
-          id: questionId
+          id: questionId,
         })
-        .execute()
+        .execute();
       if (questionUpdate.affected === 0) {
-        return false
+        return false;
       }
-      return true
-    } catch (e) { return false }
-
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  
-  async updateQuestionInPublish(inputModel: PublishInputModel, questionId: string): Promise<boolean> {
+  async updateQuestionInPublish(
+    inputModel: PublishInputModel,
+    questionId: string,
+  ): Promise<boolean> {
     try {
-
-      const questionUpdate = await this.questionsModel.createQueryBuilder()
+      const questionUpdate = await this.questionsModel
+        .createQueryBuilder()
         .update(Question)
         .set({
           published: inputModel.published,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         })
         .where({
-          id: questionId
+          id: questionId,
         })
-        .execute()
+        .execute();
       if (questionUpdate.affected === 0) {
-        return false
+        return false;
       }
-      return true
-    } catch (e) { return false }
-
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
-
 
   async deleteQuestionId(questionId: string): Promise<boolean> {
     try {
       //let user = await this.userModel.deleteOne({ _id: new mongoose.Types.ObjectId(userId) })
-      const deleteQuestionId = await this.questionsModel.createQueryBuilder()
+      const deleteQuestionId = await this.questionsModel
+        .createQueryBuilder()
         .delete()
         .from(Question)
         .where({ id: questionId })
-        .execute()
+        .execute();
       if (deleteQuestionId.affected === 0) {
-        return false
+        return false;
+      } else {
+        return true;
       }
-      else {
-        return true
-      }
+    } catch (e) {
+      return false;
     }
-    catch (e) { return false }
   }
 
   async deleteAllQuestions() {
-    const result = await this.questionsModel.createQueryBuilder()
+    const result = await this.questionsModel
+      .createQueryBuilder()
       .delete()
       .from(Question)
-      .execute()
-    return true
+      .execute();
+    return true;
   }
-  async checkingCorrectAnswer(questionsId: string ,answer: string): Promise<boolean> {
-    const result = await this.questionsQueryRepo.getAnswerByQuestiontId(questionsId)
-    return result.includes(answer.toString())
+  async checkingCorrectAnswer(
+    questionsId: string,
+    answer: string,
+  ): Promise<boolean> {
+    const result =
+      await this.questionsQueryRepo.getAnswerByQuestiontId(questionsId);
+    return result.includes(answer.toString());
   }
-
 }

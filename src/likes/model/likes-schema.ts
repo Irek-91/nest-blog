@@ -9,13 +9,13 @@
 //         type: String,
 //     })
 //     userId: string
-    
+
 //     @Prop({
 //         required: true,
 //         type: String,
 //     })
 //     login: string
-    
+
 //     @Prop({
 //         required: true,
 //         type: String,

@@ -1,9 +1,8 @@
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
-import mongoose from "mongoose";
-import { Transform } from "class-transformer";
-import { IsBLogIdExist } from "../../blogs/models/blog.decorator";
-import { photoSizeViewModel } from "src/blogs/models/blogs-model";
-
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import mongoose from 'mongoose';
+import { Transform } from 'class-transformer';
+import { IsBLogIdExist } from '../../blogs/models/blog.decorator';
+import { photoSizeViewModel } from 'src/blogs/models/blogs-model';
 
 export class postInputModel {
   //   constructor (protected blogsQueryRepository : BlogsQueryRepository) {
@@ -12,24 +11,24 @@ export class postInputModel {
   @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
-  title: string
+  title: string;
 
   @MaxLength(100)
   @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
-  shortDescription: string
+  shortDescription: string;
 
   @MaxLength(1000)
   @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
-  content: string
+  content: string;
 
   @IsBLogIdExist()
   @IsString()
   @IsNotEmpty()
-  blogId: string
+  blogId: string;
 }
 
 export class postInputModelSpecific {
@@ -37,80 +36,79 @@ export class postInputModelSpecific {
   @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
-  title: string
+  title: string;
 
   @MaxLength(100)
   @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
-  shortDescription: string
+  shortDescription: string;
 
   @MaxLength(1000)
   @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
-  content: string
+  content: string;
 }
 
 export type newestLikes = {
-  addedAt: string,
-  userId: string,
-  login: string
-}
+  addedAt: string;
+  userId: string;
+  login: string;
+};
 
 export type postImagesViewModel = {
-  main: photoSizeViewModel[] | null
-}
+  main: photoSizeViewModel[] | null;
+};
 
 export type postMongoDb = {
-  _id: mongoose.Types.ObjectId | string,
-  title: string,
-  shortDescription: string,
-  content: string,
-  blogId: string,
-  blogName: string,
-  createdAt: string,
+  _id: mongoose.Types.ObjectId | string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName: string;
+  createdAt: string;
   extendedLikesInfo: {
-    likesCount: number,
-    dislikesCount: number,
-    myStatus: string,
-    newestLikes: newestLikes[]
-  }
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: string;
+    newestLikes: newestLikes[];
+  };
 };
 
 export type postOutput = {
-  id: string,
-  title: string,
-  shortDescription: string,
-  content: string,
-  blogId: string,
-  blogName: string,
-  createdAt: string,
+  id: string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName: string;
+  createdAt: string;
   extendedLikesInfo: {
-    likesCount: number,
-    dislikesCount: number,
-    myStatus: string,
-    newestLikes: newestLikes[]
-  },
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: string;
+    newestLikes: newestLikes[];
+  };
   images: {
-    main: photoSizeViewModel[] | []
-  }
-}
+    main: photoSizeViewModel[] | [];
+  };
+};
 export type postsCollectionsType = postOutput[];
 export type paginatorPost = {
-  pagesCount: number,
-  page: number,
-  pageSize: number,
-  totalCount: number,
-  items: postOutput[]
-}
-
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: postOutput[];
+};
 
 export type postInputTests = {
-  title: string,
-  shortDescription: string,
-  content: string,
-  blogId: string,
-  blogName: string,
-  createdAt: string
-}
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName: string;
+  createdAt: string;
+};

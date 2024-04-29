@@ -6,8 +6,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import * as process from 'process';
-
 
 // @Catch(Error)
 // export class ErrorExceptionFilter implements ExceptionFilter {
@@ -72,12 +70,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         statusCode: status,
         timestamp: new Date().toISOString(),
         path: request.url,
-        responseErr : exception.getResponse()
+        responseErr: exception.getResponse(),
       });
     }
   }
 }
-
 
 export class TooManyRequests extends HttpException {
   constructor() {

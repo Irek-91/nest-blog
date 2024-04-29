@@ -8,7 +8,6 @@
 // import { Filter, ObjectId } from "mongodb";
 // import { commentMongoModel, commentViewModel, paginatorComments } from '../model/comments-model';
 
-
 // @Injectable()
 // export class CommentsRepository {
 //   constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
@@ -29,10 +28,8 @@
 //       //likesInfo: { likesCount: 0, dislikesCount: 0, myStatus: 'None' }
 //     }
 
-
 //     const commentsInstance = new this.commentModel(newComment)
 //     await commentsInstance.save()
-
 
 //     return {
 //       id: commentsInstance._id.toString(),
@@ -75,7 +72,6 @@
 //     } catch (e) { return HttpStatus.NOT_FOUND }
 //   }
 
-
 //   async updateLikeStatus(commentId: string, userId: string, likeStatus: string): Promise<HttpStatus.NO_CONTENT | HttpStatus.NOT_FOUND> {
 //     try {
 //       const comment = await this.commentModel.findOne({ _id: new ObjectId(commentId) })
@@ -92,4 +88,3 @@
 //     }
 //   }
 // }
-

@@ -133,7 +133,6 @@
 //         return this.postModel.findOne({ _id: id })
 //     }
 
-
 //     async getPostId(id: string, userId: string | null): Promise<postOutput> {
 //         try {
 //             let post = await this.postModel.findOne({ _id: new ObjectId(id) }).lean();

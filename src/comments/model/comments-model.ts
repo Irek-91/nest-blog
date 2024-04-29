@@ -1,72 +1,70 @@
-import { IsEnum, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator"
-import { ObjectId } from "mongodb"
-import { Transform } from "class-transformer";
-
+import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { ObjectId } from 'mongodb';
+import { Transform } from 'class-transformer';
 
 export class commentInput {
-
   @MaxLength(300)
   @MinLength(20)
   @Transform(({ value }) => value?.trim())
   @IsString()
   @IsNotEmpty()
-  content: string
+  content: string;
 }
 
 export type commentViewModel = {
-  id: string,
-  content: string,
+  id: string;
+  content: string;
   commentatorInfo: {
-    userId: string,
-    userLogin: string
-  },
-  createdAt: string,
+    userId: string;
+    userLogin: string;
+  };
+  createdAt: string;
   likesInfo: {
-    likesCount: number,
-    dislikesCount: number,
-    myStatus: string
-  }
-}
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: string;
+  };
+};
 
 export type getCommentsByBlog = {
-    id: string,
-    content: string,
-    commentatorInfo: {
-      userId: string,
-      userLogin: string
-    },
-    createdAt: string,
-    likesInfo: {
-      likesCount: number,
-      dislikesCount: number,
-      myStatus: string
-    },
-    postInfo: {
-      id: string,
-      title: string,
-      blogId: string,
-      blogName: string
-    }
-  }
+  id: string;
+  content: string;
+  commentatorInfo: {
+    userId: string;
+    userLogin: string;
+  };
+  createdAt: string;
+  likesInfo: {
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: string;
+  };
+  postInfo: {
+    id: string;
+    title: string;
+    blogId: string;
+    blogName: string;
+  };
+};
 
 export type paginationGetCommentsByBlog = {
-  pagesCount: number,
-  page: number,
-  pageSize: number,
-  totalCount: number,
-  items: getCommentsByBlog[] | []
-}
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: getCommentsByBlog[] | [];
+};
 
 export type commentMongoModel = {
-  _id: ObjectId | string,
-  postId: string,
-  content: string,
+  _id: ObjectId | string;
+  postId: string;
+  content: string;
   commentatorInfo: {
-    userId: string,
-    userLogin: string
-  },
-  createdAt: string
-}
+    userId: string;
+    userLogin: string;
+  };
+  createdAt: string;
+};
 
 // export type commentInputModel = {
 //   postId: string,
@@ -79,25 +77,25 @@ export type commentMongoModel = {
 // }
 
 export type likeInfoShema = {
-  _id: ObjectId,
-  userId: string,
-  commentsId: string,
-  status: string,
-  createdAt: string
-}
+  _id: ObjectId;
+  userId: string;
+  commentsId: string;
+  status: string;
+  createdAt: string;
+};
 export type paginatorComments = {
-  pagesCount: number,
-  page: number,
-  pageSize: number,
-  totalCount: number,
-  items: commentViewModel[]
-}
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: commentViewModel[];
+};
 
 export type likesPSQLModel = {
-  _id: ObjectId,
-  userId: string,
-  userLogin: string,
-  postIdOrCommentId: string,
-  status: string,
-  createdAt: string
-}
+  _id: ObjectId;
+  userId: string;
+  userLogin: string;
+  postIdOrCommentId: string;
+  status: string;
+  createdAt: string;
+};

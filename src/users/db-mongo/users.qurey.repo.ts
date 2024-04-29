@@ -7,8 +7,6 @@
 // import { userMongoModel, userViewModel } from "../models/users-model";
 // import { log } from "console";
 
-
-
 // @Injectable()
 
 // export class UsersQueryRepository {
@@ -73,7 +71,6 @@
 //     }
 //   }
 
-
 //   async findUserByCode(code: string): Promise<UserDocument | null> {
 //     try {
 //       return this.userModel.findOne({ "emailConfirmation.confirmationCode": code })
@@ -101,7 +98,6 @@
 //     }
 //     catch (e) { return HttpStatus.NOT_FOUND }
 //   }
-
 
 //   async findUserByRecoveryCode(recoveryCode: string): Promise<UserDocument | null> {
 //     try {

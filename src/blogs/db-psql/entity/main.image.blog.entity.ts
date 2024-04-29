@@ -1,8 +1,10 @@
-import { UsersBannedByBlogger } from '../../../users/db-psql/entity/users.banned.by.blogger.entity';
-import { BannedUser } from '../../../users/db-psql/entity/banned.user.entity';
-import { Post } from '../../../posts/db-psql/entity/post.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { User } from '../../../users/db-psql/entity/user.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Blog } from './blog.entity';
 
 // export enum SizeImage {
@@ -13,29 +15,27 @@ import { Blog } from './blog.entity';
 
 @Entity()
 export class MainImageForBlog {
-    @PrimaryGeneratedColumn()
-    id: string
-      
-    @Column()
-    url: string
-    
-    @Column()
-    createdAt: string
+  @PrimaryGeneratedColumn()
+  id: string;
 
-    @Column()
-    fileId: string
+  @Column()
+  url: string;
 
-    @Column()
-    fileSize: number
+  @Column()
+  createdAt: string;
 
+  @Column()
+  fileId: string;
 
-    @ManyToOne(() => Blog, (blog) => blog._id, { nullable: true , 
-        onDelete: 'CASCADE'
-    })
-    @JoinColumn({
-        name: 'blog'
-    })
-    public blog: Blog
+  @Column()
+  fileSize: number;
 
+  @ManyToOne(() => Blog, (blog) => blog._id, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({
+    name: 'blog',
+  })
+  public blog: Blog;
 }
-

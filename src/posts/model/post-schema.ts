@@ -2,7 +2,6 @@
 // import mongoose, { HydratedDocument } from "mongoose";
 // import { newestLikes } from "./post-model";
 
-
 // @Schema()
 // export class Post {
 //     _id: mongoose.Types.ObjectId;
@@ -12,37 +11,37 @@
 //         type: String,
 //     })
 //     title: string
-    
+
 //     @Prop({
 //         required: true,
 //         type: String,
 //     })
 //     shortDescription: string
-    
+
 //     @Prop({
 //         required: true,
 //         type: String,
 //     })
 //     content: string
-    
+
 //     @Prop({
 //         required: true,
 //         type: String,
 //     })
 //     blogId: string
-    
+
 //     @Prop({
 //         required: true,
 //         type: String,
 //     })
 //     blogName: string
-    
+
 //     @Prop({
 //         required: true,
 //         type: String,
 //     })
 //     createdAt:string
-   
+
 //     @Prop({
 //         required: true,
 //         type: Object,
@@ -56,14 +55,9 @@
 
 // }
 
-
-
-
 // export const PostSchema = SchemaFactory.createForClass(Post);
 
 // export type PostDocument = HydratedDocument<Post>;
-
-
 
 // export const newestLikesShema = new mongoose.Schema({
 //     addedAt: { type: String, required: true },

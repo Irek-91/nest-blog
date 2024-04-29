@@ -8,7 +8,6 @@
 // import { Filter, ObjectId } from "mongodb";
 // import { commentMongoModel, commentViewModel, paginatorComments } from '../model/comments-model';
 
-
 // @Injectable()
 // export class CommentsQueryRepository {
 //   constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
@@ -93,4 +92,3 @@
 //     } catch (e) { throw new HttpException('Not found', HttpStatus.NOT_FOUND) }
 //   }
 // }
-

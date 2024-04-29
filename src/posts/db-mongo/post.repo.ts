@@ -18,7 +18,6 @@
 
 //     ) { }
 
-    
 //     async savePost(post: HydratedDocument<postMongoDb>) {
 //         await post.save()
 //      }
@@ -30,7 +29,6 @@
 //         await postInstance.deleteOne()
 //         return true
 //     }
-
 
 //     async createdPost(newPost: postMongoDb): Promise<true> {
 
@@ -58,7 +56,7 @@
 //             const login = loginResult!.accountData.login
 //             const resultLikeStatus = await this.likeModel.findOne({userId: userId, postIdOrCommentId: postId, status: likeStatus})
 //             if (resultLikeStatus) {return true}
-            
+
 //             await this.likeModel.updateOne(
 //                 { userId: userId, postIdOrCommentId: postId},
 //                 { $set: { login: login, status: likeStatus, createdAt: new Date().toISOString() } },
@@ -66,7 +64,7 @@
 //             )
 
 //             const post = await this.postModel.findOne({ _id: new ObjectId(postId) })
-            
+
 //             const newestLikes = await this.likeModel.find({ postIdOrCommentId: postId, status: 'Like' })
 //                 .sort({ createdAt: -1 })
 //                 .limit(3)
@@ -78,14 +76,13 @@
 //                     login: like.login
 //                 }
 //             })
-            
 
 //             post!.extendedLikesInfo.newestLikes = newestLikesMaped
-            
+
 //             post!.save()
-            
+
 //             return true
-//         } catch (e) { 
+//         } catch (e) {
 //             return null
 //          }
 //     }

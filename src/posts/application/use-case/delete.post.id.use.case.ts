@@ -1,22 +1,21 @@
 import { PostRepoPSQL } from './../../db-psql/post.repo';
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs"
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 export class DeletePostIdCommand {
-    constructor(public id: string) {
-    }
+  constructor(public id: string) {}
 }
 
-
 @CommandHandler(DeletePostIdCommand)
-export class DeletePostIdUseCase implements ICommandHandler<DeletePostIdCommand> {
-    constructor(private postRepository: PostRepoPSQL) {
+export class DeletePostIdUseCase
+  implements ICommandHandler<DeletePostIdCommand>
+{
+  constructor(private postRepository: PostRepoPSQL) {}
+  async execute(command: DeletePostIdCommand): Promise<true | null> {
+    const result = await this.postRepository.deletePostId(command.id);
+    if (!result) {
+      return null;
+    } else {
+      return true;
     }
-    async execute(command: DeletePostIdCommand): Promise<true | null> {
-        const result = await this.postRepository.deletePostId(command.id)
-        if (!result) {
-            return null
-        } else {
-            return true
-        }
-    }
+  }
 }
