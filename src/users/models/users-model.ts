@@ -1,55 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
 import mongoose from 'mongoose';
 
-export class UpdateStatusInputModel {
-  @ApiProperty({
-    type: Boolean,
-  })
-  @IsBoolean()
-  @IsNotEmpty()
-  isBanned: boolean;
-
-  @ApiProperty({
-    maximum: 21,
-    minimum: 6,
-    type: String,
-  })
-  @MaxLength(21)
-  @MinLength(6)
-  @IsString()
-  @IsNotEmpty()
-  banReason: string;
-}
-
-export class BanUserByBloggerInputModel {
-  @ApiProperty({
-    type: Boolean,
-  })
-  @IsBoolean()
-  @IsNotEmpty()
-  isBanned: boolean;
-
-  @ApiProperty({
-    minimum: 20,
-    type: String,
-  })
-  @MinLength(20)
-  @IsString()
-  @IsNotEmpty()
-  banReason: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  blogId: string;
-}
 export type userViewModel = {
   id: string;
   login: string;

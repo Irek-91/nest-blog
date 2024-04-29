@@ -13,8 +13,10 @@ import {
 import { SecurityDeviceServicePSQL } from './db-psql/securityDevice.service.PSQL';
 import { CheckRefreshToken } from './../auth/guards/auth.guard';
 import { Cookies } from './../auth/guards/cookies.guard';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('security')
+@ApiTags('security')
 export class SecurityDeviceController {
   constructor(protected securityDeviceService: SecurityDeviceServicePSQL) {}
 

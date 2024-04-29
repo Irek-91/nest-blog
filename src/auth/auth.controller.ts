@@ -31,8 +31,10 @@ import { Cookies } from './guards/cookies.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { SecurityDeviceServicePSQL } from '../securityDevices/db-psql/securityDevice.service.PSQL';
 import { CommandBus } from '@nestjs/cqrs';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(
     protected usersService: UsersService,

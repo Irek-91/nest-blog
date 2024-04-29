@@ -35,8 +35,10 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { GetStatisticByUserCommand } from './application/use-case/get.statistic.by.user.use.case';
 import { ConnectUserByPairCommand } from './application/use-case/connect.user.by.pair.use.case';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('pair-game-quiz')
+@ApiTags('pair-game-quiz')
 export class PairGameController {
   constructor(
     protected pairGameService: PairGameService,

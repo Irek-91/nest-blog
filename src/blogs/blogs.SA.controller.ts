@@ -33,9 +33,11 @@ import { FindPostsByBlogIdCommand } from './../posts/application/use-case/find.p
 import { DeletePostIdCommand } from './../posts/application/use-case/delete.post.id.use.case';
 import { UpdateBanStatusByBlogCommand } from './application/use-case/update.ban.status.by.blog.use.case';
 import { GetSABlogIdCommand } from './application/use-case/get.SA.blog.id.use.';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/blogs')
+@ApiTags('SA_Blog')
 export class BlogsSAController {
   constructor(
     protected blogsService: BlogsService,

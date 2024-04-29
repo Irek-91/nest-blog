@@ -36,8 +36,10 @@ import { DeleteBlogIdCommand } from './application/use-case/delete.blog.id.use.c
 import { CreatedPostByBlogIdCommand } from './../posts/application/use-case/created.post.by.blog.id.use.case';
 import { SubscriptionUserToBlog } from './application/use-case/subscription.user.to.blog.use.case';
 import { CheckStatusSubscriptionUserCommand } from './application/use-case/check.status.subscription.user.use.case';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('blogs')
+@ApiTags('Blog')
 export class BlogsController {
   constructor(
     protected blogsService: BlogsService,

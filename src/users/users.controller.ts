@@ -17,10 +17,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './application/users.service';
-import {
-  BanUserByBloggerInputModel,
-  userViewModel,
-} from './models/users-model';
+import { userViewModel } from './models/users-model';
 import { Controller } from '@nestjs/common/decorators/core';
 import { HttpCode, Put, Request } from '@nestjs/common/decorators';
 import { CommandBus } from '@nestjs/cqrs';
@@ -31,6 +28,9 @@ import { GetBlogDBCommand } from '../blogs/application/use-case/get.blog.DB.use.
 import { ApiTags } from '@nestjs/swagger';
 import { SwaggerOptions } from '../infrastructure/decorator/swagger.decorator';
 import { CreatUserInputModel } from './models/create-user-input-model';
+import { UsersOutputModel } from './models/users-output-model';
+import { BanUserByBloggerInputModel } from './models/ban-user-by-blogger-input-model';
+import { UserOutputModel } from './models/user-output-model';
 
 @Controller()
 @ApiTags('User')
@@ -50,7 +50,7 @@ export class UsersController {
     true,
     200,
     'Return information about the users',
-    false,
+    UsersOutputModel,
     false,
     false,
     true,
@@ -78,6 +78,20 @@ export class UsersController {
   @UseGuards(BasicAuthGuard)
   @UseGuards(EmailOrLoginGuard)
   @Post('users')
+  @SwaggerOptions(
+    'Creat user',
+    false,
+    true,
+    201,
+    'Return information about the created user',
+    UserOutputModel,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+  )
   async createUser(
     @Body() inputModel: CreatUserInputModel,
   ): Promise<userViewModel> {
