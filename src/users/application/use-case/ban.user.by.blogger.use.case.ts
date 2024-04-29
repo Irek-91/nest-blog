@@ -1,6 +1,6 @@
 import { UsersRepositoryPSQL } from './../../db-psql/users.repo.PSQL';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BanUserByBloggerInputModel } from '../../models/users-model';
+import { BanUserByBloggerInputModel } from '../../models/ban-user-by-blogger-input-model';
 export class BanUserByBloggerCommand {
   constructor(
     public banUserId: string,

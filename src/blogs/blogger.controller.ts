@@ -53,9 +53,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { SaveMainImageForBlogCommand } from './application/use-case/save.main.image.for.blog.use.case';
 import { SaveWallpaperImageForBlogCommand } from './application/use-case/save.wallpaper.image.for.blog.use.case';
 import { GetPostIdCommand } from '../posts/application/use-case/get.post.id.use.case';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(UserAuthGuard)
 @Controller('blogger')
+@ApiTags('Blogger')
 export class BloggerController {
   constructor(
     protected blogsService: BlogsService,

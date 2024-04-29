@@ -15,15 +15,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './application/users.service';
-import { UpdateStatusInputModel } from './models/users-model';
 import { Controller } from '@nestjs/common/decorators/core';
 import { HttpCode, Put } from '@nestjs/common/decorators';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteUserIdCommand } from './application/use-case/delete.user.id.use.case';
 import { CreatUserInputModel } from './models/create-user-input-model';
+import { UpdateStatusInputModel } from './models/update-status-input-model';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/users')
+@ApiTags('SA_User')
 export class UsersSAController {
   constructor(
     protected usersService: UsersService,

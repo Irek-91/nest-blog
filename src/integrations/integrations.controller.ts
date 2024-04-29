@@ -17,8 +17,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { HandlerTelegram } from './use-case/handle.telegram.use.case';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('integrations')
+@ApiTags('Integrations')
 export class IntegrationsController {
   constructor(private commandBus: CommandBus) {}
 

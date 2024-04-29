@@ -19,8 +19,10 @@ import { GetUserIdByAuth, UserAuthGuard } from './../auth/guards/auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdateCommentByPostCommand } from './application/use-case/update.comment.py.post.use.case';
 import { UpdateLikeStatusCommentCommand } from './application/use-case/update.like.status.commet.use.case';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('comments')
+@ApiTags('Comment')
 export class CommentsController {
   constructor(
     protected commentsService: CommentsService,

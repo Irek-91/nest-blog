@@ -33,8 +33,10 @@ import { GetPostIdCommand } from './application/use-case/get.post.id.use.case';
 import { UpdatePostCommand } from './application/use-case/update.post.use.case';
 import { UpdateLikeStatusPostCommand } from './application/use-case/update.like.status.post.use.case';
 import { likeStatus } from '../likes/model/likes-model';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('posts')
+@ApiTags('Post')
 export class PostsController {
   constructor(
     protected postsService: PostsService,

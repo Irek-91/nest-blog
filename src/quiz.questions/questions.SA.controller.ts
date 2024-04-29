@@ -27,9 +27,11 @@ import {
 import { Controller } from '@nestjs/common/decorators/core';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteQuestionIdCommand } from './application/use-cases/delete.question.id.use.case';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(BasicAuthGuard)
 @Controller('sa/quiz/questions')
+@ApiTags('SA_questions for the game')
 export class QusetionsSAController {
   constructor(
     private commandBus: CommandBus,
