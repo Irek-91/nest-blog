@@ -47,7 +47,7 @@ export class AppController {
     return this.appService.getHello();
   }
 }
-
+@ApiTags('Testing')
 @Controller('testing/all-data')
 export class TestingController {
   constructor(
@@ -63,6 +63,20 @@ export class TestingController {
   ) {}
 
   @Delete()
+  @SwaggerOptions(
+    'Deleting data from the database before running tests',
+    false,
+    false,
+    204,
+    'All data has been deleted!!!',
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  )
   async deleteAll() {
     await this.commentModel.deleteCommentsAll();
     await this.pairModel.deleteAll();

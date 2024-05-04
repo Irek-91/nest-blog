@@ -25,7 +25,7 @@ import { DeleteUserIdCommand } from './application/use-case/delete.user.id.use.c
 import { GetBannedUsersForBlogCommand } from './application/use-case/get.banned.users.for.blog.use.case';
 import { GetUserByIdCommand } from './application/use-case/get.user.by.id.use.case';
 import { GetBlogDBCommand } from '../blogs/application/use-case/get.blog.DB.use.case';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { SwaggerOptions } from '../infrastructure/decorator/swagger.decorator';
 import { CreatUserInputModel } from './models/create-user-input-model';
 import { UsersOutputModel } from './models/users-output-model';
@@ -58,6 +58,58 @@ export class UsersController {
     false,
     false,
   )
+  @ApiQuery({
+    name: 'banStatus',
+    type: String,
+    required: false,
+    description: `Default value: all 
+    Available values : all, banned, notBanned`,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    type: String,
+    required: false,
+    description: 'Default value : createdAt',
+  })
+  @ApiQuery({
+    name: 'sortDirection',
+    type: String,
+    required: false,
+    description: `Default value: desc 
+    Available values : asc, desc`,
+  })
+  @ApiQuery({
+    name: 'pageNumber',
+    type: String,
+    required: false,
+    description:
+      'pageNumber is number of portions that should be returned\n' +
+      'Default value : 1',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    type: String,
+    required: false,
+    description:
+      'pageSize is portions size that should be returned\n' +
+      'Default value : 10',
+  })
+  @ApiQuery({
+    name: 'searchLoginTerm',
+    type: String,
+    required: false,
+    description:
+      'Search term for user Login: Login should contains this term in any position\n' +
+      'Default value : null',
+  })
+  @ApiQuery({
+    name: 'searchEmailTerm',
+    type: String,
+    required: false,
+    description:
+      'Search term for user Email: Email should contains this term in any position\n' +
+      'Default value : null',
+  })
   async getUsers(
     @Query()
     query: {
@@ -104,6 +156,20 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(UserAuthGuard)
   @Put('blogger/users/:id/ban')
+  @SwaggerOptions(
+    'Blogger ban a user by id',
+    true,
+    false,
+    204,
+    'No Content',
+    false,
+    true,
+    false,
+    true,
+    true,
+    true,
+    false,
+  )
   async banUserByBlogger(
     @Param('id', new PipeisValidUUID()) banUserId: string,
     @Body() updateData: BanUserByBloggerInputModel,
@@ -138,6 +204,20 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(UserAuthGuard)
   @Get('blogger/users/blog/:id')
+  @SwaggerOptions(
+    'Get user',
+    true,
+    false,
+    200,
+    'Return information about the user',
+    UserOutputModel,
+    false,
+    false,
+    true,
+    true,
+    false,
+    false,
+  )
   async getBannedUsersByBlog(
     @Param('id', new PipeisValidUUID()) blogId: string,
     @Request() req: any,
