@@ -2,6 +2,7 @@
 
 import nodemailer from 'nodemailer';
 import { Injectable } from '@nestjs/common';
+import process from 'process';
 
 @Injectable()
 export class EmailAdapter {
@@ -9,8 +10,8 @@ export class EmailAdapter {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'shamilov.irek.back@gmail.com',
-        pass: 'pxaubouunpscxztw',
+        user: process.env.EMAIL!,
+        pass: process.env.EMAIL_PASS!,
       },
     });
 
@@ -27,8 +28,8 @@ export class EmailAdapter {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'shamilov.irek.back@gmail.com',
-        pass: 'pxaubouunpscxztw',
+        user: process.env.EMAIL!,
+        pass: process.env.EMAIL_PASS!,
       },
     });
 
